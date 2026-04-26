@@ -1,0 +1,27 @@
+package web
+
+templ Base(pageTitle string, pageDescription string) {
+	<!DOCTYPE html>
+	<html lang="en" class="h-full">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width,initial-scale=1"/>
+			<title>{ pageTitle }</title>
+			<meta name="description" content={ pageDescription }/>
+			<link href="/assets/css/output.css" rel="stylesheet"/>
+			<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS"/>
+		</head>
+		<body class="bg-zinc-50 text-zinc-900 min-h-full">
+			<main class="max-w-3xl mx-auto px-4 py-10">
+				<header class="mb-10">
+					<nav class="flex gap-4 text-sm text-zinc-600">
+						<a href="/" class="underline">Home</a>
+						<a href="/blog" class="underline">Blog</a>
+						<a href="/rss.xml" class="underline">RSS</a>
+					</nav>
+				</header>
+				{ children... }
+			</main>
+		</body>
+	</html>
+}

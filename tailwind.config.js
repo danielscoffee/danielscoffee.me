@@ -1,5 +1,5 @@
 module.exports = {
-	content: ["./**/*.html", "./**/*.templ", "./**/*.go",],
-	theme: { extend: {}, },
+	content: ["./internal/web/**/*.templ", "./internal/web/**/*.go"],
+	theme: { extend: {} },
 	plugins: [],
 }

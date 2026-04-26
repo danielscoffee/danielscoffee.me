@@ -1,53 +1,67 @@
-# Project github.com/danielscoffee/blog
+# blog
 
-One Paragraph of project description goes here
+Personal site + blog built with Go, templ, and Tailwind.
 
-## Getting Started
+## Stack
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+- Go (`net/http`)
+- [templ](https://templ.guide/) for server-rendered pages
+- Tailwind CSS
+- Markdown posts with YAML frontmatter (stored in Git)
 
-## MakeFile
+## Local development
 
-Run build make command with tests
+1. Copy env file:
+
 ```bash
-make all
+cp .env.example .env
 ```
 
-Build the application
+2. Build and run:
+
 ```bash
 make build
-```
-
-Run the application
-```bash
 make run
 ```
-Create DB container
-```bash
-make docker-run
+
+The app runs on `http://localhost:8080` by default.
+
+## Writing posts
+
+Add Markdown files in `content/posts/*.md`:
+
+```md
+---
+title: "My Post"
+slug: "my-post"
+date: "2026-04-26"
+summary: "Short summary"
+tags: ["go", "personal"]
+draft: false
+---
+# Post title
+
+Body content...
 ```
 
-Shutdown DB Container
+Push commits to publish updates.
+
+## Useful commands
+
 ```bash
+make generate   # templ + tailwind
+make test       # generate + go test ./...
+make docker-run # run with Docker Compose
 make docker-down
 ```
 
-DB Integrations Test:
-```bash
-make itest
-```
+## Routes
 
-Live reload the application:
-```bash
-make watch
-```
-
-Run the test suite:
-```bash
-make test
-```
-
-Clean up binary from the last build:
-```bash
-make clean
-```
+- `/` home
+- `/blog` all posts
+- `/post/{slug}` post detail
+- `/tag/{tag}` posts by tag
+- `/rss.xml`
+- `/sitemap.xml`
+- `/robots.txt`
+- `/health`
