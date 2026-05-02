@@ -6,19 +6,28 @@ import (
 	"time"
 
 	"github.com/danielscoffee/danielscoffee.me/internal/content"
+	"github.com/rs/zerolog"
 )
 
 type Server struct {
-	port         int
-	contentStore *content.Store
-	siteURL      string
+	port          int
+	contentStore  *content.Store
+	projectStore  *content.ProjectStore
+	aboutPage     content.Page
+	siteURL       string
+	logger        zerolog.Logger
+	searchIndexer *SearchIndexer
 }
 
-func New(port int, siteURL string, contentStore *content.Store) *http.Server {
+func New(port int, siteURL string, contentStore *content.Store, projectStore *content.ProjectStore, aboutPage content.Page, logger zerolog.Logger, searchDocs []content.SearchDoc) *http.Server {
 	app := &Server{
-		port:         port,
-		contentStore: contentStore,
-		siteURL:      siteURL,
+		port:          port,
+		contentStore:  contentStore,
+		projectStore:  projectStore,
+		aboutPage:     aboutPage,
+		siteURL:       siteURL,
+		logger:        logger,
+		searchIndexer: NewSearchIndexer(searchDocs),
 	}
 
 	return &http.Server{

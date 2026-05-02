@@ -1,0 +1,12 @@
+@document.meta
+title: Danielscoffee.me Rebuild
+slug: danielscoffee-me-rebuild
+date: 2026-05-02
+summary: Reworked blog engine with Neorg support and better UX.
+tags: [go, neorg, web]
+draft: false
+@end
+
+* Project overview
+
+Rebuilt site architecture with cleaner routing, content loading, and runtime logging.

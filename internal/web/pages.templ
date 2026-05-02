@@ -28,6 +28,41 @@ templ BlogIndexPage(posts []content.Post) {
 	}
 }
 
+templ AboutPage(page content.Page) {
+	@Base(page.Title, page.Summary) {
+		<article class="post-prose">
+			<header class="post-header">
+				<h1 class="post-title">{ page.Title }</h1>
+			</header>
+			@templ.Raw(string(page.BodyHTML))
+		</article>
+	}
+}
+
+templ ProjectsIndexPage(projects []content.Project) {
+	@Base("Projects", "Project notes and builds") {
+		<section class="intro-block">
+			<h1 class="page-title">Projects</h1>
+			<p class="page-subtitle">Build logs, notes, and shipped experiments.</p>
+		</section>
+		<section class="section-block">
+			@ProjectList(projects)
+		</section>
+	}
+}
+
+templ ProjectDetailPage(project content.Project) {
+	@Base(project.Title, project.Summary) {
+		<article class="post-prose">
+			<header class="post-header">
+				<h1 class="post-title">{ project.Title }</h1>
+				<p class="post-date">{ project.Date }</p>
+			</header>
+			@templ.Raw(string(project.BodyHTML))
+		</article>
+	}
+}
+
 templ TagPage(tag string, posts []content.Post) {
 	@Base("Tag: "+tag, "Posts filtered by tag") {
 		<section class="intro-block">
@@ -57,6 +92,29 @@ templ PostList(posts []content.Post) {
 							for _, tag := range post.Tags {
 								<li>
 									<a class="tag-chip" href={ templ.SafeURL("/tag/" + tag) }>{ tag }</a>
+								</li>
+							}
+						</ul>
+					}
+				</div>
+			</li>
+		}
+	</ul>
+}
+
+templ ProjectList(projects []content.Project) {
+	<ul class="project-list">
+		for _, project := range projects {
+			<li class="project-item">
+				<a class="project-link" href={ templ.SafeURL("/project/" + project.Slug) }>{ project.Title }</a>
+				<p class="project-summary">{ project.Summary }</p>
+				<div class="post-meta-row">
+					<p class="post-date">{ project.Date }</p>
+					if len(project.Tags) > 0 {
+						<ul class="tag-list">
+							for _, tag := range project.Tags {
+								<li>
+									<a class="tag-chip" href={ templ.SafeURL("/projects?tag=" + tag) }>{ tag }</a>
 								</li>
 							}
 						</ul>

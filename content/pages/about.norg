@@ -1,0 +1,13 @@
+@document.meta
+title: About Me
+slug: about
+date: 2026-05-02
+summary: Who I am and what I build.
+draft: false
+@end
+
+* About me
+
+I build software with Go, Neovim, and small focused tools.
+
+I care about readable architecture, fast feedback loops, and shipping.

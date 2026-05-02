@@ -2,10 +2,13 @@ package httpapp
 
 import (
 	"html/template"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/rs/zerolog"
 
 	"github.com/danielscoffee/danielscoffee.me/internal/content"
 )
@@ -32,10 +35,35 @@ func testBlogServer() *Server {
 		},
 	}
 
+	projects := []content.Project{
+		{
+			Title:    "Side Project",
+			Slug:     "side-project",
+			Date:     "2026-05-01",
+			Summary:  "Small app",
+			Tags:     []string{"go", "web"},
+			BodyMD:   "overview",
+			BodyHTML: template.HTML(`<p>overview</p>`),
+		},
+	}
+
+	about := content.Page{
+		Title:    "About Me",
+		Slug:     "about",
+		Date:     "2026-05-01",
+		Summary:  "About",
+		BodyMD:   "about text",
+		BodyHTML: template.HTML(`<p>about text</p>`),
+	}
+
 	return &Server{
-		port:         8080,
-		contentStore: content.NewStore(posts),
-		siteURL:      "https://example.com",
+		port:          8080,
+		contentStore:  content.NewStore(posts),
+		projectStore:  content.NewProjectStore(projects),
+		aboutPage:     about,
+		siteURL:       "https://example.com",
+		logger:        zerolog.New(io.Discard),
+		searchIndexer: NewSearchIndexer(content.BuildSearchDocs(posts, projects)),
 	}
 }
 
@@ -48,11 +76,15 @@ func TestBlogRoutes(t *testing.T) {
 		statusCode int
 		contains   string
 	}{
-		{path: "/", statusCode: http.StatusOK, contains: "Daniel's Site"},
+		{path: "/", statusCode: http.StatusFound, contains: ""},
 		{path: "/blog", statusCode: http.StatusOK, contains: "Blog"},
+		{path: "/about", statusCode: http.StatusOK, contains: "About Me"},
+		{path: "/projects", statusCode: http.StatusOK, contains: "Projects"},
+		{path: "/project/side-project", statusCode: http.StatusOK, contains: "Side Project"},
 		{path: "/post/hello-world", statusCode: http.StatusOK, contains: "<article"},
 		{path: "/tag/go", statusCode: http.StatusOK, contains: "Tagged with"},
 		{path: "/post/missing", statusCode: http.StatusNotFound, contains: "404 page not found"},
+		{path: "/project/missing", statusCode: http.StatusNotFound, contains: "404 page not found"},
 	}
 
 	for _, tc := range cases {
@@ -64,8 +96,13 @@ func TestBlogRoutes(t *testing.T) {
 			t.Fatalf("path %s expected status %d got %d", tc.path, tc.statusCode, w.Code)
 		}
 
-		if !strings.Contains(w.Body.String(), tc.contains) {
+		if tc.contains != "" && !strings.Contains(w.Body.String(), tc.contains) {
 			t.Fatalf("path %s expected body to contain %q; got %q", tc.path, tc.contains, w.Body.String())
+		}
+		if tc.path == "/" {
+			if got := w.Header().Get("Location"); got != "/blog" {
+				t.Fatalf("expected redirect to /blog, got %q", got)
+			}
 		}
 	}
 }
@@ -75,7 +112,7 @@ func TestBaseTemplateIncludesThemeControls(t *testing.T) {
 	h := s.RegisterRoutes()
 
 	w := httptest.NewRecorder()
-	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/", nil))
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/blog", nil))
 
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected status 200, got %d", w.Code)
@@ -86,7 +123,9 @@ func TestBaseTemplateIncludesThemeControls(t *testing.T) {
 		`id="theme-toggle"`,
 		`/assets/js/theme-init.js`,
 		`/assets/js/theme-toggle.js`,
+		`/assets/js/search.js`,
 		`theme-preference`,
+		`search-modal`,
 	})
 }
 
@@ -100,6 +139,7 @@ func TestThemeAssetsAreServed(t *testing.T) {
 	}{
 		{path: "/assets/js/theme-init.js", contains: "theme-preference"},
 		{path: "/assets/js/theme-toggle.js", contains: "Theme:"},
+		{path: "/assets/js/search.js", contains: "Ctrl+K"},
 	}
 
 	for _, tc := range cases {
@@ -115,6 +155,23 @@ func TestThemeAssetsAreServed(t *testing.T) {
 	}
 }
 
+func TestSearchRoute(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/search?q=projects+side", nil))
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", w.Code)
+	}
+	if !strings.Contains(w.Body.String(), `"type":"projects"`) {
+		t.Fatalf("expected projects result, got %s", w.Body.String())
+	}
+	if strings.Contains(w.Body.String(), `"type":"blog"`) {
+		t.Fatalf("expected filtered results only, got %s", w.Body.String())
+	}
+}
+
 func TestPagesExposeStyleHooks(t *testing.T) {
 	s := testBlogServer()
 	h := s.RegisterRoutes()
@@ -124,7 +181,7 @@ func TestPagesExposeStyleHooks(t *testing.T) {
 		markers []string
 	}{
 		{
-			path:    "/",
+			path:    "/blog",
 			markers: []string{"page-title", "page-subtitle", "section-title", "post-list", "post-item", "post-link", "tag-chip"},
 		},
 		{
@@ -134,6 +191,10 @@ func TestPagesExposeStyleHooks(t *testing.T) {
 		{
 			path:    "/post/hello-world",
 			markers: []string{"post-prose", "post-header", "post-title", "post-date"},
+		},
+		{
+			path:    "/projects",
+			markers: []string{"project-list", "project-link"},
 		},
 	}
 

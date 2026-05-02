@@ -12,24 +12,40 @@ templ Base(pageTitle string, pageDescription string) {
 			<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS"/>
 			<script src="/assets/js/theme-init.js"></script>
 			<script defer src="/assets/js/theme-toggle.js"></script>
+			<script defer src="/assets/js/search.js"></script>
 		</head>
 		<body class="site-shell">
 			<header class="top-bar">
 				<div class="top-bar-inner">
 					<a href="/" class="site-brand">danielscoffee</a>
 					<nav class="site-nav" aria-label="Primary">
-						<a href="/" class="site-nav-link">Home</a>
 						<a href="/blog" class="site-nav-link">Blog</a>
-						<a href="/rss.xml" class="site-nav-link">RSS</a>
+						<a href="/about" class="site-nav-link">About</a>
+						<a href="/projects" class="site-nav-link">Projects</a>
 					</nav>
-					<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">
-						Theme: System
-					</button>
+					<div class="header-right">
+						<a href="https://github.com/danielscoffee" class="social-link" rel="noreferrer" target="_blank">GitHub</a>
+						<a href="https://www.linkedin.com/in/daniel-reis-santos/" class="social-link" rel="noreferrer" target="_blank">LinkedIn</a>
+						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">
+							Theme: System
+						</button>
+						<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">
+							Search <span class="search-kbd">Ctrl+K</span>
+						</button>
+					</div>
 				</div>
 			</header>
 			<main class="site-container">
 				{ children... }
 			</main>
+
+			<dialog id="search-modal" class="search-modal" aria-label="Search">
+				<div class="search-modal-inner">
+					<input id="search-input" class="search-input" type="text" placeholder="Search posts and projects. Use: blog <query> or projects <query>" autocomplete="off"/>
+					<p class="search-hint">Filters: <code>blog</code> or <code>projects</code>. Press Esc to close.</p>
+					<ul id="search-results" class="search-results"></ul>
+				</div>
+			</dialog>
 		</body>
 	</html>
 }

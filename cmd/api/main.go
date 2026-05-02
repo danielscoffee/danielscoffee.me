@@ -3,59 +3,60 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/rs/zerolog"
+
 	"github.com/danielscoffee/danielscoffee.me/internal/app"
 )
 
-func gracefulShutdown(apiServer *http.Server, done chan bool) {
-	// Create context that listens for the interrupt signal from the OS.
+func gracefulShutdown(apiServer *http.Server, logger zerolog.Logger, done chan bool) {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	// Listen for the interrupt signal.
 	<-ctx.Done()
 
-	log.Println("shutting down gracefully, press Ctrl+C again to force")
-	stop() // Allow Ctrl+C to force shutdown
+	logger.Info().Str("signal", ctx.Err().Error()).Msg("shutdown signal received")
+	stop()
 
-	// The context is used to inform the server it has 5 seconds to finish
-	// the request it is currently handling
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := apiServer.Shutdown(ctx); err != nil {
-		log.Printf("Server forced to shutdown with error: %v", err)
+		logger.Error().Err(err).Msg("graceful shutdown failed")
+	} else {
+		logger.Info().Msg("server shutdown complete")
 	}
 
-	log.Println("Server exiting")
-
-	// Notify the main goroutine that the shutdown is complete
 	done <- true
 }
 
 func main() {
-
-	apiServer, err := app.NewServer()
+	runtime, err := app.NewRuntime()
 	if err != nil {
 		panic(fmt.Sprintf("bootstrap error: %s", err))
 	}
 
-	// Create a done channel to signal when the shutdown is complete
+	runtime.Logger.Info().
+		Int("port", runtime.Port).
+		Str("site_url", runtime.SiteURL).
+		Int("post_count", runtime.PostCount).
+		Int("project_count", runtime.ProjectCount).
+		Str("log_format", runtime.LogCfg.Format).
+		Str("log_level", runtime.LogCfg.Level.String()).
+		Msg("starting server")
+
 	done := make(chan bool, 1)
+	go gracefulShutdown(runtime.Server, runtime.Logger, done)
 
-	// Run graceful shutdown in a separate goroutine
-	go gracefulShutdown(apiServer, done)
-
-	err = apiServer.ListenAndServe()
+	err = runtime.Server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
-		panic(fmt.Sprintf("http server error: %s", err))
+		runtime.Logger.Error().Err(err).Msg("http server error")
+		os.Exit(1)
 	}
 
-	// Wait for the graceful shutdown to complete
 	<-done
-	log.Println("Graceful shutdown complete.")
 }

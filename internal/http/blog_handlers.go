@@ -1,7 +1,6 @@
 package httpapp
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
@@ -14,11 +13,35 @@ func (s *Server) homeHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	renderComponent(w, r, web.HomePage(s.contentStore.Latest(5)))
+	http.Redirect(w, r, "/blog", http.StatusFound)
 }
 
 func (s *Server) blogIndexHandler(w http.ResponseWriter, r *http.Request) {
-	renderComponent(w, r, web.BlogIndexPage(s.contentStore.All()))
+	s.renderComponent(w, r, web.BlogIndexPage(s.contentStore.All()))
+}
+
+func (s *Server) aboutHandler(w http.ResponseWriter, r *http.Request) {
+	s.renderComponent(w, r, web.AboutPage(s.aboutPage))
+}
+
+func (s *Server) projectsIndexHandler(w http.ResponseWriter, r *http.Request) {
+	s.renderComponent(w, r, web.ProjectsIndexPage(s.projectStore.All()))
+}
+
+func (s *Server) projectDetailHandler(w http.ResponseWriter, r *http.Request) {
+	slug := strings.TrimPrefix(r.URL.Path, "/project/")
+	if slug == "" {
+		http.NotFound(w, r)
+		return
+	}
+
+	project, ok := s.projectStore.BySlug(slug)
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	s.renderComponent(w, r, web.ProjectDetailPage(project))
 }
 
 func (s *Server) postDetailHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +57,7 @@ func (s *Server) postDetailHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	renderComponent(w, r, web.BlogPostPage(post))
+	s.renderComponent(w, r, web.BlogPostPage(post))
 }
 
 func (s *Server) tagIndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -45,13 +68,13 @@ func (s *Server) tagIndexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	posts := s.contentStore.ByTag(tag)
-	renderComponent(w, r, web.TagPage(tag, posts))
+	s.renderComponent(w, r, web.TagPage(tag, posts))
 }
 
-func renderComponent(w http.ResponseWriter, r *http.Request, component templ.Component) {
+func (s *Server) renderComponent(w http.ResponseWriter, r *http.Request, component templ.Component) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := component.Render(r.Context(), w); err != nil {
-		log.Printf("render component: %v", err)
+		s.logger.Error().Err(err).Msg("render component failed")
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
 }

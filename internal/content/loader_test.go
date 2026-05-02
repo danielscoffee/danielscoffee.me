@@ -147,6 +147,56 @@ date: 2026-05-01
 	}
 }
 
+func TestLoadProjects_SortsNewestFirst(t *testing.T) {
+	dir := t.TempDir()
+
+	writePost(t, dir, "one.norg", `@document.meta
+title: One
+slug: one
+date: 2026-01-01
+summary: one
+@end
+body`)
+	writePost(t, dir, "two.norg", `@document.meta
+title: Two
+slug: two
+date: 2026-02-01
+summary: two
+@end
+body`)
+
+	projects, err := LoadProjects(dir)
+	if err != nil {
+		t.Fatalf("LoadProjects returned error: %v", err)
+	}
+	if len(projects) != 2 {
+		t.Fatalf("expected 2 projects, got %d", len(projects))
+	}
+	if projects[0].Slug != "two" {
+		t.Fatalf("expected newest project first, got %q", projects[0].Slug)
+	}
+}
+
+func TestLoadPage_LoadsSinglePage(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "about.norg")
+	writePost(t, dir, "about.norg", `@document.meta
+title: About
+slug: about
+date: 2026-05-01
+summary: about me
+@end
+* About`)
+
+	page, err := LoadPage(path)
+	if err != nil {
+		t.Fatalf("LoadPage returned error: %v", err)
+	}
+	if page.Slug != "about" {
+		t.Fatalf("expected slug about, got %q", page.Slug)
+	}
+}
+
 func TestStore_BySlugAndByTag(t *testing.T) {
 	store := NewStore([]Post{
 		{Title: "One", Slug: "one", Date: "2026-01-01", Tags: []string{"go", "personal"}},
