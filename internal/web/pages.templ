@@ -1,13 +1,15 @@
 package web
 
-import "github.com/danielscoffee/blog/internal/content"
+import "github.com/danielscoffee/danielscoffee.me/internal/content"
 
 templ HomePage(posts []content.Post) {
 	@Base("Daniel's Site", "Personal website and blog") {
-		<h1 class="text-4xl font-bold tracking-tight">Daniel's Site</h1>
-		<p class="mt-3 text-zinc-600">Personal notes on software, projects, and experiments.</p>
-		<section class="mt-10">
-			<h2 class="text-2xl font-semibold mb-4">Recent posts</h2>
+		<section class="intro-block">
+			<h1 class="page-title">Daniel's Site</h1>
+			<p class="page-subtitle">Personal notes on software, projects, and experiments.</p>
+		</section>
+		<section class="section-block">
+			<h2 class="section-title">Recent posts</h2>
 			@PostList(posts)
 		</section>
 	}
@@ -15,9 +17,12 @@ templ HomePage(posts []content.Post) {
 
 templ BlogIndexPage(posts []content.Post) {
 	@Base("Blog", "All blog posts") {
-		<h1 class="text-4xl font-bold tracking-tight">Blog</h1>
-		<p class="mt-3 text-zinc-600">All writing in one place.</p>
-		<section class="mt-10">
+		<section class="intro-block">
+			<h1 class="page-title">Blog</h1>
+			<p class="page-subtitle">All writing in one place.</p>
+		</section>
+		<section class="section-block">
+			<h2 class="section-title">Latest entries</h2>
 			@PostList(posts)
 		</section>
 	}
@@ -25,10 +30,13 @@ templ BlogIndexPage(posts []content.Post) {
 
 templ TagPage(tag string, posts []content.Post) {
 	@Base("Tag: "+tag, "Posts filtered by tag") {
-		<h1 class="text-4xl font-bold tracking-tight">Tagged with { tag }</h1>
-		<section class="mt-10">
+		<section class="intro-block">
+			<h1 class="page-title">Tagged with <span class="tag-emphasis">{ tag }</span></h1>
+			<p class="page-subtitle">Filtered writing by topic.</p>
+		</section>
+		<section class="section-block">
 			if len(posts) == 0 {
-				<p class="text-zinc-600">No posts found for this tag yet.</p>
+				<p class="empty-state">No posts found for this tag yet.</p>
 			} else {
 				@PostList(posts)
 			}
@@ -37,21 +45,23 @@ templ TagPage(tag string, posts []content.Post) {
 }
 
 templ PostList(posts []content.Post) {
-	<ul class="space-y-6">
+	<ul class="post-list">
 		for _, post := range posts {
-			<li class="border-b border-zinc-200 pb-5">
-				<a class="text-2xl font-semibold underline decoration-zinc-300 hover:decoration-zinc-900" href={ templ.SafeURL("/post/" + post.Slug) }>{ post.Title }</a>
-				<p class="mt-1 text-sm text-zinc-500">{ post.Date }</p>
-				<p class="mt-2 text-zinc-700">{ post.Summary }</p>
-				if len(post.Tags) > 0 {
-					<ul class="mt-3 flex gap-2 text-xs text-zinc-600">
-						for _, tag := range post.Tags {
-							<li>
-								<a class="rounded bg-zinc-200 px-2 py-1" href={ templ.SafeURL("/tag/" + tag) }>{ tag }</a>
-							</li>
-						}
-					</ul>
-				}
+			<li class="post-item">
+				<a class="post-link" href={ templ.SafeURL("/post/" + post.Slug) }>{ post.Title }</a>
+				<p class="post-summary">{ post.Summary }</p>
+				<div class="post-meta-row">
+					<p class="post-date">{ post.Date }</p>
+					if len(post.Tags) > 0 {
+						<ul class="tag-list">
+							for _, tag := range post.Tags {
+								<li>
+									<a class="tag-chip" href={ templ.SafeURL("/tag/" + tag) }>{ tag }</a>
+								</li>
+							}
+						</ul>
+					}
+				</div>
 			</li>
 		}
 	</ul>
@@ -59,9 +69,11 @@ templ PostList(posts []content.Post) {
 
 templ BlogPostPage(post content.Post) {
 	@Base(post.Title, post.Summary) {
-		<article class="prose prose-zinc max-w-none">
-			<h1>{ post.Title }</h1>
-			<p class="text-sm text-zinc-500">{ post.Date }</p>
+		<article class="post-prose">
+			<header class="post-header">
+				<h1 class="post-title">{ post.Title }</h1>
+				<p class="post-date">{ post.Date }</p>
+			</header>
 			@templ.Raw(string(post.BodyHTML))
 		</article>
 	}

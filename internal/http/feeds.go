@@ -1,4 +1,4 @@
-package server
+package httpapp
 
 import (
 	"encoding/xml"
@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/danielscoffee/blog/internal/content"
+	"github.com/danielscoffee/danielscoffee.me/internal/content"
 )
 
 func (s *Server) rssHandler(w http.ResponseWriter, r *http.Request) {

@@ -1,0 +1,37 @@
+@document.meta
+title: Neorg Post
+slug: neorg-post
+date: 2026-05-01
+summary: First post using Neorg frontmatter format.
+tags: neorg, notes
+draft: false
+@end
+
+* Neorg parser support example
+
+** Heading level 2
+
+Paragraph with inline link: [project](https://example.com)
+
+*** TODO polish task-list styles
+*** DOING wire parser into post pipeline
+*** DONE parse frontmatter + body
+*** CANCELLED old migration plan
+
+- unordered one
+- unordered two
+
+1. ordered one
+2. ordered two
+
+```go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Println("neorg parser example")
+}
+```
+
+Raw paragraph fallback line with unsupported marker => ~=~ keeps text.

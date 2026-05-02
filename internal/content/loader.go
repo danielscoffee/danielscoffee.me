@@ -23,10 +23,17 @@ type frontMatter struct {
 }
 
 func LoadPosts(dir string) ([]Post, error) {
-	files, err := filepath.Glob(filepath.Join(dir, "*.md"))
+	mdFiles, err := filepath.Glob(filepath.Join(dir, "*.md"))
 	if err != nil {
 		return nil, err
 	}
+
+	norgFiles, err := filepath.Glob(filepath.Join(dir, "*.norg"))
+	if err != nil {
+		return nil, err
+	}
+
+	files := append(mdFiles, norgFiles...)
 
 	posts := make([]Post, 0, len(files))
 	for _, file := range files {
@@ -35,7 +42,7 @@ func LoadPosts(dir string) ([]Post, error) {
 			return nil, fmt.Errorf("read %s: %w", file, err)
 		}
 
-		meta, md, err := splitFrontMatter(string(raw))
+		meta, body, preRenderedHTML, err := splitFrontMatter(string(raw), filepath.Ext(file))
 		if err != nil {
 			return nil, fmt.Errorf("parse %s: %w", file, err)
 		}
@@ -43,9 +50,12 @@ func LoadPosts(dir string) ([]Post, error) {
 			continue
 		}
 
-		htmlBody, err := renderMarkdown(md)
-		if err != nil {
-			return nil, fmt.Errorf("render markdown %s: %w", file, err)
+		htmlBody := preRenderedHTML
+		if htmlBody == "" {
+			htmlBody, err = renderMarkdown(body)
+			if err != nil {
+				return nil, fmt.Errorf("render markdown %s: %w", file, err)
+			}
 		}
 
 		posts = append(posts, Post{
@@ -55,7 +65,7 @@ func LoadPosts(dir string) ([]Post, error) {
 			Summary:  meta.Summary,
 			Tags:     meta.Tags,
 			Draft:    meta.Draft,
-			BodyMD:   md,
+			BodyMD:   body,
 			BodyHTML: template.HTML(htmlBody),
 		})
 	}
@@ -67,7 +77,20 @@ func LoadPosts(dir string) ([]Post, error) {
 	return posts, nil
 }
 
-func splitFrontMatter(raw string) (frontMatter, string, error) {
+func splitFrontMatter(raw, ext string) (frontMatter, string, string, error) {
+	switch strings.ToLower(ext) {
+	case ".md":
+		meta, body, err := splitMarkdownFrontMatter(raw)
+		return meta, body, "", err
+	case ".norg":
+		meta, body, html, err := parseNorg(raw)
+		return meta, body, html, err
+	default:
+		return frontMatter{}, "", "", fmt.Errorf("unsupported content format %q", ext)
+	}
+}
+
+func splitMarkdownFrontMatter(raw string) (frontMatter, string, error) {
 	var meta frontMatter
 
 	trimmed := strings.TrimSpace(raw)
@@ -83,13 +106,18 @@ func splitFrontMatter(raw string) (frontMatter, string, error) {
 	if err := yaml.Unmarshal([]byte(parts[1]), &meta); err != nil {
 		return meta, "", fmt.Errorf("decode yaml frontmatter: %w", err)
 	}
-
-	if meta.Title == "" || meta.Slug == "" || meta.Date == "" {
-		return meta, "", fmt.Errorf("title, slug, and date are required")
+	if err := validateFrontMatter(meta); err != nil {
+		return meta, "", err
 	}
 
-	body := strings.TrimSpace(parts[2])
-	return meta, body, nil
+	return meta, strings.TrimSpace(parts[2]), nil
+}
+
+func validateFrontMatter(meta frontMatter) error {
+	if meta.Title == "" || meta.Slug == "" || meta.Date == "" {
+		return fmt.Errorf("title, slug, and date are required")
+	}
+	return nil
 }
 
 func renderMarkdown(md string) (string, error) {

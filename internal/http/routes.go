@@ -1,11 +1,11 @@
-package server
+package httpapp
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
 
-	"github.com/danielscoffee/blog/internal/web"
+	"github.com/danielscoffee/danielscoffee.me/internal/web"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {

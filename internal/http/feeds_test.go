@@ -1,4 +1,4 @@
-package server
+package httpapp
 
 import (
 	"net/http"
@@ -12,10 +12,10 @@ func TestFeedEndpoints(t *testing.T) {
 	h := s.RegisterRoutes()
 
 	cases := []struct {
-		path               string
-		statusCode         int
-		contentType        string
-		bodyContains       string
+		path         string
+		statusCode   int
+		contentType  string
+		bodyContains string
 	}{
 		{path: "/rss.xml", statusCode: http.StatusOK, contentType: "application/rss+xml", bodyContains: "<rss"},
 		{path: "/sitemap.xml", statusCode: http.StatusOK, contentType: "application/xml", bodyContains: "<urlset"},

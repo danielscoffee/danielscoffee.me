@@ -2,7 +2,7 @@ package web
 
 templ Base(pageTitle string, pageDescription string) {
 	<!DOCTYPE html>
-	<html lang="en" class="h-full">
+	<html lang="en" class="h-full" data-theme="system">
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -10,16 +10,24 @@ templ Base(pageTitle string, pageDescription string) {
 			<meta name="description" content={ pageDescription }/>
 			<link href="/assets/css/output.css" rel="stylesheet"/>
 			<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS"/>
+			<script src="/assets/js/theme-init.js"></script>
+			<script defer src="/assets/js/theme-toggle.js"></script>
 		</head>
-		<body class="bg-zinc-50 text-zinc-900 min-h-full">
-			<main class="max-w-3xl mx-auto px-4 py-10">
-				<header class="mb-10">
-					<nav class="flex gap-4 text-sm text-zinc-600">
-						<a href="/" class="underline">Home</a>
-						<a href="/blog" class="underline">Blog</a>
-						<a href="/rss.xml" class="underline">RSS</a>
+		<body class="site-shell">
+			<header class="top-bar">
+				<div class="top-bar-inner">
+					<a href="/" class="site-brand">danielscoffee</a>
+					<nav class="site-nav" aria-label="Primary">
+						<a href="/" class="site-nav-link">Home</a>
+						<a href="/blog" class="site-nav-link">Blog</a>
+						<a href="/rss.xml" class="site-nav-link">RSS</a>
 					</nav>
-				</header>
+					<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">
+						Theme: System
+					</button>
+				</div>
+			</header>
+			<main class="site-container">
 				{ children... }
 			</main>
 		</body>

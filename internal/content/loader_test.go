@@ -3,6 +3,7 @@ package content
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -85,6 +86,64 @@ summary: no slug
 	_, err := LoadPosts(dir)
 	if err == nil {
 		t.Fatal("expected error for missing required frontmatter")
+	}
+}
+
+func TestLoadPosts_SupportsNeorgFrontMatter(t *testing.T) {
+	dir := t.TempDir()
+
+	writePost(t, dir, "post.norg", `@document.meta
+title: Norg Post
+slug: norg-post
+date: 2026-05-01
+summary: from neorg frontmatter
+tags:
+  - norg
+  - notes
+draft: false
+@end
+# Norg heading
+Body.
+`)
+
+	posts, err := LoadPosts(dir)
+	if err != nil {
+		t.Fatalf("LoadPosts returned error: %v", err)
+	}
+
+	if len(posts) != 1 {
+		t.Fatalf("expected 1 post, got %d", len(posts))
+	}
+
+	if posts[0].Slug != "norg-post" {
+		t.Fatalf("expected slug norg-post, got %q", posts[0].Slug)
+	}
+
+	if len(posts[0].Tags) != 2 || posts[0].Tags[0] != "norg" || posts[0].Tags[1] != "notes" {
+		t.Fatalf("expected tags [norg notes], got %#v", posts[0].Tags)
+	}
+}
+
+func TestLoadPosts_SupportsNeorgTaskRendering(t *testing.T) {
+	dir := t.TempDir()
+
+	writePost(t, dir, "task.norg", `@document.meta
+title: Tasks
+slug: tasks
+date: 2026-05-01
+@end
+*** TODO first task
+`)
+
+	posts, err := LoadPosts(dir)
+	if err != nil {
+		t.Fatalf("LoadPosts error: %v", err)
+	}
+	if len(posts) != 1 {
+		t.Fatalf("expected 1 post, got %d", len(posts))
+	}
+	if !strings.Contains(string(posts[0].BodyHTML), `data-task-state="todo"`) {
+		t.Fatalf("expected checklist html, got %s", posts[0].BodyHTML)
 	}
 }
 

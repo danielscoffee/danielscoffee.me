@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/danielscoffee/blog/internal/server"
+	"github.com/danielscoffee/danielscoffee.me/internal/app"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -39,15 +39,18 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 
 func main() {
 
-	server := server.NewServer()
+	apiServer, err := app.NewServer()
+	if err != nil {
+		panic(fmt.Sprintf("bootstrap error: %s", err))
+	}
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 
 	// Run graceful shutdown in a separate goroutine
-	go gracefulShutdown(server, done)
+	go gracefulShutdown(apiServer, done)
 
-	err := server.ListenAndServe()
+	err = apiServer.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}

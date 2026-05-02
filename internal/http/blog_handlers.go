@@ -1,4 +1,4 @@
-package server
+package httpapp
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
-	"github.com/danielscoffee/blog/internal/web"
+	"github.com/danielscoffee/danielscoffee.me/internal/web"
 )
 
 func (s *Server) homeHandler(w http.ResponseWriter, r *http.Request) {

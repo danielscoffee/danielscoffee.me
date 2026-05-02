@@ -1,4 +1,4 @@
-# blog
+# danielscoffee.me
 
 Personal site + blog built with Go, templ, and Tailwind.
 
