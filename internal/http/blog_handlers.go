@@ -29,8 +29,8 @@ func (s *Server) projectsIndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) projectDetailHandler(w http.ResponseWriter, r *http.Request) {
-	slug := strings.TrimPrefix(r.URL.Path, "/project/")
-	if slug == "" {
+	slug, ok := pathSuffix(r.URL.Path, "/project/")
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}
@@ -45,8 +45,8 @@ func (s *Server) projectDetailHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) postDetailHandler(w http.ResponseWriter, r *http.Request) {
-	slug := strings.TrimPrefix(r.URL.Path, "/post/")
-	if slug == "" {
+	slug, ok := pathSuffix(r.URL.Path, "/post/")
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}
@@ -61,8 +61,8 @@ func (s *Server) postDetailHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) tagIndexHandler(w http.ResponseWriter, r *http.Request) {
-	tag := strings.TrimPrefix(r.URL.Path, "/tag/")
-	if tag == "" {
+	tag, ok := pathSuffix(r.URL.Path, "/tag/")
+	if !ok {
 		http.NotFound(w, r)
 		return
 	}
@@ -77,4 +77,9 @@ func (s *Server) renderComponent(w http.ResponseWriter, r *http.Request, compone
 		s.logger.Error().Err(err).Msg("render component failed")
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 	}
+}
+
+func pathSuffix(path, prefix string) (string, bool) {
+	suffix := strings.TrimPrefix(path, prefix)
+	return suffix, suffix != ""
 }

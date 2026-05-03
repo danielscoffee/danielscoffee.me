@@ -1,5 +1,14 @@
 all: build test
 
+define docker_compose
+	@if docker compose $(1) 2>/dev/null; then \
+		: ; \
+	else \
+		echo "Falling back to Docker Compose V1"; \
+		docker-compose $(1); \
+	fi
+endef
+
 templ-install:
 	@if ! command -v templ > /dev/null; then \
 		echo "templ not found. Installing..."; \
@@ -26,20 +35,10 @@ test: generate
 	@go test ./... -v
 
 docker-run:
-	@if docker compose up --build 2>/dev/null; then \
-		: ; \
-	else \
-		echo "Falling back to Docker Compose V1"; \
-		docker-compose up --build; \
-	fi
+	$(call docker_compose,up --build)
 
 docker-down:
-	@if docker compose down 2>/dev/null; then \
-		: ; \
-	else \
-		echo "Falling back to Docker Compose V1"; \
-		docker-compose down; \
-	fi
+	$(call docker_compose,down)
 
 clean:
 	@rm -f main

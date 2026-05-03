@@ -16,20 +16,24 @@ import (
 func testBlogServer() *Server {
 	posts := []content.Post{
 		{
-			Title:    "Hello World",
-			Slug:     "hello-world",
-			Date:     "2026-04-26",
-			Summary:  "Ship the first post",
-			Tags:     []string{"go", "personal"},
+			Published: content.Published{
+				Title:   "Hello World",
+				Slug:    "hello-world",
+				Date:    "2026-04-26",
+				Summary: "Ship the first post",
+				Tags:    []string{"go", "personal"},
+			},
 			BodyMD:   "# Hello",
 			BodyHTML: template.HTML(`<h1>Hello</h1>`),
 		},
 		{
-			Title:    "Now",
-			Slug:     "now",
-			Date:     "2026-04-20",
-			Summary:  "What I'm doing now",
-			Tags:     []string{"now"},
+			Published: content.Published{
+				Title:   "Now",
+				Slug:    "now",
+				Date:    "2026-04-20",
+				Summary: "What I'm doing now",
+				Tags:    []string{"now"},
+			},
 			BodyMD:   "# Now",
 			BodyHTML: template.HTML(`<h1>Now</h1>`),
 		},
@@ -37,11 +41,13 @@ func testBlogServer() *Server {
 
 	projects := []content.Project{
 		{
-			Title:    "Side Project",
-			Slug:     "side-project",
-			Date:     "2026-05-01",
-			Summary:  "Small app",
-			Tags:     []string{"go", "web"},
+			Published: content.Published{
+				Title:   "Side Project",
+				Slug:    "side-project",
+				Date:    "2026-05-01",
+				Summary: "Small app",
+				Tags:    []string{"go", "web"},
+			},
 			BodyMD:   "overview",
 			BodyHTML: template.HTML(`<p>overview</p>`),
 		},

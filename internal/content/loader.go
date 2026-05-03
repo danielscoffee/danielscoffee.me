@@ -21,34 +21,45 @@ type frontMatter struct {
 }
 
 func LoadPosts(dir string) ([]Post, error) {
+	return loadPublished(dir, func(entry contentEntry) Post {
+		return Post{
+			Published: Published{
+				Title:   entry.meta.Title,
+				Slug:    entry.meta.Slug,
+				Date:    entry.meta.Date,
+				Summary: entry.meta.Summary,
+				Tags:    entry.meta.Tags,
+				Draft:   entry.meta.Draft,
+			},
+			BodyMD:   entry.body,
+			BodyHTML: template.HTML(entry.htmlBody),
+		}
+	})
+}
+
+type publishedContent interface {
+	publishedDate() string
+}
+
+func loadPublished[T publishedContent](dir string, convert func(contentEntry) T) ([]T, error) {
 	entries, err := loadEntries(dir)
 	if err != nil {
 		return nil, err
 	}
 
-	posts := make([]Post, 0, len(entries))
+	items := make([]T, 0, len(entries))
 	for _, entry := range entries {
 		if entry.meta.Draft {
 			continue
 		}
-
-		posts = append(posts, Post{
-			Title:    entry.meta.Title,
-			Slug:     entry.meta.Slug,
-			Date:     entry.meta.Date,
-			Summary:  entry.meta.Summary,
-			Tags:     entry.meta.Tags,
-			Draft:    entry.meta.Draft,
-			BodyMD:   entry.body,
-			BodyHTML: template.HTML(entry.htmlBody),
-		})
+		items = append(items, convert(entry))
 	}
 
-	sort.Slice(posts, func(i, j int) bool {
-		return posts[i].Date > posts[j].Date
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].publishedDate() > items[j].publishedDate()
 	})
 
-	return posts, nil
+	return items, nil
 }
 
 func splitFrontMatter(raw, ext string) (frontMatter, string, string, error) {

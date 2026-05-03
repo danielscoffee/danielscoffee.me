@@ -199,8 +199,8 @@ summary: about me
 
 func TestStore_BySlugAndByTag(t *testing.T) {
 	store := NewStore([]Post{
-		{Title: "One", Slug: "one", Date: "2026-01-01", Tags: []string{"go", "personal"}},
-		{Title: "Two", Slug: "two", Date: "2026-02-01", Tags: []string{"go"}},
+		{Published: Published{Title: "One", Slug: "one", Date: "2026-01-01", Tags: []string{"go", "personal"}}},
+		{Published: Published{Title: "Two", Slug: "two", Date: "2026-02-01", Tags: []string{"go"}}},
 	})
 
 	if _, ok := store.BySlug("one"); !ok {

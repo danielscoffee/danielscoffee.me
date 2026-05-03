@@ -1,7 +1,5 @@
 package content
 
-import "strings"
-
 // Store provides read-only lookups over loaded posts.
 type Store struct {
 	posts  []Post
@@ -10,22 +8,8 @@ type Store struct {
 }
 
 func NewStore(posts []Post) *Store {
-	postCopies := append([]Post(nil), posts...)
-	bySlug := make(map[string]Post, len(postCopies))
-	byTag := make(map[string][]Post)
-
-	for _, post := range postCopies {
-		bySlug[post.Slug] = post
-		for _, tag := range post.Tags {
-			normalized := strings.ToLower(strings.TrimSpace(tag))
-			if normalized == "" {
-				continue
-			}
-			byTag[normalized] = append(byTag[normalized], post)
-		}
-	}
-
-	return &Store{posts: postCopies, bySlug: bySlug, byTag: byTag}
+	postCopies := cloneSlice(posts)
+	return &Store{posts: postCopies, bySlug: buildSlugIndex(postCopies), byTag: buildTagIndex(postCopies)}
 }
 
 func (s *Store) All() []Post {
@@ -45,7 +29,7 @@ func (s *Store) BySlug(slug string) (Post, bool) {
 }
 
 func (s *Store) ByTag(tag string) []Post {
-	normalized := strings.ToLower(strings.TrimSpace(tag))
+	normalized := normalizeKey(tag)
 	posts := s.byTag[normalized]
-	return append([]Post(nil), posts...)
+	return cloneSlice(posts)
 }

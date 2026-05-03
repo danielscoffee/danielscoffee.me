@@ -1,19 +1,13 @@
 package content
 
-import "strings"
-
 type ProjectStore struct {
 	projects []Project
 	bySlug   map[string]Project
 }
 
 func NewProjectStore(projects []Project) *ProjectStore {
-	copies := append([]Project(nil), projects...)
-	bySlug := make(map[string]Project, len(copies))
-	for _, project := range copies {
-		bySlug[strings.ToLower(strings.TrimSpace(project.Slug))] = project
-	}
-	return &ProjectStore{projects: copies, bySlug: bySlug}
+	copies := cloneSlice(projects)
+	return &ProjectStore{projects: copies, bySlug: buildSlugIndex(copies)}
 }
 
 func (s *ProjectStore) All() []Project {
@@ -21,6 +15,6 @@ func (s *ProjectStore) All() []Project {
 }
 
 func (s *ProjectStore) BySlug(slug string) (Project, bool) {
-	project, ok := s.bySlug[strings.ToLower(strings.TrimSpace(slug))]
+	project, ok := s.bySlug[normalizeKey(slug)]
 	return project, ok
 }
