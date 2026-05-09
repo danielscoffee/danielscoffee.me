@@ -17,37 +17,37 @@ func writePost(t *testing.T, dir, name, body string) {
 func TestLoadPosts_SortsNewestFirstAndSkipsDrafts(t *testing.T) {
 	dir := t.TempDir()
 
-	writePost(t, dir, "one.md", `---
+	writePost(t, dir, "one.norg", `@document.meta
 title: One
 slug: one
 date: 2026-01-01
 summary: one summary
 tags: [go]
 draft: false
----
-# One
+@end
+* One
 Body one.
 `)
-	writePost(t, dir, "two.md", `---
+	writePost(t, dir, "two.norg", `@document.meta
 title: Two
 slug: two
 date: 2026-03-01
 summary: two summary
 tags: [personal]
 draft: false
----
-# Two
+@end
+* Two
 Body two.
 `)
-	writePost(t, dir, "draft.md", `---
+	writePost(t, dir, "draft.norg", `@document.meta
 title: Draft
 slug: draft
 date: 2026-04-01
 summary: draft summary
 tags: [draft]
 draft: true
----
-# Draft
+@end
+* Draft
 `)
 
 	posts, err := LoadPosts(dir)
@@ -75,17 +75,38 @@ draft: true
 func TestLoadPosts_RequiresTitleSlugDate(t *testing.T) {
 	dir := t.TempDir()
 
-	writePost(t, dir, "bad.md", `---
+	writePost(t, dir, "bad.norg", `@document.meta
 title: Missing slug
 date: 2026-01-01
 summary: no slug
----
-# Bad
+@end
+* Bad
 `)
 
 	_, err := LoadPosts(dir)
 	if err == nil {
 		t.Fatal("expected error for missing required frontmatter")
+	}
+}
+
+func TestLoadPosts_IgnoresMarkdownFiles(t *testing.T) {
+	dir := t.TempDir()
+
+	writePost(t, dir, "legacy.md", `---
+title: Legacy
+slug: legacy
+date: 2026-01-01
+summary: should be ignored
+---
+# Legacy
+`)
+
+	posts, err := LoadPosts(dir)
+	if err != nil {
+		t.Fatalf("LoadPosts returned error: %v", err)
+	}
+	if len(posts) != 0 {
+		t.Fatalf("expected 0 posts from markdown files, got %d", len(posts))
 	}
 }
 

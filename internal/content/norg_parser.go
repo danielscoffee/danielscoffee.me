@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"html"
+	"net/url"
+	"path"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -22,21 +25,32 @@ const (
 	norgOL
 	norgTaskList
 	norgCode
+	norgTable
+	norgQuote
+	norgDefinitionList
 )
 
 type norgNode struct {
-	kind      norgNodeKind
-	level     int
-	text      string
-	items     []string
-	taskItems []norgTaskItem
-	lang      string
-	code      string
+	kind            norgNodeKind
+	level           int
+	text            string
+	items           []string
+	taskItems       []norgTaskItem
+	lang            string
+	code            string
+	tableHTML       string
+	definitionItems []norgDefinitionItem
+	attrs           map[string]string
 }
 
 type norgTaskItem struct {
 	state string
 	text  string
+}
+
+type norgDefinitionItem struct {
+	term string
+	body string
 }
 
 func parseNorg(raw string) (frontMatter, string, string, error) {
@@ -51,7 +65,10 @@ func parseNorg(raw string) (frontMatter, string, string, error) {
 	}
 
 	body := strings.TrimSpace(strings.Join(bodyLines, "\n"))
-	htmlBody := renderNorgHTML(nodes)
+	htmlBody, err := renderNorgHTML(nodes)
+	if err != nil {
+		return frontMatter{}, "", "", err
+	}
 	return meta, body, htmlBody, nil
 }
 
@@ -184,11 +201,41 @@ func stripQuotes(v string) string {
 
 func parseNorgBlocks(lines []string) ([]norgNode, error) {
 	nodes := make([]norgNode, 0)
+	pendingAttrs := map[string]string{}
 	for i := 0; i < len(lines); {
 		line := strings.TrimRight(lines[i], "\r")
 		trimmed := strings.TrimSpace(line)
 		if trimmed == "" {
 			i++
+			continue
+		}
+
+		if key, value, ok := parseCarryoverMeta(trimmed); ok {
+			pendingAttrs[key] = value
+			i++
+			continue
+		}
+
+		attrs := takeAttrs(pendingAttrs)
+
+		if lang, ok := parseAtCodeStart(trimmed); ok {
+			i++
+			codeLines := make([]string, 0)
+			closed := false
+			for i < len(lines) {
+				current := strings.TrimRight(lines[i], "\r")
+				if strings.TrimSpace(current) == "@end" {
+					closed = true
+					i++
+					break
+				}
+				codeLines = append(codeLines, current)
+				i++
+			}
+			if !closed {
+				return nil, fmt.Errorf("unclosed @code block")
+			}
+			nodes = append(nodes, norgNode{kind: norgCode, lang: lang, code: strings.Join(codeLines, "\n"), attrs: attrs})
 			continue
 		}
 
@@ -210,7 +257,64 @@ func parseNorgBlocks(lines []string) ([]norgNode, error) {
 			if !closed {
 				return nil, fmt.Errorf("unclosed code fence")
 			}
-			nodes = append(nodes, norgNode{kind: norgCode, lang: lang, code: strings.Join(codeLines, "\n")})
+			nodes = append(nodes, norgNode{kind: norgCode, lang: lang, code: strings.Join(codeLines, "\n"), attrs: attrs})
+			continue
+		}
+
+		if isTableStart(trimmed) {
+			i++
+			tableLines := make([]string, 0)
+			closed := false
+			for i < len(lines) {
+				current := strings.TrimSpace(strings.TrimRight(lines[i], "\r"))
+				if current == "@end" {
+					closed = true
+					i++
+					break
+				}
+				tableLines = append(tableLines, strings.TrimRight(lines[i], "\r"))
+				i++
+			}
+			if !closed {
+				return nil, fmt.Errorf("unclosed @table block")
+			}
+			tableHTML, err := parseMarkdownWrapperTable(tableLines)
+			if err != nil {
+				return nil, err
+			}
+			nodes = append(nodes, norgNode{kind: norgTable, tableHTML: tableHTML, attrs: attrs})
+			continue
+		}
+
+		if text, ok := parseQuoteLine(trimmed); ok {
+			quoteLines := []string{text}
+			i++
+			for i < len(lines) {
+				next := strings.TrimSpace(strings.TrimRight(lines[i], "\r"))
+				parsed, qok := parseQuoteLine(next)
+				if !qok {
+					break
+				}
+				quoteLines = append(quoteLines, parsed)
+				i++
+			}
+			nodes = append(nodes, norgNode{kind: norgQuote, text: strings.Join(quoteLines, " "), attrs: attrs})
+			continue
+		}
+
+		if item, ok := parseDefinitionLine(trimmed); ok {
+			defs := []norgDefinitionItem{item}
+			i++
+			for i < len(lines) {
+				next := strings.TrimSpace(strings.TrimRight(lines[i], "\r"))
+				parsed, dok := parseDefinitionLine(next)
+				if !dok {
+					break
+				}
+				defs = append(defs, parsed)
+				i++
+			}
+			nodes = append(nodes, norgNode{kind: norgDefinitionList, definitionItems: defs, attrs: attrs})
 			continue
 		}
 
@@ -241,12 +345,19 @@ func parseNorgBlocks(lines []string) ([]norgNode, error) {
 				items = append(items, norgTaskItem{state: nextState, text: nextText})
 				i++
 			}
-			nodes = append(nodes, norgNode{kind: norgTaskList, taskItems: items})
+			nodes = append(nodes, norgNode{kind: norgTaskList, taskItems: items, attrs: attrs})
+			continue
+		}
+
+		if src, ok := parseDotImageLine(trimmed); ok {
+			alt := imageAltFromSrc(src)
+			nodes = append(nodes, norgNode{kind: norgParagraph, text: fmt.Sprintf("![%s](%s)", alt, src), attrs: attrs})
+			i++
 			continue
 		}
 
 		if level, text, ok := parseHeadingLine(trimmed); ok {
-			nodes = append(nodes, norgNode{kind: norgHeading, level: level, text: text})
+			nodes = append(nodes, norgNode{kind: norgHeading, level: level, text: text, attrs: attrs})
 			i++
 			continue
 		}
@@ -262,7 +373,7 @@ func parseNorgBlocks(lines []string) ([]norgNode, error) {
 				items = append(items, nextItem)
 				i++
 			}
-			nodes = append(nodes, norgNode{kind: norgUL, items: items})
+			nodes = append(nodes, norgNode{kind: norgUL, items: items, attrs: attrs})
 			continue
 		}
 
@@ -277,7 +388,7 @@ func parseNorgBlocks(lines []string) ([]norgNode, error) {
 				items = append(items, nextItem)
 				i++
 			}
-			nodes = append(nodes, norgNode{kind: norgOL, items: items})
+			nodes = append(nodes, norgNode{kind: norgOL, items: items, attrs: attrs})
 			continue
 		}
 
@@ -285,20 +396,30 @@ func parseNorgBlocks(lines []string) ([]norgNode, error) {
 		i++
 		for i < len(lines) {
 			next := strings.TrimSpace(strings.TrimRight(lines[i], "\r"))
-			if next == "" || isFenceStart(next) || isTaskLine(next) || isHeadingLine(next) || isUnorderedLine(next) || isOrderedLine(next) {
+			if _, ok := parseAtCodeStart(next); next == "" || ok || isTableStart(next) || isFenceStart(next) || isTaskLine(next) || isDotImageLine(next) || isHeadingLine(next) || isUnorderedLine(next) || isOrderedLine(next) {
+				break
+			}
+			if _, qok := parseQuoteLine(next); qok {
+				break
+			}
+			if _, dok := parseDefinitionLine(next); dok {
+				break
+			}
+			if _, _, mok := parseCarryoverMeta(next); mok {
 				break
 			}
 			paragraphLines = append(paragraphLines, next)
 			i++
 		}
-		nodes = append(nodes, norgNode{kind: norgParagraph, text: strings.Join(paragraphLines, " ")})
+		nodes = append(nodes, norgNode{kind: norgParagraph, text: strings.Join(paragraphLines, " "), attrs: attrs})
 	}
 	return nodes, nil
 }
 
-func renderNorgHTML(nodes []norgNode) string {
+func renderNorgHTML(nodes []norgNode) (string, error) {
 	var b strings.Builder
 	for _, n := range nodes {
+		attrs := renderAttrs(n.attrs)
 		switch n.kind {
 		case norgHeading:
 			lvl := n.level
@@ -308,33 +429,91 @@ func renderNorgHTML(nodes []norgNode) string {
 			if lvl > 6 {
 				lvl = 6
 			}
-			fmt.Fprintf(&b, "<h%d>%s</h%d>\n", lvl, renderInline(n.text), lvl)
+			text, err := renderInline(n.text)
+			if err != nil {
+				return "", err
+			}
+			fmt.Fprintf(&b, "<h%d%s>%s</h%d>\n", lvl, attrs, text, lvl)
 		case norgParagraph:
-			fmt.Fprintf(&b, "<p>%s</p>\n", renderInline(n.text))
+			text, err := renderInline(n.text)
+			if err != nil {
+				return "", err
+			}
+			fmt.Fprintf(&b, "<p%s>%s</p>\n", attrs, text)
 		case norgUL:
-			b.WriteString("<ul>\n")
+			fmt.Fprintf(&b, "<ul%s>\n", attrs)
 			for _, item := range n.items {
-				fmt.Fprintf(&b, "<li>%s</li>\n", renderInline(item))
+				text, err := renderInline(item)
+				if err != nil {
+					return "", err
+				}
+				fmt.Fprintf(&b, "<li>%s</li>\n", text)
 			}
 			b.WriteString("</ul>\n")
 		case norgOL:
-			b.WriteString("<ol>\n")
+			fmt.Fprintf(&b, "<ol%s>\n", attrs)
 			for _, item := range n.items {
-				fmt.Fprintf(&b, "<li>%s</li>\n", renderInline(item))
+				text, err := renderInline(item)
+				if err != nil {
+					return "", err
+				}
+				fmt.Fprintf(&b, "<li>%s</li>\n", text)
 			}
 			b.WriteString("</ol>\n")
 		case norgTaskList:
-			b.WriteString("<ul class=\"task-list\">\n")
+			fmt.Fprintf(&b, "<ul class=\"task-list\"%s>\n", attrs)
 			for _, item := range n.taskItems {
-				fmt.Fprintf(&b, "<li data-task-state=\"%s\">%s</li>\n", renderTaskState(item.state), renderInline(item.text))
+				text, err := renderInline(item.text)
+				if err != nil {
+					return "", err
+				}
+				fmt.Fprintf(&b, "<li data-task-state=\"%s\">%s</li>\n", renderTaskState(item.state), text)
 			}
 			b.WriteString("</ul>\n")
 		case norgCode:
+			if attrs != "" {
+				fmt.Fprintf(&b, "<div%s>", attrs)
+			}
 			b.WriteString(renderHighlightedCode(n.lang, n.code))
+			if attrs != "" {
+				b.WriteString("</div>")
+			}
 			b.WriteString("\n")
+		case norgTable:
+			if attrs != "" {
+				fmt.Fprintf(&b, "<div%s>", attrs)
+			}
+			b.WriteString(n.tableHTML)
+			if attrs != "" {
+				b.WriteString("</div>")
+			}
+			b.WriteString("\n")
+		case norgQuote:
+			text, err := renderInline(n.text)
+			if err != nil {
+				return "", err
+			}
+			fmt.Fprintf(&b, "<blockquote%s><p>%s</p></blockquote>\n", attrs, text)
+		case norgDefinitionList:
+			fmt.Fprintf(&b, "<dl class=\"norg-definitions\"%s>\n", attrs)
+			for _, d := range n.definitionItems {
+				if d.term != "" {
+					term, err := renderInline(d.term)
+					if err != nil {
+						return "", err
+					}
+					fmt.Fprintf(&b, "<dt>%s</dt>\n", term)
+				}
+				body, err := renderInline(d.body)
+				if err != nil {
+					return "", err
+				}
+				fmt.Fprintf(&b, "<dd>%s</dd>\n", body)
+			}
+			b.WriteString("</dl>\n")
 		}
 	}
-	return strings.TrimSpace(b.String())
+	return strings.TrimSpace(b.String()), nil
 }
 
 func renderHighlightedCode(lang, code string) string {
@@ -392,14 +571,18 @@ func renderTaskState(state string) string {
 }
 
 var (
-	chromaPreStylePattern = regexp.MustCompile(`<pre style="[^"]*">`)
-	linkPattern           = regexp.MustCompile(`\[([^\]]+)\]\(([^)]+)\)`)
+	chromaPreStylePattern   = regexp.MustCompile(`<pre style="[^"]*">`)
+	norgImagePattern        = regexp.MustCompile(`!\{([^}]+)\}\[([^\]]*)\]|\{([^}]+)\}\[([^\]]*)\]\(image\)`)
+	inlinePattern           = regexp.MustCompile(`!\[([^\]]*)\]\(([^)]+)\)|\[([^\]]+)\]\(([^)]+)\)`)
+	tableSeparatorCellRegex = regexp.MustCompile(`^:?-+:?$`)
+	carryoverPattern        = regexp.MustCompile(`^#([a-zA-Z0-9_-]+)\s+(.+)$`)
 )
 
-func renderInline(text string) string {
-	idxs := linkPattern.FindAllStringSubmatchIndex(text, -1)
+func renderInline(text string) (string, error) {
+	text = normalizeNorgImageInline(text)
+	idxs := inlinePattern.FindAllStringSubmatchIndex(text, -1)
 	if len(idxs) == 0 {
-		return html.EscapeString(text)
+		return renderTextWithModifiers(text), nil
 	}
 
 	var b strings.Builder
@@ -407,19 +590,187 @@ func renderInline(text string) string {
 	for _, idx := range idxs {
 		start := idx[0]
 		end := idx[1]
-		labelStart := idx[2]
-		labelEnd := idx[3]
-		hrefStart := idx[4]
-		hrefEnd := idx[5]
+		b.WriteString(renderTextWithModifiers(text[cursor:start]))
 
-		b.WriteString(html.EscapeString(text[cursor:start]))
-		label := html.EscapeString(text[labelStart:labelEnd])
-		href := html.EscapeString(text[hrefStart:hrefEnd])
-		fmt.Fprintf(&b, `<a href="%s">%s</a>`, href, label)
+		if idx[2] != -1 && idx[4] != -1 {
+			alt := html.EscapeString(text[idx[2]:idx[3]])
+			rawSrc := text[idx[4]:idx[5]]
+			src, err := validateCDNImageURL(rawSrc)
+			if err != nil {
+				return "", err
+			}
+			fmt.Fprintf(&b, `<img class="post-image" src="%s" alt="%s" loading="lazy" decoding="async"/>`, html.EscapeString(src), alt)
+		} else {
+			label := renderTextWithModifiers(text[idx[6]:idx[7]])
+			href := html.EscapeString(text[idx[8]:idx[9]])
+			fmt.Fprintf(&b, `<a href="%s">%s</a>`, href, label)
+		}
 		cursor = end
 	}
-	b.WriteString(html.EscapeString(text[cursor:]))
+	b.WriteString(renderTextWithModifiers(text[cursor:]))
+	return b.String(), nil
+}
+
+func renderTextWithModifiers(raw string) string {
+	var b strings.Builder
+	for i := 0; i < len(raw); {
+		delim := raw[i]
+		if !isModifierDelimiter(delim) || isEscaped(raw, i) {
+			if delim == '\\' && i+1 < len(raw) && isModifierDelimiter(raw[i+1]) {
+				b.WriteString(html.EscapeString(string(raw[i+1])))
+				i += 2
+				continue
+			}
+			b.WriteString(html.EscapeString(string(delim)))
+			i++
+			continue
+		}
+
+		j := findClosingModifier(raw, i+1, delim)
+		if j == -1 {
+			b.WriteString(html.EscapeString(string(delim)))
+			i++
+			continue
+		}
+
+		inner := raw[i+1 : j]
+		switch delim {
+		case '*':
+			fmt.Fprintf(&b, "<strong>%s</strong>", renderTextWithModifiers(inner))
+		case '/':
+			fmt.Fprintf(&b, "<em>%s</em>", renderTextWithModifiers(inner))
+		case '_':
+			fmt.Fprintf(&b, "<u>%s</u>", renderTextWithModifiers(inner))
+		case '!':
+			fmt.Fprintf(&b, "<span class=\"spoiler\">%s</span>", renderTextWithModifiers(inner))
+		case '$':
+			fmt.Fprintf(&b, "<span class=\"math-latex\">%s</span>", html.EscapeString(inner))
+		}
+		i = j + 1
+	}
 	return b.String()
+}
+
+func isModifierDelimiter(ch byte) bool {
+	switch ch {
+	case '*', '/', '_', '!', '$':
+		return true
+	default:
+		return false
+	}
+}
+
+func isEscaped(s string, index int) bool {
+	if index <= 0 {
+		return false
+	}
+	count := 0
+	for i := index - 1; i >= 0 && s[i] == '\\'; i-- {
+		count++
+	}
+	return count%2 == 1
+}
+
+func findClosingModifier(s string, start int, delim byte) int {
+	for i := start; i < len(s); i++ {
+		if s[i] == '\n' {
+			return -1
+		}
+		if s[i] == delim && !isEscaped(s, i) {
+			if i == start {
+				return -1
+			}
+			return i
+		}
+	}
+	return -1
+}
+
+func parseCarryoverMeta(line string) (string, string, bool) {
+	m := carryoverPattern.FindStringSubmatch(line)
+	if len(m) != 3 {
+		return "", "", false
+	}
+	return strings.ToLower(strings.TrimSpace(m[1])), strings.TrimSpace(m[2]), true
+}
+
+func takeAttrs(attrs map[string]string) map[string]string {
+	if len(attrs) == 0 {
+		return nil
+	}
+	out := make(map[string]string, len(attrs))
+	for k, v := range attrs {
+		out[k] = v
+		delete(attrs, k)
+	}
+	return out
+}
+
+func renderAttrs(attrs map[string]string) string {
+	if len(attrs) == 0 {
+		return ""
+	}
+	keys := make([]string, 0, len(attrs))
+	for k := range attrs {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	var b strings.Builder
+	for _, k := range keys {
+		fmt.Fprintf(&b, " data-%s=\"%s\"", html.EscapeString(k), html.EscapeString(attrs[k]))
+	}
+	return b.String()
+}
+
+func parseQuoteLine(line string) (string, bool) {
+	if !strings.HasPrefix(line, ">") {
+		return "", false
+	}
+	text := strings.TrimSpace(line)
+	for strings.HasPrefix(text, ">") {
+		text = strings.TrimSpace(strings.TrimPrefix(text, ">"))
+	}
+	return text, true
+}
+
+func parseDefinitionLine(line string) (norgDefinitionItem, bool) {
+	if !strings.HasPrefix(line, "$") {
+		return norgDefinitionItem{}, false
+	}
+	raw := strings.TrimSpace(strings.TrimPrefix(line, "$"))
+	if raw == "" {
+		return norgDefinitionItem{}, false
+	}
+	if term, body, ok := strings.Cut(raw, ":"); ok {
+		if strings.TrimSpace(body) != "" {
+			return norgDefinitionItem{term: strings.TrimSpace(term), body: strings.TrimSpace(body)}, true
+		}
+	}
+	return norgDefinitionItem{body: raw}, true
+}
+
+func validateCDNImageURL(raw string) (string, error) {
+	u, err := url.Parse(strings.TrimSpace(raw))
+	if err != nil {
+		return "", fmt.Errorf("invalid image url %q", raw)
+	}
+	if u.Scheme != "https" || u.Host == "" {
+		return "", fmt.Errorf("image url must be https CDN url: %q", raw)
+	}
+
+	host := strings.ToLower(u.Hostname())
+	if !strings.Contains(host, "cdn") {
+		return "", fmt.Errorf("image host must be CDN: %q", raw)
+	}
+
+	cleanPath := path.Clean("/" + strings.TrimPrefix(u.Path, "/"))
+	if strings.Contains(cleanPath, "..") {
+		return "", fmt.Errorf("image path traversal blocked: %q", raw)
+	}
+
+	u.Path = cleanPath
+	u.RawPath = ""
+	return u.String(), nil
 }
 
 func isFenceStart(line string) bool {
@@ -478,6 +829,153 @@ func parseUnorderedLine(line string) (string, bool) {
 func isUnorderedLine(line string) bool {
 	_, ok := parseUnorderedLine(line)
 	return ok
+}
+
+func isTableStart(line string) bool {
+	return strings.TrimSpace(line) == "@table"
+}
+
+func parseMarkdownWrapperTable(lines []string) (string, error) {
+	rows := make([][]string, 0, len(lines))
+	for _, raw := range lines {
+		trimmed := strings.TrimSpace(raw)
+		if trimmed == "" {
+			continue
+		}
+		cells, ok := parseTableRow(trimmed)
+		if !ok {
+			return "", fmt.Errorf("invalid @table row %q", raw)
+		}
+		rows = append(rows, cells)
+	}
+	if len(rows) < 2 {
+		return "", fmt.Errorf("invalid @table structure")
+	}
+
+	headers := rows[0]
+	sep := rows[1]
+	if len(headers) == 0 || len(headers) != len(sep) {
+		return "", fmt.Errorf("invalid @table structure")
+	}
+	for _, cell := range sep {
+		if !tableSeparatorCellRegex.MatchString(strings.TrimSpace(cell)) {
+			return "", fmt.Errorf("invalid @table separator")
+		}
+	}
+
+	var b strings.Builder
+	b.WriteString("<table>\n<thead><tr>")
+	for _, header := range headers {
+		text, err := renderInline(header)
+		if err != nil {
+			return "", err
+		}
+		fmt.Fprintf(&b, "<th>%s</th>", text)
+	}
+	b.WriteString("</tr></thead>\n<tbody>\n")
+	for _, row := range rows[2:] {
+		if len(row) != len(headers) {
+			return "", fmt.Errorf("invalid @table row width")
+		}
+		b.WriteString("<tr>")
+		for _, cell := range row {
+			text, err := renderInline(cell)
+			if err != nil {
+				return "", err
+			}
+			fmt.Fprintf(&b, "<td>%s</td>", text)
+		}
+		b.WriteString("</tr>\n")
+	}
+	b.WriteString("</tbody>\n</table>")
+	return b.String(), nil
+}
+
+func parseTableRow(line string) ([]string, bool) {
+	if !strings.HasPrefix(line, "|") || !strings.HasSuffix(line, "|") {
+		return nil, false
+	}
+	parts := strings.Split(line, "|")
+	if len(parts) < 3 {
+		return nil, false
+	}
+	cells := make([]string, 0, len(parts)-2)
+	for _, part := range parts[1 : len(parts)-1] {
+		cells = append(cells, strings.TrimSpace(part))
+	}
+	return cells, true
+}
+
+func parseAtCodeStart(line string) (string, bool) {
+	if !strings.HasPrefix(line, "@code") {
+		return "", false
+	}
+	return strings.TrimSpace(strings.TrimPrefix(line, "@code")), true
+}
+
+func parseDotImageLine(line string) (string, bool) {
+	if !strings.HasPrefix(line, ".image ") {
+		return "", false
+	}
+	src := strings.TrimSpace(strings.TrimPrefix(line, ".image"))
+	if src == "" {
+		return "", false
+	}
+	return src, true
+}
+
+func isDotImageLine(line string) bool {
+	_, ok := parseDotImageLine(strings.TrimSpace(line))
+	return ok
+}
+
+func imageAltFromSrc(src string) string {
+	clean := strings.TrimSpace(src)
+	if clean == "" {
+		return "image"
+	}
+	parts := strings.Split(clean, "/")
+	name := parts[len(parts)-1]
+	if dot := strings.LastIndex(name, "."); dot > 0 {
+		name = name[:dot]
+	}
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return "image"
+	}
+	return name
+}
+
+func normalizeNorgImageInline(text string) string {
+	idxs := norgImagePattern.FindAllStringSubmatchIndex(text, -1)
+	if len(idxs) == 0 {
+		return text
+	}
+
+	var b strings.Builder
+	cursor := 0
+	for _, idx := range idxs {
+		start := idx[0]
+		end := idx[1]
+		b.WriteString(text[cursor:start])
+
+		src := ""
+		alt := ""
+		if idx[2] != -1 {
+			src = strings.TrimSpace(text[idx[2]:idx[3]])
+			alt = strings.TrimSpace(text[idx[4]:idx[5]])
+		} else {
+			src = strings.TrimSpace(text[idx[6]:idx[7]])
+			alt = strings.TrimSpace(text[idx[8]:idx[9]])
+		}
+		if alt == "" {
+			alt = imageAltFromSrc(src)
+		}
+		fmt.Fprintf(&b, "![%s](%s)", alt, src)
+		cursor = end
+	}
+	b.WriteString(text[cursor:])
+	return b.String()
 }
 
 func parseOrderedLine(line string) (string, bool) {

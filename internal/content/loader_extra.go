@@ -55,15 +55,11 @@ func loadContentFile(path string) (contentEntry, error) {
 		return contentEntry{}, fmt.Errorf("parse %s: %w", path, err)
 	}
 
-	htmlBody := preRenderedHTML
-	if htmlBody == "" {
-		htmlBody, err = renderMarkdown(body)
-		if err != nil {
-			return contentEntry{}, fmt.Errorf("render markdown %s: %w", path, err)
-		}
+	if preRenderedHTML == "" {
+		return contentEntry{}, fmt.Errorf("unsupported content format %q", filepath.Ext(path))
 	}
 
-	return contentEntry{meta: meta, body: body, htmlBody: htmlBody}, nil
+	return contentEntry{meta: meta, body: body, htmlBody: preRenderedHTML}, nil
 }
 
 type contentEntry struct {
@@ -73,15 +69,10 @@ type contentEntry struct {
 }
 
 func loadEntries(dir string) ([]contentEntry, error) {
-	mdFiles, err := filepath.Glob(filepath.Join(dir, "*.md"))
+	files, err := filepath.Glob(filepath.Join(dir, "*.norg"))
 	if err != nil {
 		return nil, err
 	}
-	norgFiles, err := filepath.Glob(filepath.Join(dir, "*.norg"))
-	if err != nil {
-		return nil, err
-	}
-	files := append(mdFiles, norgFiles...)
 
 	entries := make([]contentEntry, 0, len(files))
 	for _, file := range files {

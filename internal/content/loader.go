@@ -1,14 +1,10 @@
 package content
 
 import (
-	"bytes"
 	"fmt"
 	"html/template"
 	"sort"
 	"strings"
-
-	"github.com/yuin/goldmark"
-	"gopkg.in/yaml.v3"
 )
 
 type frontMatter struct {
@@ -64,38 +60,12 @@ func loadPublished[T publishedContent](dir string, convert func(contentEntry) T)
 
 func splitFrontMatter(raw, ext string) (frontMatter, string, string, error) {
 	switch strings.ToLower(ext) {
-	case ".md":
-		meta, body, err := splitMarkdownFrontMatter(raw)
-		return meta, body, "", err
 	case ".norg":
 		meta, body, html, err := parseNorg(raw)
 		return meta, body, html, err
 	default:
 		return frontMatter{}, "", "", fmt.Errorf("unsupported content format %q", ext)
 	}
-}
-
-func splitMarkdownFrontMatter(raw string) (frontMatter, string, error) {
-	var meta frontMatter
-
-	trimmed := strings.TrimSpace(raw)
-	if !strings.HasPrefix(trimmed, "---") {
-		return meta, "", fmt.Errorf("missing frontmatter delimiter")
-	}
-
-	parts := strings.SplitN(trimmed, "---", 3)
-	if len(parts) != 3 {
-		return meta, "", fmt.Errorf("invalid frontmatter structure")
-	}
-
-	if err := yaml.Unmarshal([]byte(parts[1]), &meta); err != nil {
-		return meta, "", fmt.Errorf("decode yaml frontmatter: %w", err)
-	}
-	if err := validateFrontMatter(meta); err != nil {
-		return meta, "", err
-	}
-
-	return meta, strings.TrimSpace(parts[2]), nil
 }
 
 func validateFrontMatter(meta frontMatter) error {
@@ -105,10 +75,3 @@ func validateFrontMatter(meta frontMatter) error {
 	return nil
 }
 
-func renderMarkdown(md string) (string, error) {
-	var out bytes.Buffer
-	if err := goldmark.Convert([]byte(md), &out); err != nil {
-		return "", err
-	}
-	return out.String(), nil
-}

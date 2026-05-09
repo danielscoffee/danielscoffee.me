@@ -1,9 +1,24 @@
 /*! tailwindcss v4.2.4 | MIT License | https://tailwindcss.com */
+.block {
+  display: block;
+}
 .contents {
   display: contents;
 }
+.inline {
+  display: inline;
+}
+.table {
+  display: table;
+}
 .h-full {
   height: 100%;
+}
+.italic {
+  font-style: italic;
+}
+.underline {
+  text-decoration-line: underline;
 }
 @layer base {
   :root {
@@ -167,6 +182,17 @@
   .theme-toggle:hover, .theme-toggle:focus-visible {
     color: rgb(var(--accent-strong));
   }
+  .search-kbd {
+    display: inline-block;
+    margin-left: 0.35rem;
+    padding: 0.08rem 0.35rem;
+    border: 1px solid rgb(var(--border));
+    border-radius: 0.3rem;
+    font-size: 0.68rem;
+    line-height: 1.2;
+    color: rgb(var(--muted));
+    background: rgb(var(--surface));
+  }
   @media (max-width: 800px) {
     .site-brand {
       grid-area: brand;
@@ -313,9 +339,26 @@
     font-weight: 600;
     letter-spacing: -0.01em;
   }
-  .post-prose p, .post-prose ul, .post-prose ol {
+  .post-prose p, .post-prose ul, .post-prose ol, .post-prose table {
     margin: 1rem 0;
     color: rgb(var(--text));
+  }
+  .post-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid rgb(var(--border));
+    font-size: 0.95rem;
+  }
+  .post-prose th, .post-prose td {
+    border: 1px solid rgb(var(--border));
+    padding: 0.45rem 0.6rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  .post-prose th {
+    background: rgb(var(--chip-bg));
+    color: rgb(var(--accent-strong));
+    font-weight: 600;
   }
   .post-prose a {
     color: rgb(var(--accent-strong));
@@ -329,6 +372,43 @@
     padding-left: 1rem;
     font-style: italic;
     color: rgb(var(--muted));
+  }
+  .post-prose .norg-definitions {
+    margin: 1rem 0;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid rgb(var(--border));
+    border-radius: 0.5rem;
+    background: rgb(var(--surface));
+  }
+  .post-prose .norg-definitions dt {
+    margin-top: 0.6rem;
+    font-weight: 600;
+    color: rgb(var(--accent-strong));
+  }
+  .post-prose .norg-definitions dt:first-child {
+    margin-top: 0;
+  }
+  .post-prose .norg-definitions dd {
+    margin: 0.15rem 0 0.45rem 0;
+    color: rgb(var(--text));
+  }
+  .post-prose .spoiler {
+    border-radius: 0.25rem;
+    padding: 0 0.2rem;
+    background: rgb(var(--chip-bg));
+    color: transparent;
+    transition: color 160ms ease;
+  }
+  .post-prose .spoiler:hover, .post-prose .spoiler:focus-visible {
+    color: rgb(var(--text));
+  }
+  .post-prose .math-latex {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.95em;
+    border-radius: 0.25rem;
+    padding: 0 0.25rem;
+    background: rgb(var(--chip-bg));
+    color: rgb(var(--accent-strong));
   }
   .post-prose code {
     border-radius: 0.25rem;
@@ -352,6 +432,15 @@
     background: transparent;
     color: inherit;
     padding: 0;
+  }
+  .post-prose img, .post-prose .post-image {
+    display: block;
+    width: min(100%, 44rem);
+    height: auto;
+    margin: 1.25rem auto;
+    border: 1px solid rgb(var(--border));
+    border-radius: 0.65rem;
+    background: rgb(var(--surface));
   }
   .post-prose .chroma {
     background-color: rgb(var(--code-bg)) !important;
