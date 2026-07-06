@@ -1,4 +1,4 @@
-FROM golang:1.26.3-alpine AS build
+FROM golang:1.26.4-alpine AS build
 RUN apk add --no-cache curl libstdc++ libgcc
 
 WORKDIR /app
@@ -7,9 +7,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go install github.com/a-h/templ/cmd/templ@latest && \
+RUN go install github.com/a-h/templ/cmd/templ@v0.3.1020 && \
     templ generate -path . && \
-    curl -sL https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64-musl -o tailwindcss && \
+    curl -fL https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 -o tailwindcss && \
     chmod +x tailwindcss && \
     ./tailwindcss -i internal/web/styles/input.css -o internal/web/assets/css/output.css
 

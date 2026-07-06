@@ -60,6 +60,8 @@ Body content.
 
 Supported body features include headings, paragraphs, ordered/unordered lists, task states, tables, blockquotes, definition lists, inline formatting, code blocks with Chroma highlighting, and CDN-hosted images.
 
+Slugs and tags must use lowercase letters, numbers, and single hyphens. Dates must use `YYYY-MM-DD`.
+
 Task states:
 
 ```norg
@@ -77,12 +79,13 @@ Task states:
 - `/tag/{tag}` lists posts by tag
 - `/about` shows the about page
 - `/projects` lists projects
+- `/projects?tag={tag}` lists projects by tag
 - `/projects/{slug}` shows a project
 - `/projects/{slug}/{subpost}` shows a project devlog/subpost
 - `/project/{slug}` redirects to `/projects/{slug}`
 - `/search?q=...` returns JSON search results
-- `/rss.xml` returns RSS for blog posts
-- `/sitemap.xml` returns sitemap XML
+- `/rss.xml` returns RSS for blog posts, projects, and project subposts
+- `/sitemap.xml` returns sitemap XML for blog posts, projects, and project subposts
 - `/robots.txt` returns crawler policy
 - `/health` returns JSON health status
 
@@ -99,10 +102,10 @@ Bare `blog` or `projects` returns all items for that type.
 
 ### Prerequisites
 
-- Go 1.24+
+- Go 1.26.4+
 - `make`
 - `templ` CLI (installed automatically by `make generate` if missing)
-- Tailwind standalone binary (downloaded automatically by `make generate` if missing)
+- Tailwind standalone binary v3.4.17 (downloaded automatically by `make generate` if missing)
 
 ### Configuration
 
@@ -146,7 +149,7 @@ make generate
 This runs:
 
 - `templ generate -path .`
-- Tailwind build from `internal/web/styles/input.css` to `internal/web/assets/css/output.css`
+- Tailwind v3.4.17 build from `internal/web/styles/input.css` to `internal/web/assets/css/output.css`
 
 ## Development
 
@@ -268,17 +271,16 @@ Draft project indexes are skipped with all subposts. Draft subposts are skipped 
 
 ## Security Notes
 
-- Security headers include `X-Content-Type-Options`, `Referrer-Policy`, and `X-Frame-Options`.
+- Security headers include `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, and `X-Frame-Options`.
+- Static assets use long-lived cache headers.
+- Responses are gzip-compressed when clients advertise `Accept-Encoding: gzip`.
 - Image rendering only accepts HTTPS image URLs whose host contains `cdn`.
 - Parsed content HTML is rendered with `templ.Raw`, so parser output must remain trusted and tested.
 
 ## TODO / Open Questions
 
-- RSS and sitemap currently cover blog posts, not project pages/subposts.
-- Project tag links point to `/projects?tag=...`, but project index filtering is not implemented yet.
-- README assumes generated `*_templ.go` files may be regenerated during build; keep CI/build steps aligned with repository tracking policy.
 - `content/posts/blogcreation.norg` exists but has almost no body content.
 
 ## License
 
-No license file is currently present.
+MIT. See `LICENSE`.

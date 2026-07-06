@@ -14,6 +14,8 @@ import (
 	"github.com/danielscoffee/danielscoffee.me/internal/app"
 )
 
+var version = "dev"
+
 func gracefulShutdown(apiServer *http.Server, logger zerolog.Logger, done chan bool) {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -43,6 +45,7 @@ func main() {
 	runtime.Logger.Info().
 		Int("port", runtime.Port).
 		Str("site_url", runtime.SiteURL).
+		Str("version", version).
 		Int("post_count", runtime.PostCount).
 		Int("project_count", runtime.ProjectCount).
 		Str("log_format", runtime.LogCfg.Format).
