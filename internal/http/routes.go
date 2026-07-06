@@ -1,6 +1,7 @@
 package httpapp
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"net"
 	"net/http"
@@ -14,7 +15,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux := http.NewServeMux()
 
 	fileServer := http.FileServer(http.FS(web.Files))
-	mux.Handle("/assets/", fileServer)
+	mux.Handle("/assets/", staticCacheMiddleware(fileServer))
 
 	mux.HandleFunc("/", s.homeHandler)
 	mux.HandleFunc("/blog", s.blogIndexHandler)
@@ -30,7 +31,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("/sitemap.xml", s.sitemapHandler)
 	mux.HandleFunc("/robots.txt", s.robotsHandler)
 
-	return s.requestLoggingMiddleware(s.securityHeadersMiddleware(mux))
+	return s.requestLoggingMiddleware(s.securityHeadersMiddleware(s.compressionMiddleware(mux)))
 }
 
 func (s *Server) securityHeadersMiddleware(next http.Handler) http.Handler {
@@ -38,8 +39,75 @@ func (s *Server) securityHeadersMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
 		next.ServeHTTP(w, r)
 	})
+}
+
+func staticCacheMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) compressionMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") || r.Header.Get("Range") != "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		appendVary(w.Header(), "Accept-Encoding")
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+
+		next.ServeHTTP(&gzipResponseWriter{ResponseWriter: w, writer: gz}, r)
+	})
+}
+
+type gzipResponseWriter struct {
+	http.ResponseWriter
+	writer      *gzip.Writer
+	wroteHeader bool
+}
+
+func (w *gzipResponseWriter) WriteHeader(code int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
+	if shouldCompressStatus(code) {
+		w.Header().Del("Content-Length")
+		w.Header().Set("Content-Encoding", "gzip")
+	}
+	w.ResponseWriter.WriteHeader(code)
+}
+
+func (w *gzipResponseWriter) Write(b []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	if w.Header().Get("Content-Encoding") != "gzip" {
+		return w.ResponseWriter.Write(b)
+	}
+	return w.writer.Write(b)
+}
+
+func shouldCompressStatus(code int) bool {
+	return code >= 200 && code != http.StatusNoContent && code != http.StatusNotModified
+}
+
+func appendVary(h http.Header, value string) {
+	current := h.Values("Vary")
+	for _, existing := range current {
+		for part := range strings.SplitSeq(existing, ",") {
+			if strings.EqualFold(strings.TrimSpace(part), value) {
+				return
+			}
+		}
+	}
+	h.Add("Vary", value)
 }
 
 func (s *Server) requestLoggingMiddleware(next http.Handler) http.Handler {

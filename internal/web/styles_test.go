@@ -6,6 +6,17 @@ import (
 	"testing"
 )
 
+func TestSearchScriptAvoidsInnerHTMLForResults(t *testing.T) {
+	jsBytes, err := os.ReadFile("assets/js/search.js")
+	if err != nil {
+		t.Fatalf("read search.js: %v", err)
+	}
+
+	if strings.Contains(string(jsBytes), "innerHTML") {
+		t.Fatalf("search.js should render API results with DOM text nodes, not innerHTML")
+	}
+}
+
 func TestInputStylesDefineThemeAndComponentSelectors(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {

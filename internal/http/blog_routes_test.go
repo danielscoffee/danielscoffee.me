@@ -130,6 +130,41 @@ func TestBlogRoutes(t *testing.T) {
 	}
 }
 
+func TestSecurityAndCacheHeaders(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/blog", nil))
+
+	if got := w.Header().Get("Content-Security-Policy"); !strings.Contains(got, "default-src 'self'") {
+		t.Fatalf("expected CSP default-src self, got %q", got)
+	}
+
+	asset := httptest.NewRecorder()
+	h.ServeHTTP(asset, httptest.NewRequest(http.MethodGet, "/assets/js/search.js", nil))
+	if got := asset.Header().Get("Cache-Control"); !strings.Contains(got, "public") || !strings.Contains(got, "max-age") {
+		t.Fatalf("expected static cache header, got %q", got)
+	}
+}
+
+func TestGzipCompression(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	req := httptest.NewRequest(http.MethodGet, "/blog", nil)
+	req.Header.Set("Accept-Encoding", "gzip")
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+
+	if got := w.Header().Get("Content-Encoding"); got != "gzip" {
+		t.Fatalf("expected gzip content encoding, got %q", got)
+	}
+	if got := w.Header().Get("Vary"); !strings.Contains(got, "Accept-Encoding") {
+		t.Fatalf("expected Vary Accept-Encoding, got %q", got)
+	}
+}
+
 func TestBaseTemplateIncludesThemeControls(t *testing.T) {
 	s := testBlogServer()
 	h := s.RegisterRoutes()
