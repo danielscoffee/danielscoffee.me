@@ -89,6 +89,86 @@ summary: no slug
 	}
 }
 
+func TestLoadPosts_RejectsDuplicateSlugs(t *testing.T) {
+	dir := t.TempDir()
+
+	writePost(t, dir, "one.norg", `@document.meta
+title: One
+slug: same-slug
+date: 2026-01-01
+@end
+body`)
+	writePost(t, dir, "two.norg", `@document.meta
+title: Two
+slug: same-slug
+date: 2026-01-02
+@end
+body`)
+
+	_, err := LoadPosts(dir)
+	if err == nil {
+		t.Fatal("expected duplicate slug error")
+	}
+	if !strings.Contains(err.Error(), `duplicate post slug "same-slug"`) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestLoadPosts_RejectsInvalidDateSlugAndTag(t *testing.T) {
+	cases := []struct {
+		name    string
+		content string
+		want    string
+	}{
+		{
+			name: "invalid-date",
+			content: `@document.meta
+title: Bad Date
+slug: bad-date
+date: 2026-99-99
+@end
+body`,
+			want: "invalid date",
+		},
+		{
+			name: "invalid-slug",
+			content: `@document.meta
+title: Bad Slug
+slug: Bad Slug!
+date: 2026-01-01
+@end
+body`,
+			want: "invalid slug",
+		},
+		{
+			name: "invalid-tag",
+			content: `@document.meta
+title: Bad Tag
+slug: bad-tag
+date: 2026-01-01
+tags: [Go!]
+@end
+body`,
+			want: "invalid tag",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			writePost(t, dir, "bad.norg", tc.content)
+
+			_, err := LoadPosts(dir)
+			if err == nil {
+				t.Fatalf("expected %s error", tc.want)
+			}
+			if !strings.Contains(err.Error(), tc.want) {
+				t.Fatalf("expected error containing %q, got %v", tc.want, err)
+			}
+		})
+	}
+}
+
 func TestLoadPosts_IgnoresMarkdownFiles(t *testing.T) {
 	dir := t.TempDir()
 
@@ -332,5 +412,17 @@ func TestStore_BySlugAndByTag(t *testing.T) {
 	posts := store.ByTag("personal")
 	if len(posts) != 1 || posts[0].Slug != "one" {
 		t.Fatalf("expected personal tag to return one post 'one', got %#v", posts)
+	}
+}
+
+func TestProjectStore_ByTag(t *testing.T) {
+	store := NewProjectStore([]Project{
+		{Published: Published{Title: "One", Slug: "one", Date: "2026-01-01", Tags: []string{"go", "web"}}},
+		{Published: Published{Title: "Two", Slug: "two", Date: "2026-02-01", Tags: []string{"ops"}}},
+	})
+
+	projects := store.ByTag("go")
+	if len(projects) != 1 || projects[0].Slug != "one" {
+		t.Fatalf("expected go tag to return project one, got %#v", projects)
 	}
 }
