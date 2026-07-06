@@ -144,6 +144,9 @@ templ PostList(posts []content.Post) {
 }
 
 templ ProjectList(projects []content.Project) {
+	if len(projects) == 0 {
+		<p class="empty-state">No projects found for this tag yet.</p>
+	} else {
 	<ul class="project-list">
 		for _, project := range projects {
 			<li class="project-item">
@@ -164,6 +167,7 @@ templ ProjectList(projects []content.Project) {
 			</li>
 		}
 	</ul>
+	}
 }
 
 templ BlogPostPage(post content.Post) {

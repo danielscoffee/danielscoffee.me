@@ -3,11 +3,12 @@ package content
 type ProjectStore struct {
 	projects []Project
 	bySlug   map[string]Project
+	byTag    map[string][]Project
 }
 
 func NewProjectStore(projects []Project) *ProjectStore {
 	copies := cloneSlice(projects)
-	return &ProjectStore{projects: copies, bySlug: buildSlugIndex(copies)}
+	return &ProjectStore{projects: copies, bySlug: buildSlugIndex(copies), byTag: buildTagIndex(copies)}
 }
 
 func (s *ProjectStore) All() []Project {
@@ -17,6 +18,11 @@ func (s *ProjectStore) All() []Project {
 func (s *ProjectStore) BySlug(slug string) (Project, bool) {
 	project, ok := s.bySlug[normalizeKey(slug)]
 	return project, ok
+}
+
+func (s *ProjectStore) ByTag(tag string) []Project {
+	projects := s.byTag[normalizeKey(tag)]
+	return cloneSlice(projects)
 }
 
 // SubPost returns the named subpost within a project. Both lookups are case-insensitive.

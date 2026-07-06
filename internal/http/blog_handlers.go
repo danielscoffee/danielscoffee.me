@@ -25,7 +25,11 @@ func (s *Server) aboutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) projectsIndexHandler(w http.ResponseWriter, r *http.Request) {
-	s.renderComponent(w, r, web.ProjectsIndexPage(s.projectStore.All()))
+	projects := s.projectStore.All()
+	if tag := strings.TrimSpace(r.URL.Query().Get("tag")); tag != "" {
+		projects = s.projectStore.ByTag(tag)
+	}
+	s.renderComponent(w, r, web.ProjectsIndexPage(projects))
 }
 
 func (s *Server) projectsTreeHandler(w http.ResponseWriter, r *http.Request) {

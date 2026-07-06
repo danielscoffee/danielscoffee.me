@@ -14,13 +14,13 @@ import (
 func (s *Server) rssHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/rss+xml; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(buildRSS(s.siteURL, s.contentStore.All())))
+	_, _ = w.Write([]byte(buildRSS(s.siteURL, s.contentStore.All(), s.projectStore.All())))
 }
 
 func (s *Server) sitemapHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(buildSitemap(s.siteURL, s.contentStore.All())))
+	_, _ = w.Write([]byte(buildSitemap(s.siteURL, s.contentStore.All(), s.projectStore.All())))
 }
 
 func (s *Server) robotsHandler(w http.ResponseWriter, r *http.Request) {
@@ -48,9 +48,9 @@ type rssItem struct {
 	Description string `xml:"description,omitempty"`
 }
 
-func buildRSS(siteURL string, posts []content.Post) string {
+func buildRSS(siteURL string, posts []content.Post, projects []content.Project) string {
 	base := strings.TrimRight(siteURL, "/")
-	items := make([]rssItem, 0, len(posts))
+	items := make([]rssItem, 0, len(posts)+len(projects))
 	for _, post := range posts {
 		items = append(items, rssItem{
 			Title:       post.Title,
@@ -58,6 +58,22 @@ func buildRSS(siteURL string, posts []content.Post) string {
 			PubDate:     toRFC1123(post.Date),
 			Description: post.Summary,
 		})
+	}
+	for _, project := range projects {
+		items = append(items, rssItem{
+			Title:       project.Title,
+			Link:        base + path.Join("/projects", project.Slug),
+			PubDate:     toRFC1123(project.Date),
+			Description: project.Summary,
+		})
+		for _, sub := range project.SubPosts {
+			items = append(items, rssItem{
+				Title:       sub.Title,
+				Link:        base + path.Join("/projects", project.Slug, sub.Slug),
+				PubDate:     toRFC1123(sub.Date),
+				Description: sub.Summary,
+			})
+		}
 	}
 
 	doc := rssDocument{
@@ -88,12 +104,18 @@ type sitemapURL struct {
 	LastMod string `xml:"lastmod,omitempty"`
 }
 
-func buildSitemap(siteURL string, posts []content.Post) string {
+func buildSitemap(siteURL string, posts []content.Post, projects []content.Project) string {
 	base := strings.TrimRight(siteURL, "/")
 
-	urls := []sitemapURL{{Loc: base + "/"}, {Loc: base + "/blog"}, {Loc: base + "/rss.xml"}}
+	urls := []sitemapURL{{Loc: base + "/"}, {Loc: base + "/blog"}, {Loc: base + "/about"}, {Loc: base + "/projects"}, {Loc: base + "/rss.xml"}}
 	for _, post := range posts {
 		urls = append(urls, sitemapURL{Loc: base + path.Join("/post", post.Slug), LastMod: post.Date})
+	}
+	for _, project := range projects {
+		urls = append(urls, sitemapURL{Loc: base + path.Join("/projects", project.Slug), LastMod: project.Date})
+		for _, sub := range project.SubPosts {
+			urls = append(urls, sitemapURL{Loc: base + path.Join("/projects", project.Slug, sub.Slug), LastMod: sub.Date})
+		}
 	}
 
 	payload, err := xml.MarshalIndent(sitemapURLSet{Xmlns: "http://www.sitemaps.org/schemas/sitemap/0.9", URLs: urls}, "", "  ")

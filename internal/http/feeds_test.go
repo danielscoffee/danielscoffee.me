@@ -39,3 +39,24 @@ func TestFeedEndpoints(t *testing.T) {
 		}
 	}
 }
+
+func TestFeedsIncludeProjectsAndSubposts(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	rss := httptest.NewRecorder()
+	h.ServeHTTP(rss, httptest.NewRequest(http.MethodGet, "/rss.xml", nil))
+	for _, marker := range []string{"/projects/side-project", "/projects/side-project/rebuild", "Side Project", "Rebuild Notes"} {
+		if !strings.Contains(rss.Body.String(), marker) {
+			t.Fatalf("expected RSS to contain %q, got %s", marker, rss.Body.String())
+		}
+	}
+
+	sitemap := httptest.NewRecorder()
+	h.ServeHTTP(sitemap, httptest.NewRequest(http.MethodGet, "/sitemap.xml", nil))
+	for _, marker := range []string{"/projects", "/projects/side-project", "/projects/side-project/rebuild"} {
+		if !strings.Contains(sitemap.Body.String(), marker) {
+			t.Fatalf("expected sitemap to contain %q, got %s", marker, sitemap.Body.String())
+		}
+	}
+}
