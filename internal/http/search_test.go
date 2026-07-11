@@ -1,10 +1,28 @@
 package httpapp
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/danielscoffee/danielscoffee.me/internal/content"
 )
+
+func TestSearchRejectsOversizedQuery(t *testing.T) {
+	h := testBlogServer().RegisterRoutes()
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/search?q="+strings.Repeat("x", 257), nil)
+
+	h.ServeHTTP(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d", w.Code)
+	}
+	if got := w.Header().Get("Content-Type"); got != "application/json" {
+		t.Fatalf("expected JSON response, got %q", got)
+	}
+}
 
 func TestSearchIndexer_FilterAndRanking(t *testing.T) {
 	docs := []content.SearchDoc{

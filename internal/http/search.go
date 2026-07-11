@@ -9,6 +9,8 @@ import (
 	"github.com/danielscoffee/danielscoffee.me/internal/content"
 )
 
+const maxSearchQueryBytes = 256
+
 type SearchIndexer struct {
 	docs []content.SearchDoc
 }
@@ -80,9 +82,17 @@ func (s *SearchIndexer) Search(raw string) []SearchResult {
 }
 
 func (s *Server) searchHandler(w http.ResponseWriter, r *http.Request) {
-	q := strings.TrimSpace(r.URL.Query().Get("q"))
-	results := s.searchIndexer.Search(q)
 	w.Header().Set("Content-Type", "application/json")
+	raw := r.URL.Query().Get("q")
+	if len(raw) > maxSearchQueryBytes {
+		w.WriteHeader(http.StatusBadRequest)
+		if err := json.NewEncoder(w).Encode(map[string]string{"error": "query too long"}); err != nil {
+			s.logger.Error().Err(err).Msg("encode search error failed")
+		}
+		return
+	}
+
+	results := s.searchIndexer.Search(strings.TrimSpace(raw))
 	if err := json.NewEncoder(w).Encode(map[string]any{"results": results}); err != nil {
 		s.logger.Error().Err(err).Msg("encode search response failed")
 		http.Error(w, "internal server error", http.StatusInternalServerError)
@@ -92,13 +102,13 @@ func (s *Server) searchHandler(w http.ResponseWriter, r *http.Request) {
 
 func parseQuery(raw string) (string, string) {
 	q := strings.TrimSpace(raw)
-	switch strings.ToLower(q) {
+	lower := strings.ToLower(q)
+	switch lower {
 	case "blog":
 		return "blog", ""
 	case "projects":
 		return "projects", ""
 	}
-	lower := strings.ToLower(q)
 	if strings.HasPrefix(lower, "blog ") {
 		return "blog", strings.TrimSpace(q[len("blog "):])
 	}

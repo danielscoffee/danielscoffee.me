@@ -31,10 +31,12 @@ func New(port int, siteURL string, contentStore *content.Store, projectStore *co
 	}
 
 	return &http.Server{
-		Addr:         fmt.Sprintf(":%d", app.port),
-		Handler:      app.RegisterRoutes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		Addr:              fmt.Sprintf(":%d", app.port),
+		Handler:           app.RegisterRoutes(),
+		IdleTimeout:       time.Minute,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		MaxHeaderBytes:    1 << 20,
 	}
 }

@@ -140,6 +140,12 @@ func TestSecurityAndCacheHeaders(t *testing.T) {
 	if got := w.Header().Get("Content-Security-Policy"); !strings.Contains(got, "default-src 'self'") {
 		t.Fatalf("expected CSP default-src self, got %q", got)
 	}
+	if got := w.Header().Get("Strict-Transport-Security"); got != "max-age=31536000; includeSubDomains" {
+		t.Fatalf("unexpected HSTS header %q", got)
+	}
+	if got := w.Header().Get("Permissions-Policy"); got == "" {
+		t.Fatal("expected Permissions-Policy header")
+	}
 
 	asset := httptest.NewRecorder()
 	h.ServeHTTP(asset, httptest.NewRequest(http.MethodGet, "/assets/js/search.js", nil))

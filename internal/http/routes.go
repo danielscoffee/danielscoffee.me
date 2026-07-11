@@ -39,6 +39,8 @@ func (s *Server) securityHeadersMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+		w.Header().Set("Permissions-Policy", "camera=(), geolocation=(), microphone=()")
 		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
 		next.ServeHTTP(w, r)
 	})
@@ -60,9 +62,13 @@ func (s *Server) compressionMiddleware(next http.Handler) http.Handler {
 
 		appendVary(w.Header(), "Accept-Encoding")
 		gz := gzip.NewWriter(w)
-		defer gz.Close()
-
-		next.ServeHTTP(&gzipResponseWriter{ResponseWriter: w, writer: gz}, r)
+		grw := &gzipResponseWriter{ResponseWriter: w, writer: gz}
+		next.ServeHTTP(grw, r)
+		if grw.Header().Get("Content-Encoding") == "gzip" {
+			if err := gz.Close(); err != nil {
+				s.logger.Error().Err(err).Msg("close gzip response failed")
+			}
+		}
 	})
 }
 
