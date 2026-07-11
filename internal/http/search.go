@@ -9,7 +9,10 @@ import (
 	"github.com/danielscoffee/danielscoffee.me/internal/content"
 )
 
-const maxSearchQueryBytes = 256
+const (
+	maxSearchQueryBytes    = 256
+	maxSearchRawQueryBytes = 512
+)
 
 type SearchIndexer struct {
 	docs []content.SearchDoc
@@ -83,6 +86,14 @@ func (s *SearchIndexer) Search(raw string) []SearchResult {
 
 func (s *Server) searchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	if len(r.URL.RawQuery) > maxSearchRawQueryBytes {
+		w.WriteHeader(http.StatusBadRequest)
+		if err := json.NewEncoder(w).Encode(map[string]string{"error": "query too long"}); err != nil {
+			s.logger.Error().Err(err).Msg("encode search error failed")
+		}
+		return
+	}
+
 	raw := r.URL.Query().Get("q")
 	if len(raw) > maxSearchQueryBytes {
 		w.WriteHeader(http.StatusBadRequest)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -55,7 +56,7 @@ func staticCacheMiddleware(next http.Handler) http.Handler {
 
 func (s *Server) compressionMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") || r.Header.Get("Range") != "" {
+		if !acceptsGzip(r.Header.Get("Accept-Encoding")) || r.Header.Get("Range") != "" {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -101,7 +102,26 @@ func (w *gzipResponseWriter) Write(b []byte) (int, error) {
 }
 
 func shouldCompressStatus(code int) bool {
-	return code >= 200 && code != http.StatusNoContent && code != http.StatusNotModified
+	return code >= 200 && code != http.StatusNoContent && code != http.StatusResetContent && code != http.StatusNotModified
+}
+
+func acceptsGzip(header string) bool {
+	for value := range strings.SplitSeq(header, ",") {
+		parts := strings.Split(value, ";")
+		if !strings.EqualFold(strings.TrimSpace(parts[0]), "gzip") {
+			continue
+		}
+		for _, parameter := range parts[1:] {
+			key, value, ok := strings.Cut(parameter, "=")
+			if !ok || !strings.EqualFold(strings.TrimSpace(key), "q") {
+				continue
+			}
+			quality, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+			return err == nil && quality > 0 && quality <= 1
+		}
+		return true
+	}
+	return false
 }
 
 func appendVary(h http.Header, value string) {

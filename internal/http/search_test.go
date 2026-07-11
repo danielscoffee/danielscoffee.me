@@ -10,17 +10,24 @@ import (
 )
 
 func TestSearchRejectsOversizedQuery(t *testing.T) {
-	h := testBlogServer().RegisterRoutes()
-	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodGet, "/search?q="+strings.Repeat("x", 257), nil)
+	for _, target := range []string{
+		"/search?q=" + strings.Repeat("x", 257),
+		"/search?ignored=" + strings.Repeat("x", 513),
+	} {
+		t.Run(target[:20], func(t *testing.T) {
+			h := testBlogServer().RegisterRoutes()
+			w := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodGet, target, nil)
 
-	h.ServeHTTP(w, r)
+			h.ServeHTTP(w, r)
 
-	if w.Code != http.StatusBadRequest {
-		t.Fatalf("expected 400, got %d", w.Code)
-	}
-	if got := w.Header().Get("Content-Type"); got != "application/json" {
-		t.Fatalf("expected JSON response, got %q", got)
+			if w.Code != http.StatusBadRequest {
+				t.Fatalf("expected 400, got %d", w.Code)
+			}
+			if got := w.Header().Get("Content-Type"); got != "application/json" {
+				t.Fatalf("expected JSON response, got %q", got)
+			}
+		})
 	}
 }
 

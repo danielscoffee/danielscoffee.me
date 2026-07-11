@@ -13,25 +13,52 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func TestCompressionSkipsNoContent(t *testing.T) {
-	next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	})
-	h := testBlogServer().compressionMiddleware(next)
-	r := httptest.NewRequest(http.MethodGet, "/", nil)
-	r.Header.Set("Accept-Encoding", "gzip")
-	w := httptest.NewRecorder()
+func TestCompressionSkipsBodylessStatuses(t *testing.T) {
+	for _, status := range []int{http.StatusNoContent, http.StatusResetContent, http.StatusNotModified} {
+		t.Run(http.StatusText(status), func(t *testing.T) {
+			next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(status)
+			})
+			h := testBlogServer().compressionMiddleware(next)
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r.Header.Set("Accept-Encoding", "gzip")
+			w := httptest.NewRecorder()
 
-	h.ServeHTTP(w, r)
+			h.ServeHTTP(w, r)
 
-	if w.Code != http.StatusNoContent {
-		t.Fatalf("expected 204, got %d", w.Code)
+			if w.Code != status {
+				t.Fatalf("expected %d, got %d", status, w.Code)
+			}
+			if w.Body.Len() != 0 {
+				t.Fatalf("expected empty body, got %x", w.Body.Bytes())
+			}
+			if got := w.Header().Get("Content-Encoding"); got != "" {
+				t.Fatalf("expected no content encoding, got %q", got)
+			}
+		})
 	}
-	if w.Body.Len() != 0 {
-		t.Fatalf("expected empty body, got %x", w.Body.Bytes())
-	}
-	if got := w.Header().Get("Content-Encoding"); got != "" {
-		t.Fatalf("expected no content encoding, got %q", got)
+}
+
+func TestCompressionRespectsAcceptEncoding(t *testing.T) {
+	for _, header := range []string{"gzip;q=0", "xgzip", "gzip;q=invalid"} {
+		t.Run(header, func(t *testing.T) {
+			next := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				_, _ = w.Write([]byte("body"))
+			})
+			h := testBlogServer().compressionMiddleware(next)
+			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r.Header.Set("Accept-Encoding", header)
+			w := httptest.NewRecorder()
+
+			h.ServeHTTP(w, r)
+
+			if got := w.Header().Get("Content-Encoding"); got != "" {
+				t.Fatalf("expected no compression, got %q", got)
+			}
+			if w.Body.String() != "body" {
+				t.Fatalf("expected plain body, got %x", w.Body.Bytes())
+			}
+		})
 	}
 }
 
