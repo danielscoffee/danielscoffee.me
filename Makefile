@@ -13,7 +13,10 @@ templ-install:
 
 tailwind-install:
 	@if [ ! -f tailwindcss ]; then \
-		curl -fL https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 -o tailwindcss; \
+		trap 'rm -f tailwindcss.tmp' EXIT; \
+		curl -fL https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 -o tailwindcss.tmp; \
+		printf '%s  %s\n' "$(TAILWIND_SHA256)" tailwindcss.tmp | sha256sum -c -; \
+		mv tailwindcss.tmp tailwindcss; \
 	fi
 	@printf '%s  %s\n' "$(TAILWIND_SHA256)" tailwindcss | sha256sum -c -
 	@chmod +x tailwindcss

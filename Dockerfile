@@ -1,4 +1,4 @@
-FROM golang:1.26.5-alpine AS build
+FROM golang:1.26.5-alpine@sha256:0178a641fbb4858c5f1b48e34bdaabe0350a330a1b1149aabd498d0699ff5fb2 AS build
 RUN apk add --no-cache curl libstdc++ libgcc
 
 WORKDIR /app
@@ -16,7 +16,7 @@ RUN go install github.com/a-h/templ/cmd/templ@v0.3.1020 && \
 
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o main cmd/api/main.go
 
-FROM gcr.io/distroless/static-debian12:nonroot AS prod
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:b7bb25d9f7c31d2bdd1982feb4dafcaf137703c7075dbe2febb41c24212b946f AS prod
 WORKDIR /app
 COPY --from=build /app/main /app/main
 COPY --from=build /app/content /app/content
