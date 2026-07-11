@@ -1,6 +1,7 @@
 GO_BIN := $(shell go env GOPATH)/bin
 TEMPL := $(shell command -v templ 2>/dev/null || echo $(GO_BIN)/templ)
 AIR := $(shell command -v air 2>/dev/null || echo $(GO_BIN)/air)
+TAILWIND_SHA256 := 7d24f7fa191d2193b78cd5f5a42a6093e14409521908529f42d80b11fde1f1d4
 
 all: build test
 
@@ -14,6 +15,7 @@ tailwind-install:
 	@if [ ! -f tailwindcss ]; then \
 		curl -fL https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 -o tailwindcss; \
 	fi
+	@printf '%s  %s\n' "$(TAILWIND_SHA256)" tailwindcss | sha256sum -c -
 	@chmod +x tailwindcss
 
 generate: templ-install tailwind-install

@@ -102,7 +102,7 @@ Bare `blog` or `projects` returns all items for that type.
 
 ### Prerequisites
 
-- Go 1.26.4+
+- Go 1.26.5+
 - `make`
 - `templ` CLI (installed automatically by `make generate` if missing)
 - Tailwind standalone binary v3.4.17 (downloaded automatically by `make generate` if missing)
