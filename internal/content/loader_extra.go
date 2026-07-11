@@ -74,16 +74,9 @@ func loadProjectFolder(folder string) (Project, bool, error) {
 	}
 
 	project := Project{
-		Published: Published{
-			Title:   indexEntry.meta.Title,
-			Slug:    indexEntry.meta.Slug,
-			Date:    indexEntry.meta.Date,
-			Summary: indexEntry.meta.Summary,
-			Tags:    indexEntry.meta.Tags,
-			Draft:   indexEntry.meta.Draft,
-		},
-		BodyMD:   indexEntry.body,
-		BodyHTML: template.HTML(indexEntry.htmlBody),
+		Published: publishedFromMeta(indexEntry.meta),
+		BodyMD:    indexEntry.body,
+		BodyHTML:  template.HTML(indexEntry.htmlBody),
 	}
 
 	subPosts, err := loadProjectSubPosts(folder, project.Slug)
@@ -124,14 +117,7 @@ func loadProjectSubPosts(folder, projectSlug string) ([]ProjectSubPost, error) {
 		seenSub[entry.meta.Slug] = struct{}{}
 
 		subPosts = append(subPosts, ProjectSubPost{
-			Published: Published{
-				Title:   entry.meta.Title,
-				Slug:    entry.meta.Slug,
-				Date:    entry.meta.Date,
-				Summary: entry.meta.Summary,
-				Tags:    entry.meta.Tags,
-				Draft:   entry.meta.Draft,
-			},
+			Published:  publishedFromMeta(entry.meta),
 			ParentSlug: projectSlug,
 			BodyMD:     entry.body,
 			BodyHTML:   template.HTML(entry.htmlBody),
