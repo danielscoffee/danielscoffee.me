@@ -202,6 +202,10 @@ func TestParseNorg_InvalidLinks(t *testing.T) {
 		"//example.com/path",
 		"https:///missing-host",
 		"bad\x00path",
+		"\t/about",
+		"/about\t",
+		`/\evil.com`,
+		`/\\evil.com`,
 	} {
 		t.Run(href, func(t *testing.T) {
 			_, _, _, err := parseNorg(norgWithBody("[link](" + href + ")"))

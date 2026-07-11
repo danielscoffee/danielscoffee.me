@@ -755,15 +755,15 @@ func parseDefinitionLine(line string) (norgDefinitionItem, bool) {
 }
 
 func validateLinkURL(raw string) (string, error) {
-	href := strings.TrimSpace(raw)
-	for _, r := range href {
-		if r < ' ' || r == '\x7f' {
+	for _, r := range raw {
+		if r < ' ' || r == '\x7f' || r == '\\' {
 			return "", fmt.Errorf("invalid link url %q", raw)
 		}
 	}
 
+	href := strings.TrimSpace(raw)
 	u, err := url.Parse(href)
-	if err != nil || href == "" || u.Host != "" && u.Scheme == "" {
+	if err != nil || href == "" || (u.Host != "" && u.Scheme == "") {
 		return "", fmt.Errorf("invalid link url %q", raw)
 	}
 
