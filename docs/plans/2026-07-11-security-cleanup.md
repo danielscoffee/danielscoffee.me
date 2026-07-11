@@ -35,7 +35,7 @@ Use exact action commits with version comments:
 - setup-go: `7b8cf10d4e4a01d4992d18a89f4d7dc5a3e6d6f4` (`v4`)
 - goreleaser action: `e435ccd777264be153ace6237001ef4d979d3a7a` (`v6`)
 
-Add `permissions: contents: read` to test workflow. Replace GoReleaser `version: latest` with `version: "~> v2"`.
+Add `permissions: contents: read` to test workflow. Replace GoReleaser `version: latest` with exact version `v2.17.0`. Pin Docker build and runtime images by digest.
 
 **Step 4: Verify config**
 
@@ -99,7 +99,7 @@ Expected: new assertions fail against current behavior.
 
 **Step 3: Implement minimum fixes**
 
-Set `maxSearchQueryBytes = 256`; reject oversized handler input with JSON-compatible `400`. In gzip middleware, close writer only when compression activated. Add HSTS (`max-age=31536000; includeSubDomains`) and restrictive Permissions Policy. Configure `ReadHeaderTimeout: 5*time.Second` and `MaxHeaderBytes: 1<<20`.
+Set decoded search query limit to 256 bytes and raw query limit to 512 bytes; reject oversized input with JSON `400`. Parse `Accept-Encoding` tokens and quality values, exclude bodyless statuses from compression, and close gzip writer only when compression activates. Add HSTS (`max-age=31536000; includeSubDomains`) and restrictive Permissions Policy. Configure `ReadHeaderTimeout: 5*time.Second` and `MaxHeaderBytes: 1<<20`.
 
 **Step 4: Small safe cleanup**
 
