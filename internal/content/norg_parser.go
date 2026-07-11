@@ -603,8 +603,11 @@ func renderInline(text string) (string, error) {
 			fmt.Fprintf(&b, `<img class="post-image" src="%s" alt="%s" loading="lazy" decoding="async"/>`, html.EscapeString(src), alt)
 		} else {
 			label := renderTextWithModifiers(text[idx[6]:idx[7]])
-			href := html.EscapeString(text[idx[8]:idx[9]])
-			fmt.Fprintf(&b, `<a href="%s">%s</a>`, href, label)
+			href, err := validateLinkURL(text[idx[8]:idx[9]])
+			if err != nil {
+				return "", err
+			}
+			fmt.Fprintf(&b, `<a href="%s">%s</a>`, html.EscapeString(href), label)
 		}
 		cursor = end
 	}
@@ -749,6 +752,43 @@ func parseDefinitionLine(line string) (norgDefinitionItem, bool) {
 		}
 	}
 	return norgDefinitionItem{body: raw}, true
+}
+
+func validateLinkURL(raw string) (string, error) {
+	href := strings.TrimSpace(raw)
+	for _, r := range href {
+		if r < ' ' || r == '\x7f' {
+			return "", fmt.Errorf("invalid link url %q", raw)
+		}
+	}
+
+	u, err := url.Parse(href)
+	if err != nil || href == "" || u.Host != "" && u.Scheme == "" {
+		return "", fmt.Errorf("invalid link url %q", raw)
+	}
+
+	switch strings.ToLower(u.Scheme) {
+	case "":
+		if !strings.HasPrefix(href, "/") &&
+			!strings.HasPrefix(href, "./") &&
+			!strings.HasPrefix(href, "../") &&
+			!strings.HasPrefix(href, "#") &&
+			!strings.HasPrefix(href, "?") {
+			return "", fmt.Errorf("invalid link url %q", raw)
+		}
+	case "http", "https":
+		if u.Host == "" {
+			return "", fmt.Errorf("invalid link url %q", raw)
+		}
+	case "mailto":
+		if u.Opaque == "" {
+			return "", fmt.Errorf("invalid link url %q", raw)
+		}
+	default:
+		return "", fmt.Errorf("invalid link url %q", raw)
+	}
+
+	return u.String(), nil
 }
 
 func validateCDNImageURL(raw string) (string, error) {

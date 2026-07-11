@@ -171,6 +171,54 @@ date: 2026-05-01
 	}
 }
 
+func TestParseNorg_ValidLinks(t *testing.T) {
+	for _, href := range []string{
+		"/about",
+		"./guide",
+		"../index",
+		"#section",
+		"?page=2",
+		"https://example.com/docs",
+		"http://example.com/docs",
+		"mailto:hello@example.com",
+	} {
+		t.Run(href, func(t *testing.T) {
+			_, _, rendered, err := parseNorg(norgWithBody("[link](" + href + ")"))
+			if err != nil {
+				t.Fatalf("parse valid link: %v", err)
+			}
+			if !strings.Contains(rendered, `href="`+href+`"`) {
+				t.Fatalf("expected href %q, got %s", href, rendered)
+			}
+		})
+	}
+}
+
+func TestParseNorg_InvalidLinks(t *testing.T) {
+	for _, href := range []string{
+		"javascript:alert(1)",
+		"data:text/html,pwn",
+		"ftp://example.com/file",
+		"//example.com/path",
+		"https:///missing-host",
+		"bad\x00path",
+	} {
+		t.Run(href, func(t *testing.T) {
+			_, _, _, err := parseNorg(norgWithBody("[link](" + href + ")"))
+			if err == nil {
+				t.Fatal("expected invalid link error")
+			}
+			if !strings.Contains(err.Error(), "invalid link url") {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
+	}
+}
+
+func norgWithBody(body string) string {
+	return "@document.meta\ntitle: X\nslug: x\ndate: 2026-05-01\n@end\n" + body + "\n"
+}
+
 func TestParseNorg_InvalidCDNImageFails(t *testing.T) {
 	raw := `@document.meta
 title: X
