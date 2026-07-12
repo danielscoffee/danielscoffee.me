@@ -1,3 +1,51 @@
+@font-face {
+  font-family: "Source Serif 4";
+
+  font-style: normal;
+
+  font-weight: 400;
+
+  font-display: swap;
+
+  src: url("/assets/fonts/source-serif-4-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Source Serif 4";
+
+  font-style: normal;
+
+  font-weight: 600;
+
+  font-display: swap;
+
+  src: url("/assets/fonts/source-serif-4-semibold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+
+  font-style: normal;
+
+  font-weight: 400;
+
+  font-display: swap;
+
+  src: url("/assets/fonts/source-sans-3-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+
+  font-style: normal;
+
+  font-weight: 600;
+
+  font-display: swap;
+
+  src: url("/assets/fonts/source-sans-3-semibold.woff2") format("woff2");
+}
+
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
@@ -556,6 +604,9 @@ video {
 
 :root {
   color-scheme: light;
+  --font-editorial: "Source Serif 4", Georgia, serif;
+  --font-ui: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --font-code: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --bg: 250 250 249;
   --surface: 255 255 255;
   --text: 24 24 27;

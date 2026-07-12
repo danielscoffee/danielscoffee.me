@@ -17,6 +17,31 @@ func TestSearchScriptAvoidsInnerHTMLForResults(t *testing.T) {
 	}
 }
 
+func TestTypographyAssetsAndTokens(t *testing.T) {
+	fontFiles := []string{
+		"assets/fonts/source-serif-4-regular.woff2",
+		"assets/fonts/source-serif-4-semibold.woff2",
+		"assets/fonts/source-sans-3-regular.woff2",
+		"assets/fonts/source-sans-3-semibold.woff2",
+		"assets/fonts/OFL.txt",
+	}
+	for _, path := range fontFiles {
+		if _, err := os.Stat(path); err != nil {
+			t.Errorf("expected typography asset %q: %v", path, err)
+		}
+	}
+
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	for _, marker := range []string{"Source Serif 4", "Source Sans 3", "--font-editorial", "--font-ui", "--font-code"} {
+		if !strings.Contains(string(cssBytes), marker) {
+			t.Errorf("expected input.css to contain %q", marker)
+		}
+	}
+}
+
 func TestInputStylesDefineThemeAndComponentSelectors(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
