@@ -171,6 +171,30 @@ func TestGzipCompression(t *testing.T) {
 	}
 }
 
+func TestRenderedBlogRouteIncludesAccessibleSiteShell(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/blog", nil))
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", w.Code)
+	}
+
+	assertContainsAll(t, w.Body.String(), []string{
+		`class="skip-link" href="#main-content"`,
+		`<main id="main-content"`,
+		`class="site-masthead"`,
+		`aria-label="Primary navigation"`,
+		`aria-label="Theme: System"`,
+		`aria-label="Open search"`,
+		`aria-labelledby="search-title"`,
+		`<button class="search-close" type="submit">Close</button>`,
+		`<footer class="site-footer"`,
+		`href="/rss.xml"`,
+	})
+}
+
 func TestBaseTemplateIncludesThemeControls(t *testing.T) {
 	s := testBlogServer()
 	h := s.RegisterRoutes()

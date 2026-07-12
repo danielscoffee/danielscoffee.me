@@ -8,6 +8,8 @@ templ Base(pageTitle string, pageDescription string) {
 			<meta name="viewport" content="width=device-width,initial-scale=1"/>
 			<title>{ pageTitle }</title>
 			<meta name="description" content={ pageDescription }/>
+			<link rel="preload" href="/assets/fonts/source-serif-4-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+			<link rel="preload" href="/assets/fonts/source-sans-3-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
 			<link href="/assets/css/output.css" rel="stylesheet"/>
 			<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS"/>
 			<script src="/assets/js/theme-init.js"></script>
@@ -15,33 +17,48 @@ templ Base(pageTitle string, pageDescription string) {
 			<script defer src="/assets/js/search.js"></script>
 		</head>
 		<body class="site-shell">
-			<header class="top-bar">
-				<div class="top-bar-inner">
-					<a href="/" class="site-brand">danielscoffee</a>
-					<nav class="site-nav" aria-label="Primary">
+			<a class="skip-link" href="#main-content">Skip to content</a>
+			<header class="site-masthead">
+				<div class="masthead-inner">
+					<div class="brand-block">
+						<a href="/" class="site-brand">danielscoffee</a>
+						<span class="site-tagline">Notes on software and making things</span>
+					</div>
+					<nav class="site-nav" aria-label="Primary navigation">
 						<a href="/blog" class="site-nav-link">Blog</a>
 						<a href="/about" class="site-nav-link">About</a>
 						<a href="/projects" class="site-nav-link">Projects</a>
 					</nav>
-					<div class="header-right">
+					<div class="header-actions">
 						<a href="https://github.com/danielscoffee" class="social-link" rel="noreferrer" target="_blank">GitHub</a>
 						<a href="https://www.linkedin.com/in/daniel-reis-santos/" class="social-link" rel="noreferrer" target="_blank">LinkedIn</a>
-						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">
-							Theme: System
-						</button>
-						<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">
-							Search <span class="search-kbd">Ctrl+K</span>
-						</button>
+						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">Theme: System</button>
+						<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">Search <span class="search-kbd">Ctrl+K</span></button>
 					</div>
 				</div>
 			</header>
-			<main class="site-container">
+			<main id="main-content" class="site-container">
 				{ children... }
 			</main>
+			<footer class="site-footer">
+				<div class="footer-inner">
+					<span>danielscoffee</span>
+					<nav aria-label="Footer links">
+						<a href="/rss.xml">RSS</a>
+						<a href="https://github.com/danielscoffee" rel="noreferrer">GitHub</a>
+						<a href="https://www.linkedin.com/in/daniel-reis-santos/" rel="noreferrer">LinkedIn</a>
+					</nav>
+				</div>
+			</footer>
 
-			<dialog id="search-modal" class="search-modal" aria-label="Search">
+			<dialog id="search-modal" class="search-modal" aria-labelledby="search-title">
 				<div class="search-modal-inner">
-					<input id="search-input" class="search-input" type="text" placeholder="Search posts and projects. Use: blog <query> or projects <query>" autocomplete="off"/>
+					<div class="search-dialog-header">
+						<h2 id="search-title">Search site</h2>
+						<form method="dialog"><button class="search-close" type="submit">Close</button></form>
+					</div>
+					<label for="search-input" class="search-label">Search posts and projects</label>
+					<input id="search-input" class="search-input" type="search" placeholder="Try: blog accessibility" autocomplete="off"/>
 					<p class="search-hint">Filters: <code>blog</code> or <code>projects</code>. Press Esc to close.</p>
 					<ul id="search-results" class="search-results"></ul>
 				</div>
