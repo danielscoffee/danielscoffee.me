@@ -171,7 +171,7 @@ func TestGzipCompression(t *testing.T) {
 	}
 }
 
-func TestRenderedBlogRouteIncludesAccessibleSiteShell(t *testing.T) {
+func TestSiteShell(t *testing.T) {
 	s := testBlogServer()
 	h := s.RegisterRoutes()
 
@@ -191,7 +191,7 @@ func TestRenderedBlogRouteIncludesAccessibleSiteShell(t *testing.T) {
 		`aria-labelledby="search-title"`,
 		`<button class="search-close" type="submit">Close</button>`,
 		`<footer class="site-footer"`,
-		`href="/rss.xml"`,
+		`class="footer-action-link" href="/rss.xml"`,
 	})
 }
 
