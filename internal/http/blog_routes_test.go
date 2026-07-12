@@ -260,6 +260,52 @@ func TestSearchRoute(t *testing.T) {
 	}
 }
 
+func TestEditorialIndexes(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	cases := []struct {
+		path    string
+		markers []string
+	}{
+		{
+			path: "/blog",
+			markers: []string{
+				`class="page-intro"`, `<h1 class="page-title">Blog</h1>`,
+				`class="editorial-list post-list"`, `class="editorial-card post-item"`,
+				`<time class="editorial-date" datetime="2026-04-26">2026-04-26</time>`,
+				`href="/post/hello-world"`, `href="/tag/go"`,
+			},
+		},
+		{
+			path: "/projects",
+			markers: []string{
+				`class="page-intro"`, `<h1 class="page-title">Projects</h1>`,
+				`class="editorial-list project-list"`, `class="editorial-card project-item"`,
+				`<time class="editorial-date" datetime="2026-05-01">2026-05-01</time>`,
+				`href="/projects/side-project"`, `href="/projects?tag=go"`,
+			},
+		},
+		{
+			path: "/tag/go",
+			markers: []string{
+				`class="page-intro"`, `Tagged with <span class="tag-emphasis">go</span>`,
+				`class="editorial-list post-list"`, `class="editorial-card post-item"`,
+				`datetime="2026-04-26"`, `href="/post/hello-world"`, `href="/tag/personal"`,
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, tc.path, nil))
+		if w.Code != http.StatusOK {
+			t.Fatalf("%s expected status 200, got %d", tc.path, w.Code)
+		}
+		assertContainsAll(t, w.Body.String(), tc.markers)
+	}
+}
+
 func TestPagesExposeStyleHooks(t *testing.T) {
 	s := testBlogServer()
 	h := s.RegisterRoutes()

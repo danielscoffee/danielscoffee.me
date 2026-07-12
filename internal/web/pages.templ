@@ -6,12 +6,23 @@ import (
 	"github.com/danielscoffee/danielscoffee.me/internal/content"
 )
 
+templ PageIntro(title, subtitle string) {
+	<header class="page-intro">
+		<h1 class="page-title">{ title }</h1>
+		<p class="page-subtitle">{ subtitle }</p>
+	</header>
+}
+
+templ TagPageIntro(tag, subtitle string) {
+	<header class="page-intro">
+		<h1 class="page-title">Tagged with <span class="tag-emphasis">{ tag }</span></h1>
+		<p class="page-subtitle">{ subtitle }</p>
+	</header>
+}
+
 templ HomePage(posts []content.Post) {
 	@Base("Daniel's Site", "Personal website and blog") {
-		<section class="intro-block">
-			<h1 class="page-title">Daniel's Site</h1>
-			<p class="page-subtitle">Personal notes on software, projects, and experiments.</p>
-		</section>
+		@PageIntro("Daniel's Site", "Personal notes on software, projects, and experiments.")
 		<section class="section-block">
 			<h2 class="section-title">Recent posts</h2>
 			@PostList(posts)
@@ -21,10 +32,7 @@ templ HomePage(posts []content.Post) {
 
 templ BlogIndexPage(posts []content.Post) {
 	@Base("Blog", "All blog posts") {
-		<section class="intro-block">
-			<h1 class="page-title">Blog</h1>
-			<p class="page-subtitle">All writing in one place.</p>
-		</section>
+		@PageIntro("Blog", "All writing in one place.")
 		<section class="section-block">
 			<h2 class="section-title">Latest entries</h2>
 			@PostList(posts)
@@ -45,10 +53,7 @@ templ AboutPage(page content.Page) {
 
 templ ProjectsIndexPage(projects []content.Project) {
 	@Base("Projects", "Project notes and builds") {
-		<section class="intro-block">
-			<h1 class="page-title">Projects</h1>
-			<p class="page-subtitle">Build logs, notes, and shipped experiments.</p>
-		</section>
+		@PageIntro("Projects", "Build logs, notes, and shipped experiments.")
 		<section class="section-block">
 			@ProjectList(projects)
 		</section>
@@ -106,10 +111,7 @@ templ ProjectSubPostPage(project content.Project, sub content.ProjectSubPost) {
 
 templ TagPage(tag string, posts []content.Post) {
 	@Base("Tag: "+tag, "Posts filtered by tag") {
-		<section class="intro-block">
-			<h1 class="page-title">Tagged with <span class="tag-emphasis">{ tag }</span></h1>
-			<p class="page-subtitle">Filtered writing by topic.</p>
-		</section>
+		@TagPageIntro(tag, "Filtered writing by topic.")
 		<section class="section-block">
 			if len(posts) == 0 {
 				<p class="empty-state">No posts found for this tag yet.</p>
@@ -120,23 +122,39 @@ templ TagPage(tag string, posts []content.Post) {
 	}
 }
 
+templ EditorialDate(date string) {
+	<time class="editorial-date" datetime={ date }>{ date }</time>
+}
+
+templ PostTags(tags []string) {
+	if len(tags) > 0 {
+		<ul class="tag-list">
+			for _, tag := range tags {
+				<li><a class="tag-chip" href={ templ.SafeURL("/tag/" + tag) }>{ tag }</a></li>
+			}
+		</ul>
+	}
+}
+
+templ ProjectTags(tags []string) {
+	if len(tags) > 0 {
+		<ul class="tag-list">
+			for _, tag := range tags {
+				<li><a class="tag-chip" href={ templ.SafeURL("/projects?tag=" + tag) }>{ tag }</a></li>
+			}
+		</ul>
+	}
+}
+
 templ PostList(posts []content.Post) {
-	<ul class="post-list">
+	<ul class="editorial-list post-list">
 		for _, post := range posts {
-			<li class="post-item">
-				<a class="post-link" href={ templ.SafeURL("/post/" + post.Slug) }>{ post.Title }</a>
-				<p class="post-summary">{ post.Summary }</p>
-				<div class="post-meta-row">
-					<p class="post-date">{ post.Date }</p>
-					if len(post.Tags) > 0 {
-						<ul class="tag-list">
-							for _, tag := range post.Tags {
-								<li>
-									<a class="tag-chip" href={ templ.SafeURL("/tag/" + tag) }>{ tag }</a>
-								</li>
-							}
-						</ul>
-					}
+			<li class="editorial-card post-item">
+				<h3 class="editorial-title"><a class="editorial-link post-link" href={ templ.SafeURL("/post/" + post.Slug) }>{ post.Title }</a></h3>
+				<p class="editorial-summary post-summary">{ post.Summary }</p>
+				<div class="editorial-meta post-meta-row">
+					@EditorialDate(post.Date)
+					@PostTags(post.Tags)
 				</div>
 			</li>
 		}
@@ -147,22 +165,14 @@ templ ProjectList(projects []content.Project) {
 	if len(projects) == 0 {
 		<p class="empty-state">No projects found for this tag yet.</p>
 	} else {
-	<ul class="project-list">
+	<ul class="editorial-list project-list">
 		for _, project := range projects {
-			<li class="project-item">
-				<a class="project-link" href={ templ.SafeURL("/projects/" + project.Slug) }>{ project.Title }</a>
-				<p class="project-summary">{ project.Summary }</p>
-				<div class="post-meta-row">
-					<p class="post-date">{ project.Date }</p>
-					if len(project.Tags) > 0 {
-						<ul class="tag-list">
-							for _, tag := range project.Tags {
-								<li>
-									<a class="tag-chip" href={ templ.SafeURL("/projects?tag=" + tag) }>{ tag }</a>
-								</li>
-							}
-						</ul>
-					}
+			<li class="editorial-card project-item">
+				<h2 class="editorial-title"><a class="editorial-link project-link" href={ templ.SafeURL("/projects/" + project.Slug) }>{ project.Title }</a></h2>
+				<p class="editorial-summary project-summary">{ project.Summary }</p>
+				<div class="editorial-meta post-meta-row">
+					@EditorialDate(project.Date)
+					@ProjectTags(project.Tags)
 				</div>
 			</li>
 		}
@@ -184,10 +194,9 @@ templ BlogPostPage(post content.Post) {
 
 templ NotFoundPage() {
 	@Base("Page not found", "The requested page could not be found") {
-		<section class="intro-block error-page">
+		<section class="error-page">
 			<p class="page-subtitle">404</p>
-			<h1 class="page-title">Page not found</h1>
-			<p class="page-subtitle">This page wandered off, or the link is wrong.</p>
+			@PageIntro("Page not found", "This page wandered off, or the link is wrong.")
 			<a class="site-nav-link" href="/blog">Back to blog</a>
 		</section>
 	}
@@ -195,10 +204,9 @@ templ NotFoundPage() {
 
 templ ServerErrorPage() {
 	@Base("Something broke", "An internal server error occurred") {
-		<section class="intro-block error-page">
+		<section class="error-page">
 			<p class="page-subtitle">500</p>
-			<h1 class="page-title">Something broke</h1>
-			<p class="page-subtitle">Server hit a problem. Try again in a minute.</p>
+			@PageIntro("Something broke", "Server hit a problem. Try again in a minute.")
 			<a class="site-nav-link" href="/blog">Back to blog</a>
 		</section>
 	}
