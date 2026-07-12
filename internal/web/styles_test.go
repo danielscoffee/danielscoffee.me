@@ -251,6 +251,16 @@ func TestSyntaxTokensAndProseWrapping(t *testing.T) {
 	}
 }
 
+func TestInputStylesUseSingleComponentsLayer(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	if got := strings.Count(string(cssBytes), "@layer components"); got != 1 {
+		t.Fatalf("expected one components layer, got %d", got)
+	}
+}
+
 func TestInputStyles(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
