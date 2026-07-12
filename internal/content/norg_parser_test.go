@@ -61,6 +61,9 @@ fmt.Println("ok")
 	if !strings.Contains(html, `<span`) {
 		t.Fatalf("expected highlighted code spans in html: %s", html)
 	}
+	if !strings.Contains(html, `<pre class="chroma" tabindex="0">`) {
+		t.Fatalf("expected keyboard-focusable highlighted code, got %s", html)
+	}
 	for _, marker := range []string{
 		`<blockquote data-priority="high"><p>this is quote line</p></blockquote>`,
 		`<dl class="norg-definitions">`,
@@ -76,8 +79,8 @@ fmt.Println("ok")
 			t.Fatalf("expected rendered marker %q, got %s", marker, html)
 		}
 	}
-	if !strings.Contains(html, `<table>`) || !strings.Contains(html, `<th>Name</th>`) || !strings.Contains(html, `<td>blog</td>`) {
-		t.Fatalf("expected rendered table html, got %s", html)
+	if !strings.Contains(html, `<table tabindex="0">`) || !strings.Contains(html, `<th>Name</th>`) || !strings.Contains(html, `<td>blog</td>`) {
+		t.Fatalf("expected keyboard-focusable table html, got %s", html)
 	}
 	if strings.Contains(html, "<html>") || strings.Contains(html, "<body") {
 		t.Fatalf("expected code fragment html only, got full document: %s", html)
@@ -119,6 +122,13 @@ func TestParseNorg_OffsetsHeadingsToReservePageTitle(t *testing.T) {
 	}
 	if strings.Contains(html, "<h1") {
 		t.Errorf("Norg body must reserve h1 for page title: %s", html)
+	}
+}
+
+func TestPlainCodeHTML_IsKeyboardFocusable(t *testing.T) {
+	html := plainCodeHTML("text", "a < b")
+	if !strings.Contains(html, `<pre tabindex="0"><code class="language-text">a &lt; b</code></pre>`) {
+		t.Fatalf("expected keyboard-focusable escaped code, got %s", html)
 	}
 }
 

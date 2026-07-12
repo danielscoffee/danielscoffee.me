@@ -544,7 +544,8 @@ func renderHighlightedCode(lang, code string) string {
 	}
 
 	rendered := strings.TrimSpace(out.String())
-	rendered = chromaPreStylePattern.ReplaceAllString(rendered, `<pre class="chroma">`)
+	rendered = strings.Replace(rendered, `<pre class="chroma">`, `<pre class="chroma" tabindex="0">`, 1)
+	rendered = chromaPreStylePattern.ReplaceAllString(rendered, `<pre class="chroma" tabindex="0">`)
 	return rendered
 }
 
@@ -553,7 +554,7 @@ func plainCodeHTML(lang, code string) string {
 	if lang != "" {
 		langClass = fmt.Sprintf(" class=\"language-%s\"", html.EscapeString(lang))
 	}
-	return fmt.Sprintf("<pre><code%s>%s</code></pre>", langClass, html.EscapeString(code))
+	return fmt.Sprintf("<pre tabindex=\"0\"><code%s>%s</code></pre>", langClass, html.EscapeString(code))
 }
 
 func renderTaskState(state string) string {
@@ -906,7 +907,7 @@ func parseMarkdownWrapperTable(lines []string) (string, error) {
 	}
 
 	var b strings.Builder
-	b.WriteString("<table>\n<thead><tr>")
+	b.WriteString("<table tabindex=\"0\">\n<thead><tr>")
 	for _, header := range headers {
 		text, err := renderInline(header)
 		if err != nil {
