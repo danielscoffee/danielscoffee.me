@@ -935,7 +935,7 @@
 		text-decoration: none;
 	}
 
-	.search-message {
+	.search-result-message {
 		padding: 0.9rem 0.75rem;
 		border: 1px dashed rgb(var(--border));
 		border-radius: var(--radius-sm);
@@ -943,8 +943,8 @@
 		text-align: center;
 	}
 
-	.search-message-loading { color: rgb(var(--accent-strong)); }
-	.search-message-error { color: rgb(var(--text)); border-color: rgb(var(--accent)); }
+	.search-result-message-loading { color: rgb(var(--accent-strong)); }
+	.search-result-message-error { color: rgb(var(--text)); border-color: rgb(var(--accent)); }
 
 	.search-result a:hover,
 	.search-result a:focus-visible {

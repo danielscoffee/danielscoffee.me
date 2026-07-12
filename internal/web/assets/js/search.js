@@ -31,14 +31,22 @@
 		const link = document.createElement("a");
 		link.setAttribute(
 			"href",
-			typeof href === "string" && /^\/(?!\/)/.test(href) ? href : "#",
+			typeof href === "string" && /^\/(?!\/)/.test(href) && !href.includes("\\")
+				? href
+				: "#",
 		);
 		return link;
 	};
 
+	const messageClasses = {
+		loading: "search-result-message-loading",
+		empty: "search-result-message-empty",
+		error: "search-result-message-error",
+	};
+
 	const messageItem = (message, state) => {
 		const li = document.createElement("li");
-		li.className = `search-result search-message search-message-${state}`;
+		li.className = `search-result search-result-message ${messageClasses[state] || ""}`;
 		li.textContent = message;
 		return li;
 	};

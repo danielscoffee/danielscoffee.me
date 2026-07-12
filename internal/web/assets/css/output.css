@@ -1521,6 +1521,59 @@ a {
   gap: 0.5rem;
 }
 
+.search-result a {
+  display: block;
+  min-height: 44px;
+  box-sizing: border-box;
+  border: 1px solid rgb(var(--border));
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.75rem;
+  background: rgb(var(--surface));
+  color: rgb(var(--text));
+  text-decoration: none;
+}
+
+.search-result-message {
+  padding: 0.9rem 0.75rem;
+  border: 1px dashed rgb(var(--border));
+  border-radius: var(--radius-sm);
+  color: rgb(var(--muted));
+  text-align: center;
+}
+
+.search-result-message-loading {
+  color: rgb(var(--accent-strong));
+}
+
+.search-result-message-error {
+  color: rgb(var(--text));
+  border-color: rgb(var(--accent));
+}
+
+.search-result a:hover,
+	.search-result a:focus-visible {
+  border-color: rgb(var(--accent));
+}
+
+.search-result-type {
+  font-size: 0.72rem;
+  color: rgb(var(--muted));
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.search-result-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.search-result-summary {
+  font-size: 0.82rem;
+  color: rgb(var(--muted));
+  margin-top: 0.2rem;
+}
+
 @media (max-width: 480px) {
   .search-modal {
     width: calc(100vw - 1rem);

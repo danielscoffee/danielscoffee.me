@@ -28,6 +28,46 @@ func TestSearchScriptSafeAsyncMessagesAndKeyboard(t *testing.T) {
 	}
 }
 
+func TestSearchResultLinksRejectUnsafePaths(t *testing.T) {
+	jsBytes, err := os.ReadFile("assets/js/search.js")
+	if err != nil {
+		t.Fatalf("read search.js: %v", err)
+	}
+	js := string(jsBytes)
+	for _, guard := range []string{`/^\/(?!\/)/`, `!href.includes("\\")`} {
+		if !strings.Contains(js, guard) {
+			t.Errorf("search result URL guard missing %q", guard)
+		}
+	}
+}
+
+func TestTailwindRetainsDynamicSearchStyles(t *testing.T) {
+	configBytes, err := os.ReadFile("../../tailwind.config.js")
+	if err != nil {
+		t.Fatalf("read tailwind config: %v", err)
+	}
+	if !strings.Contains(string(configBytes), `./internal/web/assets/js/**/*.js`) {
+		t.Error("tailwind content must scan JavaScript assets")
+	}
+
+	cssBytes, err := os.ReadFile("assets/css/output.css")
+	if err != nil {
+		t.Fatalf("read generated CSS: %v", err)
+	}
+	css := string(cssBytes)
+	for _, selector := range []string{
+		".search-result",
+		".search-result-message",
+		".search-result-message-loading",
+		".search-result-message-error",
+		".search-result-title",
+	} {
+		if !strings.Contains(css, selector) {
+			t.Errorf("generated CSS missing dynamic selector %q", selector)
+		}
+	}
+}
+
 func TestThemeScriptKeepsModesStorageAndCompactText(t *testing.T) {
 	jsBytes, err := os.ReadFile("assets/js/theme-toggle.js")
 	if err != nil {
