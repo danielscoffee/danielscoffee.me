@@ -626,6 +626,10 @@ video {
   --chip-text: 91 58 40;
   --code-bg: 239 229 215;
   --code-text: 66 42 29;
+  --syntax-keyword: 153 27 27;
+  --syntax-function: 107 33 168;
+  --syntax-string: 21 95 60;
+  --syntax-number: 3 82 130;
   --task-todo: 145 45 15;
   --task-doing: 25 70 140;
   --task-done: 20 105 50;
@@ -648,6 +652,10 @@ video {
   --chip-text: 225 199 171;
   --code-bg: 22 16 13;
   --code-text: 238 216 190;
+  --syntax-keyword: 252 165 165;
+  --syntax-function: 216 180 254;
+  --syntax-string: 134 239 172;
+  --syntax-number: 125 211 252;
   --task-todo: 255 180 110;
   --task-doing: 130 190 255;
   --task-done: 115 220 145;
@@ -671,6 +679,10 @@ video {
     --chip-text: 225 199 171;
     --code-bg: 22 16 13;
     --code-text: 238 216 190;
+    --syntax-keyword: 252 165 165;
+    --syntax-function: 216 180 254;
+    --syntax-string: 134 239 172;
+    --syntax-number: 125 211 252;
     --task-todo: 255 180 110;
     --task-doing: 130 190 255;
     --task-done: 115 220 145;
@@ -1088,6 +1100,7 @@ a {
   font-family: var(--font-editorial);
   font-size: clamp(1.03rem, 0.99rem + 0.2vw, 1.12rem);
   line-height: 1.82;
+  overflow-wrap: anywhere;
 }
 
 .article-header,
@@ -1287,6 +1300,7 @@ a {
   max-width: 100%;
   margin: 1.5rem 0;
   overflow-x: auto;
+  overflow-wrap: normal;
   -webkit-overflow-scrolling: touch;
   border-radius: 0.5rem;
   border: 1px solid rgb(var(--border));
@@ -1330,12 +1344,12 @@ a {
 	.post-prose .chroma .kp,
 	.post-prose .chroma .kr,
 	.post-prose .chroma .kt {
-  color: rgb(239 68 68);
+  color: rgb(var(--syntax-keyword));
 }
 
 .post-prose .chroma .nf,
 	.post-prose .chroma .fm {
-  color: rgb(168 85 247);
+  color: rgb(var(--syntax-function));
 }
 
 .post-prose .chroma .s,
@@ -1352,7 +1366,7 @@ a {
 	.post-prose .chroma .sr,
 	.post-prose .chroma .s1,
 	.post-prose .chroma .ss {
-  color: rgb(34 197 94);
+  color: rgb(var(--syntax-string));
 }
 
 .post-prose .chroma .m,
@@ -1362,7 +1376,7 @@ a {
 	.post-prose .chroma .mi,
 	.post-prose .chroma .il,
 	.post-prose .chroma .mo {
-  color: rgb(56 189 248);
+  color: rgb(var(--syntax-number));
 }
 
 .post-prose .chroma .c,
@@ -1642,6 +1656,10 @@ a {
 
 .fixed {
   position: fixed;
+}
+
+.inline {
+  display: inline;
 }
 
 .h-full {

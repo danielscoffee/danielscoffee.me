@@ -103,6 +103,37 @@ func TestTaskLabelsUseThemeContrastTokens(t *testing.T) {
 	}
 }
 
+func TestSyntaxTokensAndProseWrapping(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+
+	for _, token := range []string{"--syntax-keyword", "--syntax-function", "--syntax-string", "--syntax-number"} {
+		if strings.Count(css, token+":") < 3 {
+			t.Errorf("expected %s in light, dark, and system-dark themes", token)
+		}
+		if !strings.Contains(css, "color: rgb(var("+token+"))") {
+			t.Errorf("expected syntax rules to use %s", token)
+		}
+	}
+	for _, fixed := range []string{"rgb(239 68 68)", "rgb(168 85 247)", "rgb(34 197 94)", "rgb(56 189 248)"} {
+		if strings.Contains(css, fixed) {
+			t.Errorf("fixed syntax color forbidden: %s", fixed)
+		}
+	}
+
+	articleRule := regexp.MustCompile(`(?s)\.article-body\s*\{[^}]*\}`).FindString(css)
+	if !strings.Contains(articleRule, "overflow-wrap: anywhere") {
+		t.Error("article body must wrap long prose and inline code")
+	}
+	preRule := regexp.MustCompile(`(?s)\.post-prose pre\s*\{[^}]*\}`).FindString(css)
+	if !strings.Contains(preRule, "overflow-x: auto") || !strings.Contains(preRule, "overflow-wrap: normal") {
+		t.Error("preformatted code must preserve horizontal scrolling without wrapping")
+	}
+}
+
 func TestInputStyles(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
