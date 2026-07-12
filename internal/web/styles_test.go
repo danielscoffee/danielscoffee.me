@@ -59,7 +59,7 @@ func TestTypographyAssetsAndTokens(t *testing.T) {
 	}
 }
 
-func TestInputStylesDefineThemeAndComponentSelectors(t *testing.T) {
+func TestInputStyles(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
 		t.Fatalf("read styles: %v", err)
@@ -67,8 +67,25 @@ func TestInputStylesDefineThemeAndComponentSelectors(t *testing.T) {
 
 	css := string(cssBytes)
 	required := []string{
+		"--bg:",
+		"--surface:",
+		"--surface-raised:",
+		"--text:",
+		"--muted:",
+		"--border:",
+		"--accent:",
+		"--accent-strong:",
+		"--focus:",
+		"--shadow-color:",
+		"--radius-sm:",
+		"--radius-md:",
+		"--content-wide:",
+		"--content-reading:",
 		":root[data-theme=\"dark\"]",
 		":root[data-theme=\"system\"]",
+		"@media (prefers-color-scheme: dark)",
+		":focus-visible",
+		"::selection",
 		".site-nav-link",
 		".theme-toggle",
 		".post-list",
