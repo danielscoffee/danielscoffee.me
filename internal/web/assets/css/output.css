@@ -1535,6 +1535,7 @@ a {
 }
 
 .project-subpost-link {
+  min-width: 0;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -1547,6 +1548,7 @@ a {
 
 .project-subpost-title {
   margin: 0;
+  overflow-wrap: anywhere;
   font-family: var(--font-editorial);
   font-size: 1.1rem;
   font-weight: 600;
@@ -1561,6 +1563,7 @@ a {
 
 .project-subpost-summary {
   margin: 0;
+  overflow-wrap: anywhere;
   color: rgb(var(--muted));
   font-size: 0.85rem;
   line-height: 1.55;

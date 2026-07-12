@@ -78,6 +78,28 @@ func TestProjectSubpostGrid(t *testing.T) {
 	}
 }
 
+func TestProjectSubpostLongContentWraps(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+
+	for selector, property := range map[string]string{
+		`.project-subpost-link`:    `min-width\s*:\s*0`,
+		`.project-subpost-title`:   `overflow-wrap\s*:\s*anywhere`,
+		`.project-subpost-summary`: `overflow-wrap\s*:\s*anywhere`,
+	} {
+		rule := regexp.MustCompile(`(?s)` + regexp.QuoteMeta(selector) + `\s*\{[^}]*\}`).Find(cssBytes)
+		if rule == nil {
+			t.Errorf("%s rule missing", selector)
+			continue
+		}
+		if !regexp.MustCompile(property).Match(rule) {
+			t.Errorf("%s must contain %s", selector, property)
+		}
+	}
+}
+
 func TestProjectSubpostDatePreservesMutedContrast(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
