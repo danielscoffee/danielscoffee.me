@@ -23,11 +23,20 @@ func TestTypographyAssetsAndTokens(t *testing.T) {
 		"assets/fonts/source-serif-4-semibold.woff2",
 		"assets/fonts/source-sans-3-regular.woff2",
 		"assets/fonts/source-sans-3-semibold.woff2",
-		"assets/fonts/OFL.txt",
 	}
 	for _, path := range fontFiles {
+		font, err := os.ReadFile(path)
+		if err != nil {
+			t.Errorf("read typography asset %q: %v", path, err)
+			continue
+		}
+		if len(font) < 4 || string(font[:4]) != "wOF2" {
+			t.Errorf("typography asset %q does not have WOFF2 magic", path)
+		}
+	}
+	for _, path := range []string{"assets/fonts/OFL.txt", "assets/fonts/README.md"} {
 		if _, err := os.Stat(path); err != nil {
-			t.Errorf("expected typography asset %q: %v", path, err)
+			t.Errorf("expected typography documentation %q: %v", path, err)
 		}
 	}
 
@@ -35,7 +44,15 @@ func TestTypographyAssetsAndTokens(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read styles: %v", err)
 	}
-	for _, marker := range []string{"Source Serif 4", "Source Sans 3", "--font-editorial", "--font-ui", "--font-code"} {
+	markers := []string{
+		"Source Serif 4", "Source Sans 3", "--font-editorial", "--font-ui", "--font-code",
+		"font-display: swap", "font-weight: 400", "font-weight: 600",
+		`url("/assets/fonts/source-serif-4-regular.woff2")`,
+		`url("/assets/fonts/source-serif-4-semibold.woff2")`,
+		`url("/assets/fonts/source-sans-3-regular.woff2")`,
+		`url("/assets/fonts/source-sans-3-semibold.woff2")`,
+	}
+	for _, marker := range markers {
 		if !strings.Contains(string(cssBytes), marker) {
 			t.Errorf("expected input.css to contain %q", marker)
 		}
