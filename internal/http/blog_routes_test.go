@@ -302,7 +302,16 @@ func TestEditorialIndexes(t *testing.T) {
 		if w.Code != http.StatusOK {
 			t.Fatalf("%s expected status 200, got %d", tc.path, w.Code)
 		}
-		assertContainsAll(t, w.Body.String(), tc.markers)
+		body := w.Body.String()
+		assertContainsAll(t, body, tc.markers)
+		if tc.path == "/tag/go" {
+			heading := `<h2 class="section-title">Posts</h2>`
+			headingIndex := strings.Index(body, heading)
+			cardIndex := strings.Index(body, `class="editorial-card post-item"`)
+			if headingIndex == -1 || cardIndex == -1 || headingIndex > cardIndex {
+				t.Fatalf("%s expected %q before post cards", tc.path, heading)
+			}
+		}
 	}
 }
 

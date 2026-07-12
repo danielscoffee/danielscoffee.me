@@ -113,6 +113,7 @@ templ TagPage(tag string, posts []content.Post) {
 	@Base("Tag: "+tag, "Posts filtered by tag") {
 		@TagPageIntro(tag, "Filtered writing by topic.")
 		<section class="section-block">
+			<h2 class="section-title">Posts</h2>
 			if len(posts) == 0 {
 				<p class="empty-state">No posts found for this tag yet.</p>
 			} else {
