@@ -1504,137 +1504,73 @@ a {
   gap: 0.5rem;
 }
 
-/* Subposts grid — antfu-style: flat, mono meta, no motion, dotted dividers. */
-
 .project-subposts-grid {
   list-style: none;
   margin: 1.5rem 0 0;
   padding: 0;
   display: grid;
-  gap: 0;
   grid-template-columns: 1fr;
-  grid-auto-rows: minmax(140px, auto);
-  grid-auto-flow: dense;
-  border-top: 1px dashed rgb(var(--border));
-  border-left: 1px dashed rgb(var(--border));
-}
-
-.project-subpost-card {
-  display: flex;
-  border-right: 1px dashed rgb(var(--border));
-  border-bottom: 1px dashed rgb(var(--border));
-  background: transparent;
+  gap: 1rem;
 }
 
 @media (min-width: 640px) {
-  .project-subposts-grid[data-count="1"] {
-    grid-template-columns: 1fr;
-  }
-
-  .project-subposts-grid[data-count="1"] > .project-subpost-card {
-    grid-row: span 2;
-  }
-
-  .project-subposts-grid[data-count="2"] {
+  .project-subposts-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
 
-  .project-subposts-grid[data-count="2"] > .project-subpost-card {
-    grid-row: span 2;
-  }
+.project-subpost-card {
+  min-width: 0;
+  display: flex;
+  border: 1px solid rgb(var(--border));
+  border-radius: var(--radius-md);
+  background: rgb(var(--surface));
+  box-shadow: 0 0.25rem 0.9rem rgb(var(--shadow-color) / 0.06);
+}
 
-  .project-subposts-grid[data-count="3"] {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .project-subposts-grid[data-count="3"]
-			> .project-subpost-card:nth-child(1) {
-    grid-column: span 2;
-    grid-row: span 2;
-  }
-
-  .project-subposts-grid[data-count="4"] {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .project-subposts-grid:not([data-count="1"]):not([data-count="2"]):not(
-				[data-count="3"]
-			):not([data-count="4"]) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .project-subposts-grid:not([data-count="1"]):not([data-count="2"]):not(
-				[data-count="3"]
-			):not([data-count="4"])
-			> .project-subpost-card:nth-child(6n + 1) {
-    grid-column: span 2;
-    grid-row: span 2;
-  }
-
-  .project-subposts-grid:not([data-count="1"]):not([data-count="2"]):not(
-				[data-count="3"]
-			):not([data-count="4"])
-			> .project-subpost-card:nth-child(6n + 4) {
-    grid-column: span 2;
-  }
-
-  .project-subposts-grid:not([data-count="1"]):not([data-count="2"]):not(
-				[data-count="3"]
-			):not([data-count="4"])
-			> .project-subpost-card:nth-child(6n + 5) {
-    grid-row: span 2;
-  }
+.project-subpost-card:hover,
+	.project-subpost-card:focus-within {
+  border-color: rgb(var(--accent) / 0.55);
+  box-shadow: 0 0.4rem 1.2rem rgb(var(--shadow-color) / 0.09);
 }
 
 .project-subpost-link {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 1.25rem 1.5rem;
+  min-height: 44px;
+  padding: 1.25rem;
   color: rgb(var(--text));
   text-decoration: none;
-  width: 100%;
 }
 
 .project-subpost-title {
-  font-size: 1rem;
-  font-weight: 500;
   margin: 0;
-  color: rgb(var(--text));
-  letter-spacing: -0.01em;
+  font-family: var(--font-editorial);
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
-.project-subpost-card:hover .project-subpost-title {
+.project-subpost-card:hover .project-subpost-title,
+	.project-subpost-card:focus-within .project-subpost-title {
   color: rgb(var(--accent-strong));
   text-decoration: underline;
   text-underline-offset: 4px;
-  text-decoration-thickness: 1px;
-}
-
-.project-subposts-grid[data-count="3"]
-		> .project-subpost-card:nth-child(1)
-		.project-subpost-title,
-	.project-subposts-grid:not([data-count="1"]):not([data-count="2"]):not(
-			[data-count="3"]
-		):not([data-count="4"])
-		> .project-subpost-card:nth-child(6n + 1)
-		.project-subpost-title {
-  font-size: 1.25rem;
 }
 
 .project-subpost-summary {
-  font-size: 0.85rem;
-  color: rgb(var(--muted));
   margin: 0;
+  color: rgb(var(--muted));
+  font-size: 0.85rem;
   line-height: 1.55;
 }
 
 .project-subpost-date {
-  font-family: var(--font-code);
-  font-size: 0.72rem;
-  color: rgb(var(--muted));
   margin-top: auto;
-  letter-spacing: 0.02em;
+  color: rgb(var(--muted));
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
 }
 
 .project-subpost-breadcrumb {
@@ -1660,6 +1596,10 @@ a {
 
 .inline {
   display: inline;
+}
+
+.grid {
+  display: grid;
 }
 
 .h-full {

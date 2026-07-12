@@ -1,10 +1,6 @@
 package web
 
-import (
-	"strconv"
-
-	"github.com/danielscoffee/danielscoffee.me/internal/content"
-)
+import "github.com/danielscoffee/danielscoffee.me/internal/content"
 
 templ PageIntro(title, subtitle string) {
 	<header class="page-intro">
@@ -87,7 +83,7 @@ templ ProjectDetailPage(project content.Project) {
 }
 
 templ ProjectSubPostGrid(project content.Project) {
-	<ul class="project-subposts-grid" data-count={ strconv.Itoa(len(project.SubPosts)) }>
+	<ul class="project-subposts-grid">
 		for _, sub := range project.SubPosts {
 			<li class="project-subpost-card">
 				<a class="project-subpost-link" href={ templ.SafeURL("/projects/" + project.Slug + "/" + sub.Slug) }>

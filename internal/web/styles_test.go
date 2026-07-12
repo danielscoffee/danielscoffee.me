@@ -60,6 +60,24 @@ func TestTypographyAssetsAndTokens(t *testing.T) {
 	}
 }
 
+func TestProjectSubpostGrid(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+	for _, forbidden := range []string{"[data-count=", "nth-child(6n+1)", "nth-child(6n + 1)", "nth-child(6n+"} {
+		if strings.Contains(css, forbidden) {
+			t.Errorf("count-specific project grid CSS forbidden: %q", forbidden)
+		}
+	}
+	for _, marker := range []string{".project-subposts-grid", "grid-template-columns: 1fr", "repeat(2, 1fr)", ".project-subpost-card", ".project-subpost-link", "min-height: 44px", ":focus-within"} {
+		if !strings.Contains(css, marker) {
+			t.Errorf("expected stable project grid CSS %q", marker)
+		}
+	}
+}
+
 func TestProjectSubpostDatePreservesMutedContrast(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
