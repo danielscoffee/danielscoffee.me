@@ -1,20 +1,57 @@
 package web
 
 import (
+	"bytes"
+	"context"
 	"os"
 	"regexp"
 	"strings"
 	"testing"
 )
 
-func TestSearchScriptAvoidsInnerHTMLForResults(t *testing.T) {
+func TestSearchScriptSafeAsyncMessagesAndKeyboard(t *testing.T) {
 	jsBytes, err := os.ReadFile("assets/js/search.js")
 	if err != nil {
 		t.Fatalf("read search.js: %v", err)
 	}
+	js := string(jsBytes)
+	if strings.Contains(js, "innerHTML") {
+		t.Fatal("search.js should render API results with DOM text nodes, not innerHTML")
+	}
+	for _, marker := range []string{"AbortController", "signal:", "Loading…", "No results", "Search unavailable", "textContent", "trigger.focus()", "ctrlKey", "metaKey", `key === "escape"`} {
+		if !strings.Contains(js, marker) {
+			t.Errorf("search.js missing %q", marker)
+		}
+	}
+	if strings.Contains(js, `resultLink("#")`) {
+		t.Error("search status messages must not be links")
+	}
+}
 
-	if strings.Contains(string(jsBytes), "innerHTML") {
-		t.Fatalf("search.js should render API results with DOM text nodes, not innerHTML")
+func TestThemeScriptKeepsModesStorageAndCompactText(t *testing.T) {
+	jsBytes, err := os.ReadFile("assets/js/theme-toggle.js")
+	if err != nil {
+		t.Fatalf("read theme-toggle.js: %v", err)
+	}
+	js := string(jsBytes)
+	for _, marker := range []string{`"theme-preference"`, `"system", "light", "dark"`, "matchMedia", "localStorage", "button.textContent = labels[mode]", `button.setAttribute("aria-label", label)`} {
+		if !strings.Contains(js, marker) {
+			t.Errorf("theme-toggle.js missing %q", marker)
+		}
+	}
+}
+
+func TestThemeRenderedShellStartsCompactWithFullLabel(t *testing.T) {
+	var output bytes.Buffer
+	if err := Base("Title", "Description").Render(context.Background(), &output); err != nil {
+		t.Fatalf("render base: %v", err)
+	}
+	html := output.String()
+	if !strings.Contains(html, `id="theme-toggle"`) || !strings.Contains(html, `aria-label="Theme: System"`) || !strings.Contains(html, `>System</button>`) {
+		t.Fatalf("theme control should render compact text and full accessible label: %s", html)
+	}
+	if !strings.Contains(html, `id="search-results" class="search-results" aria-live="polite"`) {
+		t.Error("search results should announce updates")
 	}
 }
 

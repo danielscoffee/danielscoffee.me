@@ -32,7 +32,7 @@ templ Base(pageTitle string, pageDescription string) {
 					<div class="header-actions">
 						<a href="https://github.com/danielscoffee" class="social-link" rel="noreferrer" target="_blank">GitHub</a>
 						<a href="https://www.linkedin.com/in/daniel-reis-santos/" class="social-link" rel="noreferrer" target="_blank">LinkedIn</a>
-						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">Theme: System</button>
+						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">System</button>
 						<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">Search <span class="search-kbd">Ctrl+K</span></button>
 					</div>
 				</div>
@@ -60,7 +60,7 @@ templ Base(pageTitle string, pageDescription string) {
 					<label for="search-input" class="search-label">Search posts and projects</label>
 					<input id="search-input" class="search-input" type="search" placeholder="Try: blog accessibility" autocomplete="off"/>
 					<p class="search-hint">Filters: <code>blog</code> or <code>projects</code>. Press Esc to close.</p>
-					<ul id="search-results" class="search-results"></ul>
+					<ul id="search-results" class="search-results" aria-live="polite"></ul>
 				</div>
 			</dialog>
 		</body>
