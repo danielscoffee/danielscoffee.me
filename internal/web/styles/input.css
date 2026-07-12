@@ -899,7 +899,6 @@
 		color: rgb(var(--muted));
 		margin-top: auto;
 		letter-spacing: 0.02em;
-		opacity: 0.75;
 	}
 
 	.project-subpost-breadcrumb {

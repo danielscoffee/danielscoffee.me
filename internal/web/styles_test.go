@@ -2,6 +2,7 @@ package web
 
 import (
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -56,6 +57,21 @@ func TestTypographyAssetsAndTokens(t *testing.T) {
 		if !strings.Contains(string(cssBytes), marker) {
 			t.Errorf("expected input.css to contain %q", marker)
 		}
+	}
+}
+
+func TestProjectSubpostDatePreservesMutedContrast(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+
+	dateRule := regexp.MustCompile(`(?s)\.project-subpost-date\s*\{[^}]*\}`).Find(cssBytes)
+	if dateRule == nil {
+		t.Fatal("project subpost date rule missing")
+	}
+	if strings.Contains(string(dateRule), "var(--muted)") && regexp.MustCompile(`\bopacity\s*:`).Match(dateRule) {
+		t.Fatal("project subpost date must not reduce muted text contrast with opacity")
 	}
 }
 
