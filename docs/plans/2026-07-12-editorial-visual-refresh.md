@@ -257,7 +257,7 @@ Check keyboard-only navigation, focus return, dialog behavior, 200% zoom, reduce
 
 **Step 4: Compare scope and size**
 
-Confirm no backend/parser/API changes. Confirm obsolete CSS removed and source remains organized into one components layer. Document remaining visual risks.
+Confirm no backend/API changes. Parser scope exception: offset Norg headings by one level, capped at `h6`, reserving `h1` for page title. Confirm obsolete CSS removed and source remains organized into one components layer. Document remaining visual risks.
 
 **Step 5: Final review and commit**
 

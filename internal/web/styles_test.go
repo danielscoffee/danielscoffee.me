@@ -75,6 +75,34 @@ func TestProjectSubpostDatePreservesMutedContrast(t *testing.T) {
 	}
 }
 
+func TestTaskLabelsUseThemeContrastTokens(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+	for _, token := range []string{"--task-todo:", "--task-doing:", "--task-done:", "--task-cancelled:"} {
+		if strings.Count(css, token) < 3 {
+			t.Errorf("expected %s in light, dark, and system-dark themes", token)
+		}
+		if !strings.Contains(css, "color: rgb(var("+strings.TrimSuffix(token, ":")+"))") {
+			t.Errorf("expected task label to use %s", token)
+		}
+	}
+	taskStart := strings.Index(css, ".post-prose ul.task-list")
+	taskEnd := strings.Index(css[taskStart:], ".search-modal")
+	taskCSS := css[taskStart : taskStart+taskEnd]
+	for _, fixed := range []string{"rgb(234 88 12)", "rgb(37 99 235)", "rgb(22 163 74)", "rgb(239 68 68)"} {
+		if strings.Contains(taskCSS, fixed) {
+			t.Errorf("fixed task label color forbidden: %s", fixed)
+		}
+	}
+	cancelledRule := regexp.MustCompile(`(?s)li\[data-task-state="cancelled"\]\s*\{[^}]*\}`).FindString(css)
+	if strings.Contains(cancelledRule, "opacity:") {
+		t.Error("cancelled task must not reduce contrast with opacity")
+	}
+}
+
 func TestInputStyles(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {

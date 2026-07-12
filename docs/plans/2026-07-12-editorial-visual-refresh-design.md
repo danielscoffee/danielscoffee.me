@@ -26,7 +26,7 @@ Add skip link, semantic `time` elements, dialog close control, minimum touch tar
 
 ## Scope boundaries
 
-No backend, route, parser, content schema, or search API changes. Generated `output.css` remains generated-only. JavaScript changes stay limited to search state/focus behavior and compact theme labels. Preserve safe DOM rendering without `innerHTML`.
+No backend, route, content schema, or search API changes. Accessibility exception: only parser change offsets Norg headings by one level (capped at `h6`) to reserve `h1` for page title. Generated `output.css` remains generated-only. JavaScript changes stay limited to search state/focus behavior and compact theme labels. Preserve safe DOM rendering without `innerHTML`.
 
 ## Validation
 

@@ -94,6 +94,34 @@ fmt.Println("ok")
 	}
 }
 
+func TestParseNorg_OffsetsHeadingsToReservePageTitle(t *testing.T) {
+	_, _, html, err := parseNorg(norgWithBody("* Section\n** Subsection"))
+	if err != nil {
+		t.Fatalf("parseNorg error: %v", err)
+	}
+	capped, err := renderNorgHTML([]norgNode{
+		{kind: norgHeading, level: 5, text: "Deep"},
+		{kind: norgHeading, level: 6, text: "Deeper"},
+	})
+	if err != nil {
+		t.Fatalf("renderNorgHTML error: %v", err)
+	}
+	html += capped
+	for _, heading := range []string{
+		"<h2>Section</h2>",
+		"<h3>Subsection</h3>",
+		"<h6>Deep</h6>",
+		"<h6>Deeper</h6>",
+	} {
+		if !strings.Contains(html, heading) {
+			t.Errorf("expected %q in %s", heading, html)
+		}
+	}
+	if strings.Contains(html, "<h1") {
+		t.Errorf("Norg body must reserve h1 for page title: %s", html)
+	}
+}
+
 func TestParseNorg_PreservesUTF8Punctuation(t *testing.T) {
 	raw := "@document.meta\n" +
 		"title: UTF8\n" +

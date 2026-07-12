@@ -24,7 +24,7 @@ func testBlogServer() *Server {
 				Tags:    []string{"go", "personal"},
 			},
 			BodyMD:   "# Hello",
-			BodyHTML: template.HTML(`<h1>Hello</h1>`),
+			BodyHTML: template.HTML(`<h2>Hello</h2>`),
 		},
 		{
 			Published: content.Published{
@@ -35,7 +35,7 @@ func testBlogServer() *Server {
 				Tags:    []string{"now"},
 			},
 			BodyMD:   "# Now",
-			BodyHTML: template.HTML(`<h1>Now</h1>`),
+			BodyHTML: template.HTML(`<h2>Now</h2>`),
 		},
 	}
 
@@ -325,7 +325,7 @@ func TestEditorialArticles(t *testing.T) {
 		rawContent string
 		breadcrumb string
 	}{
-		{path: "/post/hello-world", date: "2026-04-26", rawContent: `<h1>Hello</h1>`},
+		{path: "/post/hello-world", date: "2026-04-26", rawContent: `<h2>Hello</h2>`},
 		{path: "/projects/side-project", date: "2026-05-01", rawContent: `<p>overview</p>`},
 		{path: "/projects/side-project/rebuild", date: "2026-05-10", rawContent: `<p>rebuild body</p>`, breadcrumb: `href="/projects/side-project"`},
 		{path: "/about", rawContent: `<p>about text</p>`},

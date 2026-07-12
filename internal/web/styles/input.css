@@ -59,6 +59,10 @@
 		--chip-text: 91 58 40;
 		--code-bg: 239 229 215;
 		--code-text: 66 42 29;
+		--task-todo: 145 45 15;
+		--task-doing: 25 70 140;
+		--task-done: 20 105 50;
+		--task-cancelled: 170 30 30;
 	}
 
 	:root[data-theme="dark"] {
@@ -77,6 +81,10 @@
 		--chip-text: 225 199 171;
 		--code-bg: 22 16 13;
 		--code-text: 238 216 190;
+		--task-todo: 255 180 110;
+		--task-doing: 130 190 255;
+		--task-done: 115 220 145;
+		--task-cancelled: 255 145 145;
 	}
 
 	@media (prefers-color-scheme: dark) {
@@ -96,6 +104,10 @@
 			--chip-text: 225 199 171;
 			--code-bg: 22 16 13;
 			--code-text: 238 216 190;
+			--task-todo: 255 180 110;
+			--task-doing: 130 190 255;
+			--task-done: 115 220 145;
+			--task-cancelled: 255 145 145;
 		}
 	}
 
@@ -773,28 +785,27 @@
 		font-size: 1em;
 		font-weight: 500;
 		letter-spacing: 0;
-		color: rgb(234 88 12);
+		color: rgb(var(--task-todo));
 		line-height: 1.5;
 	}
 
 	.post-prose ul.task-list li[data-task-state="doing"]::before {
 		content: "[DOING]";
-		color: rgb(37 99 235);
+		color: rgb(var(--task-doing));
 	}
 
 	.post-prose ul.task-list li[data-task-state="done"]::before {
 		content: "[DONE]";
-		color: rgb(22 163 74);
+		color: rgb(var(--task-done));
 	}
 
 	.post-prose ul.task-list li[data-task-state="cancelled"] {
-		opacity: 0.8;
 		color: rgb(var(--muted));
 	}
 
 	.post-prose ul.task-list li[data-task-state="cancelled"]::before {
 		content: "[CANCELLED]";
-		color: rgb(239 68 68);
+		color: rgb(var(--task-cancelled));
 	}
 
 	.search-modal {

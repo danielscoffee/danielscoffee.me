@@ -423,9 +423,9 @@ func renderNorgHTML(nodes []norgNode) (string, error) {
 		attrs := renderAttrs(n.attrs)
 		switch n.kind {
 		case norgHeading:
-			lvl := n.level
-			if lvl < 1 {
-				lvl = 1
+			lvl := n.level + 1
+			if lvl < 2 {
+				lvl = 2
 			}
 			if lvl > 6 {
 				lvl = 6
