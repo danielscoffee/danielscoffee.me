@@ -315,6 +315,46 @@ func TestEditorialIndexes(t *testing.T) {
 	}
 }
 
+func TestEditorialArticles(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	cases := []struct {
+		path       string
+		date       string
+		rawContent string
+		breadcrumb string
+	}{
+		{path: "/post/hello-world", date: "2026-04-26", rawContent: `<h1>Hello</h1>`},
+		{path: "/projects/side-project", date: "2026-05-01", rawContent: `<p>overview</p>`},
+		{path: "/projects/side-project/rebuild", date: "2026-05-10", rawContent: `<p>rebuild body</p>`, breadcrumb: `href="/projects/side-project"`},
+		{path: "/about", rawContent: `<p>about text</p>`},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.path, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, tc.path, nil))
+			if w.Code != http.StatusOK {
+				t.Fatalf("expected status 200, got %d", w.Code)
+			}
+			body := w.Body.String()
+			assertContainsAll(t, body, []string{`<article class="article-shell`, `class="article-header`, `class="article-body`, tc.rawContent})
+			if tc.date != "" {
+				assertContainsAll(t, body, []string{`<time class="editorial-date" datetime="` + tc.date + `">` + tc.date + `</time>`})
+			}
+			if tc.breadcrumb != "" && !strings.Contains(body, tc.breadcrumb) {
+				t.Fatalf("expected breadcrumb %q", tc.breadcrumb)
+			}
+			bodyStart := strings.Index(body, `class="article-body`)
+			rawStart := strings.Index(body, tc.rawContent)
+			if bodyStart == -1 || rawStart < bodyStart {
+				t.Fatalf("expected raw content inside article body")
+			}
+		})
+	}
+}
+
 func TestPagesExposeStyleHooks(t *testing.T) {
 	s := testBlogServer()
 	h := s.RegisterRoutes()
@@ -333,7 +373,7 @@ func TestPagesExposeStyleHooks(t *testing.T) {
 		},
 		{
 			path:    "/post/hello-world",
-			markers: []string{"post-prose", "post-header", "post-title", "post-date"},
+			markers: []string{"article-shell", "article-header", "article-title", "article-body", "editorial-date"},
 		},
 		{
 			path:    "/projects",

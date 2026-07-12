@@ -40,13 +40,22 @@ templ BlogIndexPage(posts []content.Post) {
 	}
 }
 
+templ ArticleHeader(title, date string) {
+	<header class="article-header post-header">
+		<h1 class="article-title post-title">{ title }</h1>
+		if date != "" {
+			@EditorialDate(date)
+		}
+	</header>
+}
+
 templ AboutPage(page content.Page) {
 	@Base(page.Title, page.Summary) {
-		<article class="post-prose">
-			<header class="post-header">
-				<h1 class="post-title">{ page.Title }</h1>
-			</header>
-			@templ.Raw(string(page.BodyHTML))
+		<article class="article-shell post-prose">
+			@ArticleHeader(page.Title, "")
+			<div class="article-body">
+				@templ.Raw(string(page.BodyHTML))
+			</div>
 		</article>
 	}
 }
@@ -62,12 +71,11 @@ templ ProjectsIndexPage(projects []content.Project) {
 
 templ ProjectDetailPage(project content.Project) {
 	@Base(project.Title, project.Summary) {
-		<article class="post-prose">
-			<header class="post-header">
-				<h1 class="post-title">{ project.Title }</h1>
-				<p class="post-date">{ project.Date }</p>
-			</header>
-			@templ.Raw(string(project.BodyHTML))
+		<article class="article-shell post-prose">
+			@ArticleHeader(project.Title, project.Date)
+			<div class="article-body">
+				@templ.Raw(string(project.BodyHTML))
+			</div>
 		</article>
 		if len(project.SubPosts) > 0 {
 			<section class="section-block">
@@ -87,7 +95,7 @@ templ ProjectSubPostGrid(project content.Project) {
 					if sub.Summary != "" {
 						<p class="project-subpost-summary">{ sub.Summary }</p>
 					}
-					<p class="project-subpost-date">{ sub.Date }</p>
+					<div class="project-subpost-date">@EditorialDate(sub.Date)</div>
 				</a>
 			</li>
 		}
@@ -99,12 +107,11 @@ templ ProjectSubPostPage(project content.Project, sub content.ProjectSubPost) {
 		<nav class="project-subpost-breadcrumb">
 			<a class="project-subpost-back" href={ templ.SafeURL("/projects/" + project.Slug) }>&larr; { project.Title }</a>
 		</nav>
-		<article class="post-prose">
-			<header class="post-header">
-				<h1 class="post-title">{ sub.Title }</h1>
-				<p class="post-date">{ sub.Date }</p>
-			</header>
-			@templ.Raw(string(sub.BodyHTML))
+		<article class="article-shell post-prose">
+			@ArticleHeader(sub.Title, sub.Date)
+			<div class="article-body">
+				@templ.Raw(string(sub.BodyHTML))
+			</div>
 		</article>
 	}
 }
@@ -183,12 +190,11 @@ templ ProjectList(projects []content.Project) {
 
 templ BlogPostPage(post content.Post) {
 	@Base(post.Title, post.Summary) {
-		<article class="post-prose">
-			<header class="post-header">
-				<h1 class="post-title">{ post.Title }</h1>
-				<p class="post-date">{ post.Date }</p>
-			</header>
-			@templ.Raw(string(post.BodyHTML))
+		<article class="article-shell post-prose">
+			@ArticleHeader(post.Title, post.Date)
+			<div class="article-body">
+				@templ.Raw(string(post.BodyHTML))
+			</div>
 		</article>
 	}
 }
