@@ -1,6 +1,7 @@
 package content
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -97,6 +98,27 @@ fmt.Println("ok")
 	}
 }
 
+func TestParseTagValues(t *testing.T) {
+	tests := []struct {
+		raw  string
+		want []string
+	}{
+		{raw: "go", want: []string{"go"}},
+		{raw: "[go]", want: []string{"go"}},
+		{raw: `"go"`, want: []string{"go"}},
+		{raw: "go, notes", want: []string{"go", "notes"}},
+		{raw: `""`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.raw, func(t *testing.T) {
+			if got := parseTagValues(tt.raw); !reflect.DeepEqual(got, tt.want) {
+				t.Fatalf("parseTagValues(%q) = %#v, want %#v", tt.raw, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestParseNorg_OffsetsHeadingsToReservePageTitle(t *testing.T) {
 	_, _, html, err := parseNorg(norgWithBody("* Section\n** Subsection"))
 	if err != nil {
@@ -156,6 +178,35 @@ func TestParseNorg_MissingEndFails(t *testing.T) {
 	_, _, _, err := parseNorg("@document.meta\ntitle: X\n")
 	if err == nil {
 		t.Fatal("expected error")
+	}
+}
+
+func TestParseNorg_FencedCode(t *testing.T) {
+	tests := []struct {
+		name    string
+		body    string
+		wantErr string
+	}{
+		{name: "closed", body: "```go\nfmt.Println(1)\n```\n"},
+		{name: "unclosed", body: "```go\nfmt.Println(1)\n", wantErr: "unclosed code fence"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, _, html, err := parseNorg(norgWithBody(tt.body))
+			if tt.wantErr != "" {
+				if err == nil || err.Error() != tt.wantErr {
+					t.Fatalf("expected %q, got %v", tt.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("parseNorg error: %v", err)
+			}
+			if !strings.Contains(html, "fmt") {
+				t.Fatalf("expected rendered fenced code, got %s", html)
+			}
+		})
 	}
 }
 

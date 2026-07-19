@@ -87,19 +87,13 @@ func (s *SearchIndexer) Search(raw string) []SearchResult {
 func (s *Server) searchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if len(r.URL.RawQuery) > maxSearchRawQueryBytes {
-		w.WriteHeader(http.StatusBadRequest)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "query too long"}); err != nil {
-			s.logger.Error().Err(err).Msg("encode search error failed")
-		}
+		s.writeQueryTooLong(w)
 		return
 	}
 
 	raw := r.URL.Query().Get("q")
 	if len(raw) > maxSearchQueryBytes {
-		w.WriteHeader(http.StatusBadRequest)
-		if err := json.NewEncoder(w).Encode(map[string]string{"error": "query too long"}); err != nil {
-			s.logger.Error().Err(err).Msg("encode search error failed")
-		}
+		s.writeQueryTooLong(w)
 		return
 	}
 
@@ -108,6 +102,13 @@ func (s *Server) searchHandler(w http.ResponseWriter, r *http.Request) {
 		s.logger.Error().Err(err).Msg("encode search response failed")
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
+	}
+}
+
+func (s *Server) writeQueryTooLong(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusBadRequest)
+	if err := json.NewEncoder(w).Encode(map[string]string{"error": "query too long"}); err != nil {
+		s.logger.Error().Err(err).Msg("encode search error failed")
 	}
 }
 

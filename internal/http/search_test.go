@@ -27,6 +27,9 @@ func TestSearchRejectsOversizedQuery(t *testing.T) {
 			if got := w.Header().Get("Content-Type"); got != "application/json" {
 				t.Fatalf("expected JSON response, got %q", got)
 			}
+			if got := w.Body.String(); got != "{\"error\":\"query too long\"}\n" {
+				t.Fatalf("unexpected response body %q", got)
+			}
 		})
 	}
 }

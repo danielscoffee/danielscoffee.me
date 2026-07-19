@@ -170,17 +170,8 @@ func parseTagValues(raw string) []string {
 		v = strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(v, "["), "]"))
 	}
 
-	parts := strings.Split(v, ",")
-	if len(parts) == 1 {
-		item := stripQuotes(strings.TrimSpace(parts[0]))
-		if item == "" {
-			return nil
-		}
-		return []string{item}
-	}
-
-	out := make([]string, 0, len(parts))
-	for _, p := range parts {
+	var out []string
+	for _, p := range strings.Split(v, ",") {
 		item := stripQuotes(strings.TrimSpace(p))
 		if item != "" {
 			out = append(out, item)
@@ -198,6 +189,18 @@ func stripQuotes(v string) string {
 		}
 	}
 	return v
+}
+
+func collectBlockLines(lines []string, start int, end string) ([]string, int, bool) {
+	block := make([]string, 0)
+	for i := start; i < len(lines); i++ {
+		line := strings.TrimRight(lines[i], "\r")
+		if strings.TrimSpace(line) == end {
+			return block, i + 1, true
+		}
+		block = append(block, line)
+	}
+	return block, len(lines), false
 }
 
 func parseNorgBlocks(lines []string) ([]norgNode, error) {
@@ -220,65 +223,32 @@ func parseNorgBlocks(lines []string) ([]norgNode, error) {
 		attrs := takeAttrs(pendingAttrs)
 
 		if lang, ok := parseAtCodeStart(trimmed); ok {
-			i++
-			codeLines := make([]string, 0)
-			closed := false
-			for i < len(lines) {
-				current := strings.TrimRight(lines[i], "\r")
-				if strings.TrimSpace(current) == "@end" {
-					closed = true
-					i++
-					break
-				}
-				codeLines = append(codeLines, current)
-				i++
-			}
+			codeLines, next, closed := collectBlockLines(lines, i+1, "@end")
 			if !closed {
 				return nil, fmt.Errorf("unclosed @code block")
 			}
+			i = next
 			nodes = append(nodes, norgNode{kind: norgCode, lang: lang, code: strings.Join(codeLines, "\n"), attrs: attrs})
 			continue
 		}
 
 		if isFenceStart(trimmed) {
 			lang := strings.TrimSpace(strings.TrimPrefix(trimmed, "```"))
-			i++
-			codeLines := make([]string, 0)
-			closed := false
-			for i < len(lines) {
-				current := strings.TrimRight(lines[i], "\r")
-				if strings.TrimSpace(current) == "```" {
-					closed = true
-					i++
-					break
-				}
-				codeLines = append(codeLines, current)
-				i++
-			}
+			codeLines, next, closed := collectBlockLines(lines, i+1, "```")
 			if !closed {
 				return nil, fmt.Errorf("unclosed code fence")
 			}
+			i = next
 			nodes = append(nodes, norgNode{kind: norgCode, lang: lang, code: strings.Join(codeLines, "\n"), attrs: attrs})
 			continue
 		}
 
 		if isTableStart(trimmed) {
-			i++
-			tableLines := make([]string, 0)
-			closed := false
-			for i < len(lines) {
-				current := strings.TrimSpace(strings.TrimRight(lines[i], "\r"))
-				if current == "@end" {
-					closed = true
-					i++
-					break
-				}
-				tableLines = append(tableLines, strings.TrimRight(lines[i], "\r"))
-				i++
-			}
+			tableLines, next, closed := collectBlockLines(lines, i+1, "@end")
 			if !closed {
 				return nil, fmt.Errorf("unclosed @table block")
 			}
+			i = next
 			tableHTML, err := parseMarkdownWrapperTable(tableLines)
 			if err != nil {
 				return nil, err
