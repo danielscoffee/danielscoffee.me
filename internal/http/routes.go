@@ -49,7 +49,7 @@ func (s *Server) securityHeadersMiddleware(next http.Handler) http.Handler {
 
 func staticCacheMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		w.Header().Set("Cache-Control", "public, no-cache")
 		next.ServeHTTP(w, r)
 	})
 }

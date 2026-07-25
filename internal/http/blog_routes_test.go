@@ -149,8 +149,8 @@ func TestSecurityAndCacheHeaders(t *testing.T) {
 
 	asset := httptest.NewRecorder()
 	h.ServeHTTP(asset, httptest.NewRequest(http.MethodGet, "/assets/js/search.js", nil))
-	if got := asset.Header().Get("Cache-Control"); !strings.Contains(got, "public") || !strings.Contains(got, "max-age") {
-		t.Fatalf("expected static cache header, got %q", got)
+	if got := asset.Header().Get("Cache-Control"); got != "public, no-cache" {
+		t.Fatalf("expected static assets to revalidate, got %q", got)
 	}
 }
 
@@ -181,10 +181,12 @@ func TestSiteShell(t *testing.T) {
 		t.Fatalf("expected status 200, got %d", w.Code)
 	}
 
-	assertContainsAll(t, w.Body.String(), []string{
+	body := w.Body.String()
+	assertContainsAll(t, body, []string{
 		`class="skip-link" href="#main-content"`,
 		`<main id="main-content"`,
 		`class="site-masthead"`,
+		`<a href="/" class="site-brand">danielscoffee</a>`,
 		`aria-label="Primary navigation"`,
 		`aria-label="Theme: System"`,
 		`aria-label="Open search"`,
@@ -193,6 +195,9 @@ func TestSiteShell(t *testing.T) {
 		`<footer class="site-footer"`,
 		`class="footer-action-link" href="/rss.xml"`,
 	})
+	if strings.Contains(body, `class="site-tagline"`) {
+		t.Error("site header should not contain tagline")
+	}
 }
 
 func TestBaseTemplateIncludesThemeControls(t *testing.T) {
@@ -209,9 +214,10 @@ func TestBaseTemplateIncludesThemeControls(t *testing.T) {
 	assertContainsAll(t, w.Body.String(), []string{
 		`data-theme="system"`,
 		`id="theme-toggle"`,
-		`/assets/js/theme-init.js`,
-		`/assets/js/theme-toggle.js`,
-		`/assets/js/search.js`,
+		`href="/assets/css/output.css?v=2"`,
+		`src="/assets/js/theme-init.js?v=2"`,
+		`src="/assets/js/theme-toggle.js?v=2"`,
+		`src="/assets/js/search.js?v=2"`,
 		`theme-preference`,
 		`search-modal`,
 	})

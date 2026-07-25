@@ -137,6 +137,50 @@ func TestTypographyAssetsAndTokens(t *testing.T) {
 	}
 }
 
+func TestFlatFullWidthMasthead(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+
+	rule := regexp.MustCompile(`(?s)\.site-masthead\s*\{[^}]*\}`).FindString(string(cssBytes))
+	for _, marker := range []string{"width: 100%", "margin: 0", "border: 0", "border-radius: 0", "box-shadow: none"} {
+		if !strings.Contains(rule, marker) {
+			t.Errorf("flat masthead rule missing %q: %s", marker, rule)
+		}
+	}
+}
+
+func TestProjectContentStaysContained(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+
+	selectors := map[string]string{
+		"article shell":        `\.article-shell,\s*\.post-prose`,
+		"article body":         `\.article-body`,
+		"section block":        `\.section-block`,
+		"project subpost grid": `\.project-subposts-grid`,
+	}
+	for name, selector := range selectors {
+		rule := regexp.MustCompile(`(?s)` + selector + `\s*\{[^}]*\}`).FindString(css)
+		if !strings.Contains(rule, "min-width: 0") {
+			t.Errorf("%s must contain its content", name)
+		}
+	}
+
+	shellRule := regexp.MustCompile(`(?s)\.article-shell,\s*\.post-prose\s*\{[^}]*\}`).FindString(css)
+	bodyRule := regexp.MustCompile(`(?s)\.article-body\s*\{[^}]*\}`).FindString(css)
+	if !strings.Contains(shellRule, "width: 100%") || strings.Contains(shellRule, "--content-reading") {
+		t.Errorf("article shell must use full content width: %s", shellRule)
+	}
+	if !strings.Contains(bodyRule, "max-width: none") {
+		t.Errorf("article body must not cap reading width: %s", bodyRule)
+	}
+}
+
 func TestProjectSubpostGrid(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
@@ -148,9 +192,9 @@ func TestProjectSubpostGrid(t *testing.T) {
 			t.Errorf("count-specific project grid CSS forbidden: %q", forbidden)
 		}
 	}
-	for _, marker := range []string{".project-subposts-grid", "grid-template-columns: 1fr", "repeat(2, 1fr)", ".project-subpost-card", ".project-subpost-link", "min-height: 44px", ":focus-within"} {
+	for _, marker := range []string{".project-subposts-grid", "grid-template-columns: minmax(0, 1fr)", "repeat(2, minmax(0, 1fr))", "repeat(3, minmax(0, 1fr))", "grid-column: span 2", "grid-row: span 2", ".project-subpost-card", ".project-subpost-link", "min-height: 44px", ":focus-within"} {
 		if !strings.Contains(css, marker) {
-			t.Errorf("expected stable project grid CSS %q", marker)
+			t.Errorf("expected bento project grid CSS %q", marker)
 		}
 	}
 }
@@ -217,6 +261,20 @@ func TestTaskLabelsUseThemeContrastTokens(t *testing.T) {
 	cancelledRule := regexp.MustCompile(`(?s)li\[data-task-state="cancelled"\]\s*\{[^}]*\}`).FindString(css)
 	if strings.Contains(cancelledRule, "opacity:") {
 		t.Error("cancelled task must not reduce contrast with opacity")
+	}
+}
+
+func TestTableFitsContentAndKeepsOverflow(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+
+	rule := regexp.MustCompile(`(?s)\.post-prose table\s*\{[^}]*\}`).FindString(string(cssBytes))
+	for _, marker := range []string{"width: fit-content", "max-width: 100%", "overflow-x: auto"} {
+		if !strings.Contains(rule, marker) {
+			t.Errorf("table rule missing %q: %s", marker, rule)
+		}
 	}
 }
 
