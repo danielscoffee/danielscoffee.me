@@ -200,6 +200,20 @@ make docker-down
 
 The Docker build generates templ output and Tailwind CSS before compiling the Go binary.
 
+## Railway
+
+Railway auto-detects root `Dockerfile`. `railway.json` checks `/health`
+before activating deployment. Configure these service variables:
+
+```text
+APP_ENV=production
+LOG_FORMAT=json
+LOG_LEVEL=info
+SITE_URL=https://${{RAILWAY_PUBLIC_DOMAIN}}
+```
+
+Deploy with `railway up` or connect the repository in Railway.
+
 ## Releases
 
 Tagged releases matching `v*.*.*` run GoReleaser via GitHub Actions.
