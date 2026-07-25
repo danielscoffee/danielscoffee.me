@@ -21,12 +21,20 @@ templ Base(pageTitle string, pageDescription string) {
 			<header class="site-masthead">
 				<div class="masthead-inner">
 					<a href="/" class="site-brand">danielscoffee</a>
-					<nav class="site-nav" aria-label="Primary navigation">
+					<nav class="site-nav site-nav-desktop" aria-label="Primary navigation">
 						<a href="/blog" class="site-nav-link">Blog</a>
 						<a href="/about" class="site-nav-link">About</a>
 						<a href="/projects" class="site-nav-link">Projects</a>
 					</nav>
-					<div class="header-actions">
+					<details class="mobile-menu">
+						<summary class="mobile-menu-toggle" aria-controls="mobile-menu-links header-actions">Menu</summary>
+						<nav id="mobile-menu-links" class="mobile-menu-links" aria-label="Mobile navigation">
+							<a href="/blog" class="site-nav-link">Blog</a>
+							<a href="/about" class="site-nav-link">About</a>
+							<a href="/projects" class="site-nav-link">Projects</a>
+						</nav>
+					</details>
+					<div id="header-actions" class="header-actions">
 						<a href="https://github.com/danielscoffee" class="social-link" rel="noreferrer" target="_blank">GitHub</a>
 						<a href="https://www.linkedin.com/in/daniel-reis-santos/" class="social-link" rel="noreferrer" target="_blank">LinkedIn</a>
 						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">System</button>

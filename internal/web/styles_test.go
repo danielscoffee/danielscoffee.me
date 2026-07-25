@@ -137,6 +137,42 @@ func TestTypographyAssetsAndTokens(t *testing.T) {
 	}
 }
 
+func TestShortPagesKeepFooterAtViewportEnd(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+
+	shellRule := regexp.MustCompile(`(?s)\.site-shell\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"min-height: 100dvh", "display: flex", "flex-direction: column"} {
+		if !strings.Contains(shellRule, marker) {
+			t.Errorf("site shell missing %q: %s", marker, shellRule)
+		}
+	}
+	containerRule := regexp.MustCompile(`(?s)\.site-container\s*\{[^}]*\}`).FindString(css)
+	if !strings.Contains(containerRule, "flex: 1 0 auto") {
+		t.Errorf("site content must fill short viewports: %s", containerRule)
+	}
+}
+
+func TestResponsiveFooterStaysSingleLine(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+
+	footerRules := regexp.MustCompile(`(?s)\.footer-inner\s*\{[^}]*\}`).FindAllString(css, -1)
+	if !strings.Contains(strings.Join(footerRules, "\n"), "flex-direction: row") {
+		t.Errorf("responsive footer must stay on one row: %v", footerRules)
+	}
+	footerNavRules := regexp.MustCompile(`(?s)\.footer-inner nav\s*\{[^}]*\}`).FindAllString(css, -1)
+	if !strings.Contains(strings.Join(footerNavRules, "\n"), "flex-wrap: nowrap") {
+		t.Errorf("responsive footer links must not wrap: %v", footerNavRules)
+	}
+}
+
 func TestFlatFullWidthMasthead(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
@@ -147,6 +183,46 @@ func TestFlatFullWidthMasthead(t *testing.T) {
 	for _, marker := range []string{"width: 100%", "margin: 0", "border: 0", "border-radius: 0", "box-shadow: none"} {
 		if !strings.Contains(rule, marker) {
 			t.Errorf("flat masthead rule missing %q: %s", marker, rule)
+		}
+	}
+}
+
+func TestResponsiveMobileMenu(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+
+	menuRules := regexp.MustCompile(`(?s)\.mobile-menu\s*\{[^}]*\}`).FindAllString(css, -1)
+	menuCSS := strings.Join(menuRules, "\n")
+	if !strings.Contains(menuCSS, "display: none") || !strings.Contains(menuCSS, "display: block") {
+		t.Errorf("mobile menu must hide on desktop and show on mobile: %v", menuRules)
+	}
+	toggleRule := regexp.MustCompile(`(?s)\.mobile-menu-toggle\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"display: flex", "width: fit-content", "min-height: 44px", "margin-left: auto"} {
+		if !strings.Contains(toggleRule, marker) {
+			t.Errorf("mobile menu toggle missing %q: %s", marker, toggleRule)
+		}
+	}
+	mobileNavRule := regexp.MustCompile(`(?s)\.site-nav-desktop\s*\{[^}]*\}`).FindString(css)
+	if !strings.Contains(mobileNavRule, "display: none") {
+		t.Errorf("desktop nav must hide on mobile: %s", mobileNavRule)
+	}
+	actionRules := regexp.MustCompile(`(?s)\.header-actions\s*\{[^}]*\}`).FindAllString(css, -1)
+	if !strings.Contains(strings.Join(actionRules, "\n"), "display: none") {
+		t.Errorf("mobile actions must stay collapsed: %v", actionRules)
+	}
+	openActionsRule := regexp.MustCompile(`(?s)\.masthead-inner:has\(\.mobile-menu\[open\]\) \.header-actions\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"display: grid", "grid-template-columns: 1fr"} {
+		if !strings.Contains(openActionsRule, marker) {
+			t.Errorf("open mobile menu actions missing %q: %s", marker, openActionsRule)
+		}
+	}
+	mobileActionRule := regexp.MustCompile(`(?s)\.header-actions \.theme-toggle\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"width: 100%", "justify-content: flex-start"} {
+		if !strings.Contains(mobileActionRule, marker) {
+			t.Errorf("mobile menu action missing %q: %s", marker, mobileActionRule)
 		}
 	}
 }

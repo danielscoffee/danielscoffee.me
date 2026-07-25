@@ -173,6 +173,9 @@
 @layer components {
 	.site-shell {
 		min-height: 100%;
+		min-height: 100dvh;
+		display: flex;
+		flex-direction: column;
 	}
 
 	.skip-link {
@@ -222,6 +225,41 @@
 		font: 600 1.05rem var(--font-editorial);
 		text-decoration: none;
 		white-space: nowrap;
+	}
+	.mobile-menu {
+		display: none;
+	}
+	.mobile-menu-toggle {
+		display: flex;
+		width: fit-content;
+		min-height: 44px;
+		align-items: center;
+		margin-left: auto;
+		padding: 0.35rem 0.55rem;
+		cursor: pointer;
+		list-style: none;
+		color: rgb(var(--muted));
+		font: 500 0.82rem var(--font-ui);
+	}
+	.mobile-menu-toggle::-webkit-details-marker {
+		display: none;
+	}
+	.mobile-menu-toggle::after {
+		content: "+";
+		margin-left: 0.4rem;
+	}
+	.mobile-menu[open] .mobile-menu-toggle::after {
+		content: "−";
+	}
+	.mobile-menu-links {
+		display: grid;
+		gap: 0.1rem;
+		margin-top: 0.25rem;
+		padding-bottom: 0.5rem;
+	}
+	.mobile-menu-links .site-nav-link {
+		width: 100%;
+		justify-content: flex-start;
 	}
 	.site-nav,
 	.header-actions {
@@ -278,6 +316,7 @@
 
 	.site-container {
 		width: min(calc(100% - 2rem), var(--content-wide));
+		flex: 1 0 auto;
 		margin: 0 auto;
 		padding: 2.5rem 0 3rem;
 	}
@@ -326,18 +365,61 @@
 		.footer-inner {
 			width: calc(100% - 1.25rem);
 		}
+		.masthead-inner {
+			display: grid;
+			grid-template-columns: 1fr;
+			align-items: start;
+		}
+		.site-brand,
+		.mobile-menu {
+			grid-area: 1 / 1;
+		}
+		.site-brand {
+			position: relative;
+			z-index: 1;
+			justify-self: start;
+		}
+		.site-nav-desktop {
+			display: none;
+		}
+		.mobile-menu {
+			display: block;
+			width: 100%;
+		}
+		.mobile-menu-toggle {
+			position: relative;
+			z-index: 2;
+		}
 		.header-actions {
-			flex: 1 1 100%;
+			display: none;
+			grid-row: 2;
+			justify-content: flex-start;
+		}
+		.masthead-inner:has(.mobile-menu[open]) .header-actions {
+			display: grid;
+			grid-template-columns: 1fr;
+			gap: 0.1rem;
+		}
+		.header-actions .theme-toggle {
+			width: 100%;
+			justify-content: flex-start;
+		}
+		#theme-toggle {
 			justify-content: flex-start;
 		}
 		.social-link {
 			display: none;
 		}
 		.footer-inner {
-			align-items: flex-start;
-			flex-direction: column;
-			justify-content: center;
-			padding: 1rem 0;
+			align-items: center;
+			flex-direction: row;
+			justify-content: space-between;
+			gap: 0.5rem;
+			padding: 0;
+		}
+		.footer-inner nav {
+			flex-wrap: nowrap;
+			gap: 0.5rem;
 		}
 	}
 
