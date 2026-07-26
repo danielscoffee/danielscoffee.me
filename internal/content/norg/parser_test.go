@@ -1,4 +1,4 @@
-package content
+package norg
 
 import (
 	"reflect"
@@ -44,7 +44,7 @@ fmt.Println("ok")
 !{https://cdn.example.com/images/old.png}[old image]
 `
 
-	meta, body, html, err := parseNorg(raw)
+	meta, body, html, err := Parse(raw)
 	if err != nil {
 		t.Fatalf("parseNorg error: %v", err)
 	}
@@ -120,7 +120,7 @@ func TestParseTagValues(t *testing.T) {
 }
 
 func TestParseNorg_OffsetsHeadingsToReservePageTitle(t *testing.T) {
-	_, _, html, err := parseNorg(norgWithBody("* Section\n** Subsection"))
+	_, _, html, err := Parse(norgWithBody("* Section\n** Subsection"))
 	if err != nil {
 		t.Fatalf("parseNorg error: %v", err)
 	}
@@ -162,7 +162,7 @@ func TestParseNorg_PreservesUTF8Punctuation(t *testing.T) {
 		"@end\n" +
 		"Search is one of the few things on this site that runs on every request. No DB, no Elastic — just a slice of `SearchDoc` and a scorer that walks it.\n"
 
-	_, _, html, err := parseNorg(raw)
+	_, _, html, err := Parse(raw)
 	if err != nil {
 		t.Fatalf("parseNorg error: %v", err)
 	}
@@ -175,7 +175,7 @@ func TestParseNorg_PreservesUTF8Punctuation(t *testing.T) {
 }
 
 func TestParseNorg_MissingEndFails(t *testing.T) {
-	_, _, _, err := parseNorg("@document.meta\ntitle: X\n")
+	_, _, _, err := Parse("@document.meta\ntitle: X\n")
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -193,7 +193,7 @@ func TestParseNorg_FencedCode(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, _, html, err := parseNorg(norgWithBody(tt.body))
+			_, _, html, err := Parse(norgWithBody(tt.body))
 			if tt.wantErr != "" {
 				if err == nil || err.Error() != tt.wantErr {
 					t.Fatalf("expected %q, got %v", tt.wantErr, err)
@@ -219,7 +219,7 @@ date: 2026-05-01
 @code go
 fmt.Println(1)
 `
-	_, _, _, err := parseNorg(raw)
+	_, _, _, err := Parse(raw)
 	if err == nil {
 		t.Fatal("expected unclosed @code block error")
 	}
@@ -236,7 +236,7 @@ date: 2026-05-01
 | - | - |
 | 1 | 2 |
 `
-	_, _, _, err := parseNorg(raw)
+	_, _, _, err := Parse(raw)
 	if err == nil {
 		t.Fatal("expected unclosed @table block error")
 	}
@@ -251,7 +251,7 @@ date: 2026-05-01
 *** WAITING no state support
 `
 
-	_, _, _, err := parseNorg(raw)
+	_, _, _, err := Parse(raw)
 	if err == nil {
 		t.Fatal("expected invalid task state error")
 	}
@@ -272,7 +272,7 @@ func TestParseNorg_ValidLinks(t *testing.T) {
 		"mailto:hello@example.com",
 	} {
 		t.Run(href, func(t *testing.T) {
-			_, _, rendered, err := parseNorg(norgWithBody("[link](" + href + ")"))
+			_, _, rendered, err := Parse(norgWithBody("[link](" + href + ")"))
 			if err != nil {
 				t.Fatalf("parse valid link: %v", err)
 			}
@@ -297,7 +297,7 @@ func TestParseNorg_InvalidLinks(t *testing.T) {
 		`/\\evil.com`,
 	} {
 		t.Run(href, func(t *testing.T) {
-			_, _, _, err := parseNorg(norgWithBody("[link](" + href + ")"))
+			_, _, _, err := Parse(norgWithBody("[link](" + href + ")"))
 			if err == nil {
 				t.Fatal("expected invalid link error")
 			}
@@ -321,7 +321,7 @@ date: 2026-05-01
 ![bad](https://evil.example.com/pwn.png)
 `
 
-	_, _, _, err := parseNorg(raw)
+	_, _, _, err := Parse(raw)
 	if err == nil {
 		t.Fatal("expected CDN image validation error")
 	}
