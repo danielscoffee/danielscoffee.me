@@ -3,20 +3,11 @@ package content
 import (
 	"fmt"
 	"html/template"
-	"regexp"
 	"sort"
 	"strings"
-	"time"
-)
 
-type frontMatter struct {
-	Title   string   `yaml:"title"`
-	Slug    string   `yaml:"slug"`
-	Date    string   `yaml:"date"`
-	Summary string   `yaml:"summary"`
-	Tags    []string `yaml:"tags"`
-	Draft   bool     `yaml:"draft"`
-}
+	"github.com/danielscoffee/danielscoffee.me/internal/content/norg"
+)
 
 func LoadPosts(dir string) ([]Post, error) {
 	return loadPublished(dir, "post", func(entry contentEntry) Post {
@@ -28,7 +19,7 @@ func LoadPosts(dir string) ([]Post, error) {
 	})
 }
 
-func publishedFromMeta(meta frontMatter) Published {
+func publishedFromMeta(meta norg.Meta) Published {
 	return Published{
 		Title:   meta.Title,
 		Slug:    meta.Slug,
@@ -70,32 +61,9 @@ func loadPublished[T publishedContent](dir, kind string, convert func(contentEnt
 	return items, nil
 }
 
-func splitFrontMatter(raw, ext string) (frontMatter, string, string, error) {
-	switch strings.ToLower(ext) {
-	case ".norg":
-		meta, body, html, err := parseNorg(raw)
-		return meta, body, html, err
-	default:
-		return frontMatter{}, "", "", fmt.Errorf("unsupported content format %q", ext)
+func splitFrontMatter(raw, ext string) (norg.Meta, string, string, error) {
+	if strings.EqualFold(ext, ".norg") {
+		return norg.Parse(raw)
 	}
+	return norg.Meta{}, "", "", fmt.Errorf("unsupported content format %q", ext)
 }
-
-func validateFrontMatter(meta frontMatter) error {
-	if meta.Title == "" || meta.Slug == "" || meta.Date == "" {
-		return fmt.Errorf("title, slug, and date are required")
-	}
-	if !keyPattern.MatchString(meta.Slug) {
-		return fmt.Errorf("invalid slug %q: use lowercase letters, numbers, and single hyphens", meta.Slug)
-	}
-	if _, err := time.Parse("2006-01-02", meta.Date); err != nil {
-		return fmt.Errorf("invalid date %q: use YYYY-MM-DD", meta.Date)
-	}
-	for _, tag := range meta.Tags {
-		if !keyPattern.MatchString(tag) {
-			return fmt.Errorf("invalid tag %q: use lowercase letters, numbers, and single hyphens", tag)
-		}
-	}
-	return nil
-}
-
-var keyPattern = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)

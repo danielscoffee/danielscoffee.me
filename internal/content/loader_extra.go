@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/danielscoffee/danielscoffee.me/internal/content/norg"
 )
 
 const projectIndexFile = "index.norg"
@@ -69,10 +71,6 @@ func loadProjectFolder(folder string) (Project, bool, error) {
 	if indexEntry.meta.Draft {
 		return Project{}, false, nil
 	}
-	if err := validateFrontMatter(indexEntry.meta); err != nil {
-		return Project{}, false, fmt.Errorf("project %s: %w", folder, err)
-	}
-
 	project := Project{
 		Published: publishedFromMeta(indexEntry.meta),
 		BodyMD:    indexEntry.body,
@@ -107,9 +105,6 @@ func loadProjectSubPosts(folder, projectSlug string) ([]ProjectSubPost, error) {
 		}
 		if entry.meta.Draft {
 			continue
-		}
-		if err := validateFrontMatter(entry.meta); err != nil {
-			return nil, fmt.Errorf("subpost %s: %w", file, err)
 		}
 		if _, dup := seenSub[entry.meta.Slug]; dup {
 			return nil, fmt.Errorf("duplicate subpost slug %q in project %q", entry.meta.Slug, projectSlug)
@@ -171,7 +166,7 @@ func loadContentFile(path string) (contentEntry, error) {
 }
 
 type contentEntry struct {
-	meta     frontMatter
+	meta     norg.Meta
 	body     string
 	htmlBody string
 }
