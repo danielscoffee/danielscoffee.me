@@ -17,7 +17,7 @@ templ TagPageIntro(tag, subtitle string) {
 }
 
 templ BlogIndexPage(posts []content.Post) {
-	@Base("Blog", "All blog posts") {
+	@Base("Blog", "All blog posts", "blog") {
 		@PageIntro("Blog", "All writing in one place.")
 		<section class="section-block">
 			<h2 class="section-title">Latest entries</h2>
@@ -36,7 +36,7 @@ templ ArticleHeader(title, date string) {
 }
 
 templ AboutPage(page content.Page) {
-	@Base(page.Title, page.Summary) {
+	@Base(page.Title, page.Summary, "about") {
 		<article class="article-shell post-prose">
 			@ArticleHeader(page.Title, "")
 			<div class="article-body">
@@ -47,7 +47,7 @@ templ AboutPage(page content.Page) {
 }
 
 templ ProjectsIndexPage(projects []content.Project) {
-	@Base("Projects", "Project notes and builds") {
+	@Base("Projects", "Project notes and builds", "projects") {
 		@PageIntro("Projects", "Build logs, notes, and shipped experiments.")
 		<section class="section-block">
 			@ProjectList(projects)
@@ -56,7 +56,7 @@ templ ProjectsIndexPage(projects []content.Project) {
 }
 
 templ ProjectDetailPage(project content.Project) {
-	@Base(project.Title, project.Summary) {
+	@Base(project.Title, project.Summary, "projects") {
 		<article class="article-shell post-prose">
 			@ArticleHeader(project.Title, project.Date)
 			<div class="article-body">
@@ -89,7 +89,7 @@ templ ProjectSubPostGrid(project content.Project) {
 }
 
 templ ProjectSubPostPage(project content.Project, sub content.ProjectSubPost) {
-	@Base(sub.Title, sub.Summary) {
+	@Base(sub.Title, sub.Summary, "projects") {
 		<nav class="project-subpost-breadcrumb">
 			<a class="project-subpost-back" href={ templ.SafeURL("/projects/" + project.Slug) }>&larr; { project.Title }</a>
 		</nav>
@@ -103,7 +103,7 @@ templ ProjectSubPostPage(project content.Project, sub content.ProjectSubPost) {
 }
 
 templ TagPage(tag string, posts []content.Post) {
-	@Base("Tag: "+tag, "Posts filtered by tag") {
+	@Base("Tag: "+tag, "Posts filtered by tag", "blog") {
 		@TagPageIntro(tag, "Filtered writing by topic.")
 		<section class="section-block">
 			<h2 class="section-title">Posts</h2>
@@ -175,7 +175,7 @@ templ ProjectList(projects []content.Project) {
 }
 
 templ BlogPostPage(post content.Post) {
-	@Base(post.Title, post.Summary) {
+	@Base(post.Title, post.Summary, "blog") {
 		<article class="article-shell post-prose">
 			@ArticleHeader(post.Title, post.Date)
 			<div class="article-body">
@@ -186,7 +186,7 @@ templ BlogPostPage(post content.Post) {
 }
 
 templ NotFoundPage() {
-	@Base("Page not found", "The requested page could not be found") {
+	@Base("Page not found", "The requested page could not be found", "") {
 		<section class="error-page">
 			<p class="page-subtitle">404</p>
 			@PageIntro("Page not found", "This page wandered off, or the link is wrong.")
@@ -196,7 +196,7 @@ templ NotFoundPage() {
 }
 
 templ ServerErrorPage() {
-	@Base("Something broke", "An internal server error occurred") {
+	@Base("Something broke", "An internal server error occurred", "") {
 		<section class="error-page">
 			<p class="page-subtitle">500</p>
 			@PageIntro("Something broke", "Server hit a problem. Try again in a minute.")

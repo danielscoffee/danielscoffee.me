@@ -790,34 +790,46 @@ a {
   padding-block: 0.875rem;
 }
 
-/* The way back to the home board: a drawn arrow plus the brand. The
-	   label shares a view-transition name with the board title on /. */
+/* Left: the current section, linking to its index. It shares a
+	   view-transition name with the matching door name on /. */
 
-.site-back {
+.site-section {
   display: inline-flex;
   min-height: 44px;
   align-items: center;
-  gap: 0.5rem;
   color: rgb(var(--accent-strong));
   font: 600 1.05rem var(--font-editorial);
   text-decoration: none;
   white-space: nowrap;
 }
 
+.site-section:hover,
+	.site-section:focus-visible {
+  color: rgb(var(--text));
+}
+
+/* Far right: an icon-only way back to the home board. */
+
+.site-back {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  color: rgb(var(--muted));
+  transition: color 180ms ease;
+}
+
 .site-back-arrow {
-  width: 1rem;
-  height: 1rem;
+  width: 1.1rem;
+  height: 1.1rem;
   flex: none;
   transition: transform 180ms ease;
 }
 
-.site-back-label {
-  display: inline-block;
-}
-
 .site-back:hover,
 	.site-back:focus-visible {
-  color: rgb(var(--text));
+  color: rgb(var(--accent-strong));
 }
 
 .site-back:hover .site-back-arrow,
@@ -829,6 +841,7 @@ a {
   display: flex;
   align-items: center;
   gap: 0.2rem;
+  margin-left: auto;
 }
 
 .site-nav-link,
@@ -953,10 +966,6 @@ a {
   font: 600 clamp(2rem, 5vw, 2.5rem) / 1.1 var(--font-editorial);
   letter-spacing: -0.015em;
   overflow-wrap: anywhere;
-}
-
-.board-title-text {
-  display: inline-block;
 }
 
 .board-body {
@@ -1854,18 +1863,6 @@ a {
   text-underline-offset: 3px;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
 .fixed {
   position: fixed;
 }
@@ -1989,21 +1986,46 @@ a {
 }
 
 /* Cross-document view transition (Chromium, Safari 18.2+; others just
-   navigate). The board title on / and the back-link label on inner pages
-   share one name, so the brand glides between them while the rest fades. */
+   navigate). Each door name on / shares a name with the section label on
+   that section's pages, so "Blog" glides into the header while the rest
+   fades, and back again. */
 
 @view-transition {
   navigation: auto;
 }
 
-.board-title-text,
-.site-back-label {
-  view-transition-name: site-brand;
+.door-name[data-section="blog"],
+.site-section[data-section="blog"] {
+  view-transition-name: section-blog;
 }
 
-::view-transition-group(site-brand) {
+.door-name[data-section="projects"],
+.site-section[data-section="projects"] {
+  view-transition-name: section-projects;
+}
+
+.door-name[data-section="about"],
+.site-section[data-section="about"] {
+  view-transition-name: section-about;
+}
+
+::view-transition-group(section-blog),
+::view-transition-group(section-projects),
+::view-transition-group(section-about) {
   animation-duration: 450ms;
   animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Door names with no partner on the other page (Projects and About when
+   you open Blog) fade with the page instead of lingering over it. */
+
+::view-transition-old(section-blog):only-child,
+::view-transition-old(section-projects):only-child,
+::view-transition-old(section-about):only-child,
+::view-transition-new(section-blog):only-child,
+::view-transition-new(section-projects):only-child,
+::view-transition-new(section-about):only-child {
+  animation-duration: 220ms;
 }
 
 ::view-transition-old(root),
@@ -2013,10 +2035,10 @@ a {
 
 /* Theme switch (theme-toggle.js, transition type "theme"): one whole-page
    crossfade, 700ms on a symmetric curve, so screen brightness ramps instead
-   of flipping. The brand joins the page snapshot instead of gliding. */
+   of flipping. Section labels join the page snapshot instead of gliding. */
 
-html:active-view-transition-type(theme) .board-title-text,
-html:active-view-transition-type(theme) .site-back-label {
+html:active-view-transition-type(theme) .door-name,
+html:active-view-transition-type(theme) .site-section {
   view-transition-name: none;
 }
 

@@ -182,9 +182,8 @@ func TestSiteShell(t *testing.T) {
 		`class="skip-link" href="#main-content"`,
 		`<main id="main-content"`,
 		`class="site-masthead"`,
-		`<a href="/" class="site-back">`,
-		`<span class="sr-only">Back to home: </span>`,
-		`<span class="site-back-label">danielscoffee</span>`,
+		`<a href="/blog" class="site-section" data-section="blog">blog</a>`,
+		`<a href="/" class="site-back" aria-label="Back to home">`,
 		`<div id="header-actions" class="header-actions">`,
 		`href="https://github.com/danielscoffee"`,
 		`href="https://www.linkedin.com/in/daniel-reis-santos/"`,
@@ -221,7 +220,10 @@ func TestHomePage(t *testing.T) {
 
 	body := w.Body.String()
 	assertContainsAll(t, body, []string{
-		`<h1 id="board-title" class="board-title"><span class="board-title-text">danielscoffee</span></h1>`,
+		`<h1 id="board-title" class="board-title">danielscoffee</h1>`,
+		`<span class="door-name" data-section="blog">Blog</span>`,
+		`<span class="door-name" data-section="projects">Projects</span>`,
+		`<span class="door-name" data-section="about">About</span>`,
 		`Backend developer. Systems enjoyer. Production bug survivor.`,
 		`<a class="board-door" href="/blog">`,
 		`<a class="board-door" href="/projects">`,

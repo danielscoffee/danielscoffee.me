@@ -12,7 +12,7 @@ templ siteHead(pageTitle string, pageDescription string) {
 	<script src="/assets/js/theme-init.js?v=2"></script>
 }
 
-templ Base(pageTitle string, pageDescription string) {
+templ Base(pageTitle string, pageDescription string, section string) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full" data-theme="system">
 		<head>
@@ -24,14 +24,17 @@ templ Base(pageTitle string, pageDescription string) {
 			<a class="skip-link" href="#main-content">Skip to content</a>
 			<header class="site-masthead">
 				<div class="masthead-inner">
-					<a href="/" class="site-back">
-						<svg class="site-back-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 8H2.5"></path><path d="M7 3.5 2.5 8 7 12.5"></path></svg>
-						<span class="sr-only">Back to home: </span>
-						<span class="site-back-label">danielscoffee</span>
-					</a>
+					if section != "" {
+						<a href={ templ.SafeURL("/" + section) } class="site-section" data-section={ section }>{ section }</a>
+					} else {
+						<a href="/" class="site-section">danielscoffee</a>
+					}
 					<div id="header-actions" class="header-actions">
 						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme" aria-live="polite" data-theme-storage-key="theme-preference">Theme</button>
 						<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">Search <span class="search-kbd">Ctrl+K</span></button>
+						<a href="/" class="site-back" aria-label="Back to home">
+							<svg class="site-back-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 8H2.5"></path><path d="M7 3.5 2.5 8 7 12.5"></path></svg>
+						</a>
 					</div>
 				</div>
 			</header>

@@ -86,7 +86,7 @@ func TestThemeScriptKeepsModesStorageAndCompactText(t *testing.T) {
 
 func TestThemeRenderedShellStartsCompactWithFullLabel(t *testing.T) {
 	var output bytes.Buffer
-	if err := Base("Title", "Description").Render(context.Background(), &output); err != nil {
+	if err := Base("Title", "Description", "blog").Render(context.Background(), &output); err != nil {
 		t.Fatalf("render base: %v", err)
 	}
 	html := output.String()
@@ -197,10 +197,16 @@ func TestBackLinkMasthead(t *testing.T) {
 	}
 	css := string(cssBytes)
 
-	backRule := regexp.MustCompile(`(?s)\t\.site-back\s*\{[^}]*\}`).FindString(css)
+	sectionRule := regexp.MustCompile(`(?s)\t\.site-section\s*\{[^}]*\}`).FindString(css)
 	for _, marker := range []string{"min-height: 44px", "var(--font-editorial)"} {
+		if !strings.Contains(sectionRule, marker) {
+			t.Errorf("section label missing %q: %s", marker, sectionRule)
+		}
+	}
+	backRule := regexp.MustCompile(`(?s)\t\.site-back\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"width: 44px", "height: 44px"} {
 		if !strings.Contains(backRule, marker) {
-			t.Errorf("back link missing %q: %s", marker, backRule)
+			t.Errorf("back arrow needs a 44px target, missing %q: %s", marker, backRule)
 		}
 	}
 	for _, removed := range []string{".site-nav-desktop", ".mobile-menu", ".site-menu", ".social-link"} {
@@ -259,9 +265,11 @@ func TestBrandViewTransition(t *testing.T) {
 	if !regexp.MustCompile(`(?m)^@view-transition \{\n\tnavigation: auto;`).MatchString(css) {
 		t.Error("pages must opt in to cross-document view transitions")
 	}
-	nameRule := regexp.MustCompile(`(?s)\.board-title-text,\n\.site-back-label \{[^}]*\}`).FindString(css)
-	if !strings.Contains(nameRule, "view-transition-name: site-brand") {
-		t.Errorf("board title and back label must share the site-brand transition name: %q", nameRule)
+	for _, section := range []string{"blog", "projects", "about"} {
+		nameRule := regexp.MustCompile(`(?s)\.door-name\[data-section="` + section + `"\],\n\.site-section\[data-section="` + section + `"\] \{[^}]*\}`).FindString(css)
+		if !strings.Contains(nameRule, "view-transition-name: section-"+section) {
+			t.Errorf("door name and section label for %s must share a transition name: %q", section, nameRule)
+		}
 	}
 	reducedAt := strings.Index(css, "@media (prefers-reduced-motion: reduce)")
 	if reducedAt < 0 || !strings.Contains(css[reducedAt:], "@view-transition {\n\t\tnavigation: none;") {

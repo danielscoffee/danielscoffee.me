@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-11T02:21:28+00:00",
+  "generatedAt": "2026-10-11T02:03:39+00:00",
   "title": "Design System: danielscoffee",
   "extensions": {
     "colorMeta": {
@@ -533,9 +533,9 @@
         "purpose": "All animation and transition durations under prefers-reduced-motion: reduce."
       },
       {
-        "name": "brand-view-transition",
+        "name": "section-view-transition",
         "value": "450ms cubic-bezier(0.2, 0, 0, 1); root crossfade 220ms",
-        "purpose": "Cross-document view transition: the board title and the back-link label share view-transition-name site-brand. Off under reduced motion."
+        "purpose": "Cross-document view transition: each door name on / shares view-transition-name section-<name> with the matching section label, gliding 450ms while the page crossfades 220ms; unpartnered names fade at 220ms. Off under reduced motion."
       },
       {
         "name": "theme-crossfade",
@@ -620,12 +620,12 @@
       "css": ".ds-dialog { width: min(42rem, 100%); display: grid; gap: 0.8rem; padding: 1.15rem; border: 1px solid rgb(var(--border)); border-radius: 0.75rem; background: rgb(var(--surface-raised)); color: rgb(var(--text)); box-shadow: 0 1.5rem 4rem rgb(var(--shadow-color) / 0.28); } .ds-dialog-head { display: flex; align-items: center; justify-content: space-between; } .ds-dialog-head h2 { margin: 0; font: 600 1.25rem \"Source Serif 4\", Georgia, serif; } .ds-dialog-close { min-width: 44px; min-height: 44px; border: 1px solid rgb(var(--border)); border-radius: 0.375rem; background: transparent; color: rgb(var(--text)); } .ds-dialog-input { min-height: 48px; border: 1px solid rgb(var(--border)); border-radius: 0.375rem; background: rgb(var(--bg)); color: rgb(var(--text)); padding: 0.7rem 0.85rem; font-size: 1rem; } .ds-dialog-input:focus { border-color: rgb(var(--accent)); outline: 2px solid rgb(var(--focus)); outline-offset: 2px; } .ds-dialog-results { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; } .ds-dialog-results a { display: block; min-height: 44px; padding: 0.65rem 0.75rem; border: 1px solid rgb(var(--border)); border-radius: 0.375rem; background: rgb(var(--surface)); color: rgb(var(--text)); text-decoration: none; } .ds-dialog-results a:hover, .ds-dialog-results a:focus-visible { border-color: rgb(var(--accent)); } .ds-dialog-type { display: block; font-size: 0.72rem; color: rgb(var(--muted)); text-transform: uppercase; letter-spacing: 0.03em; } .ds-dialog-title { display: block; margin-top: 0.2rem; font-size: 0.92rem; font-weight: 600; }"
     },
     {
-      "name": "Back Link",
+      "name": "Section Header",
       "kind": "nav",
-      "refersTo": "site-back",
-      "description": "Inner-page masthead link back to the home board: drawn arrow plus serif brand.",
-      "html": "<a class=\"ds-back\" href=\"#\"><svg class=\"ds-back-arrow\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 8H2.5\"/><path d=\"M7 3.5 2.5 8 7 12.5\"/></svg><span>danielscoffee</span></a>",
-      "css": ".ds-back { display: inline-flex; min-height: 44px; align-items: center; gap: 0.5rem; color: rgb(var(--accent-strong)); font: 600 1.05rem \"Source Serif 4\", Georgia, serif; text-decoration: none; white-space: nowrap; transition: color 180ms ease; } .ds-back-arrow { width: 1rem; height: 1rem; flex: none; transition: transform 180ms ease; } .ds-back:hover, .ds-back:focus-visible { color: rgb(var(--text)); } .ds-back:hover .ds-back-arrow, .ds-back:focus-visible .ds-back-arrow { transform: translateX(-3px); } .ds-back:focus-visible { outline: 3px solid rgb(var(--focus)); outline-offset: 3px; }"
+      "refersTo": "site-section",
+      "description": "Inner-page masthead: section label at left, theme and search, icon-only back arrow at the far right.",
+      "html": "<header class=\"ds-masthead\"><a class=\"ds-section\" href=\"#\">blog</a><span class=\"ds-actions\"><button class=\"ds-ghost\" type=\"button\">Theme: Light</button><button class=\"ds-ghost\" type=\"button\">Search</button><a class=\"ds-back\" href=\"#\" aria-label=\"Back to home\"><svg class=\"ds-back-arrow\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 8H2.5\"/><path d=\"M7 3.5 2.5 8 7 12.5\"/></svg></a></span></header>",
+      "css": ".ds-masthead { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4.5rem; } .ds-section { display: inline-flex; min-height: 44px; align-items: center; color: rgb(var(--accent-strong)); font: 600 1.05rem \"Source Serif 4\", Georgia, serif; text-decoration: none; } .ds-section:hover, .ds-section:focus-visible { color: rgb(var(--text)); } .ds-actions { display: flex; align-items: center; gap: 0.2rem; margin-left: auto; } .ds-ghost { display: inline-flex; min-height: 44px; align-items: center; padding: 0.35rem 0.55rem; border: 0; background: transparent; color: rgb(var(--muted)); font: 500 0.82rem \"Source Sans 3\", system-ui, sans-serif; } .ds-back { display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: rgb(var(--muted)); transition: color 180ms ease; } .ds-back-arrow { width: 1.1rem; height: 1.1rem; transition: transform 180ms ease; } .ds-back:hover, .ds-back:focus-visible { color: rgb(var(--accent-strong)); } .ds-back:hover .ds-back-arrow, .ds-back:focus-visible .ds-back-arrow { transform: translateX(-3px); } .ds-masthead a:focus-visible { outline: 3px solid rgb(var(--focus)); outline-offset: 3px; }"
     }
   ],
   "narrative": {
@@ -687,7 +687,7 @@
       "Do treat the scene-plate frame-grow (0.3s ease-out) as the first named exception to 180ms; it is a size change that needs the longer travel. Any other motion longer than 180ms needs the same explicit justification.",
       "Do keep the board intro single-shot: the intro line holds for about 4.6s and fades out (350ms), then the three rows settle upward over 400ms with an 80ms stagger, finishing near 5.2s; it plays once per tab session, any key, click, or focus skips it, and `prefers-reduced-motion` skips it entirely.",
       "Do crop scene photos for the frame: the subject sits inside the central 100-300 window of the 400×400 crop so the 96px rest frame shows it whole, and the outer ring adds the context revealed on grow. Use only CC0 or equivalent photos, self-hosted, under 60KB, with the source embedded and listed in CREDITS.md.",
-      "Do keep the inner-page header to a back link plus theme and search; section navigation lives on the home board.",
+      "Do keep the inner-page header to the section label, theme, search, and the back arrow; section navigation lives on the home board.",
       "Do edit `internal/web/styles/input.css` and `.templ` sources; `output.css` is generated.",
       "Do keep coffee motifs in the site's framing (home, masthead, footer, empty and error states), where they say who wrote this, and keep them out of article bodies."
     ],

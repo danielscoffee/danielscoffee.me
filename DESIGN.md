@@ -158,12 +158,17 @@ components:
   scene-plate:
     backgroundColor: "{colors.kraft-frame}"
     size: "96px"
-  site-back:
+  site-section:
     textColor: "{colors.cinnamon-roast-deep}"
     typography: "{typography.brand}"
     height: "44px"
-  site-back-hover:
+  site-section-hover:
     textColor: "{colors.espresso-ink}"
+  site-back:
+    textColor: "{colors.cold-brew}"
+    size: "44px"
+  site-back-hover:
+    textColor: "{colors.cinnamon-roast-deep}"
   dialog-search:
     backgroundColor: "{colors.fresh-filter}"
     textColor: "{colors.espresso-ink}"
@@ -263,7 +268,7 @@ The home page has its own shell: no masthead, no footer. The menu spans the full
 
 Vertical rhythm: main content pads 2.5rem top and 3rem bottom; sections are separated by 2.5rem; cards pad with `clamp(1.25rem, 3vw, 1.75rem)`.
 
-Responsive behavior: inner pages use one masthead at every width: the back link (drawn arrow plus brand) at left, theme and search at right. The row wraps the actions under the back link when space runs out (around 320px), and at ≤560px the shell gutter tightens to 0.625rem per side. On touch devices the `Ctrl+K` hint is hidden. At 480px the search dialog goes nearly full-screen.
+Responsive behavior: inner pages use one masthead at every width: the section label at left; theme, search, and the back arrow at right. The actions keep to the right edge and wrap under the label only when space runs out, and at ≤560px the shell gutter tightens to 0.625rem per side. On touch devices the `Ctrl+K` hint is hidden. At 480px the search dialog goes nearly full-screen.
 
 ## Elevation & Depth
 
@@ -313,10 +318,11 @@ Warm and tactile: controls feel like paper and ink you can touch, with restraint
 - **States:** search results show loading (accent text), empty (dashed Kraft Line box, centered muted text), and error (accent border) messages.
 
 ### Navigation
-- **Masthead (inner pages):** a back link to the home board at left, and the theme and search ghost buttons at right, at every width, inside the wide shell. There are no section links: the home board is the site's navigation. Transparent and borderless; the footer carries the only top border and the GitHub, LinkedIn, and RSS links. The home page has neither masthead nor footer.
-- **Back link:** a 1rem drawn arrow (authored SVG, 1.75 stroke, currentColor) plus "danielscoffee" in the Brand style, Cinnamon Roast Deep, 44px tall. Hover and focus turn it Espresso Ink and nudge the arrow 3px left (180ms). Its accessible name is "Back to home: danielscoffee".
+- **Masthead (inner pages):** the current section at left (`blog`, `projects`, `about`), then theme, search, and a back arrow at the far right, at every width, inside the wide shell. The home board is the site's navigation, so the header carries no section links. Transparent and borderless; the footer carries the only top border and the GitHub, LinkedIn, and RSS links. Pages without a section (404, 500) show "danielscoffee" linking home. The home page has neither masthead nor footer.
+- **Section label:** the section name in lowercase, in the Brand style (Source Serif 4 600, 1.05rem, Cinnamon Roast Deep), 44px tall, linking to the section index; hover and focus turn it Espresso Ink.
+- **Back arrow:** an icon-only 44×44px link to `/` at the far right: a 1.1rem drawn arrow (authored SVG, 1.75 stroke, currentColor) in Cold Brew, turning Cinnamon Roast Deep and nudging 3px left on hover and focus (180ms). Its accessible name is "Back to home".
 - **Theme button:** a two-state Light/Dark switch labelled "Theme: Light" or "Theme: Dark". With no saved choice the site follows the OS (`data-theme="system"`) and the label shows the theme it resolves to; a click saves the opposite theme. The switch crossfades the whole page over 700ms on `cubic-bezier(0.45, 0, 0.55, 1)` (a typed same-document view transition, `theme`), so screen brightness ramps instead of flipping; browsers without typed view transitions ease colours over the same 700ms instead. The fade moves nothing, so it stays under reduced motion.
-- **Brand transition:** pages opt in to cross-document view transitions. The board title on `/` and the back-link label share `view-transition-name: site-brand`, so the brand glides between the board header and the masthead (450ms, `cubic-bezier(0.2, 0, 0, 1)`) while the page crossfades (220ms). Reduced motion turns view transitions off; browsers without support simply navigate.
+- **Section transition:** pages opt in to cross-document view transitions. Each door name on `/` shares a `view-transition-name` (`section-blog`, `section-projects`, `section-about`) with the section label on that section's pages, so "Blog" glides into the header (450ms, `cubic-bezier(0.2, 0, 0, 1)`) while the page crossfades (220ms), and back again on the arrow. Door names with no partner fade at the page's 220ms instead of lingering. Reduced motion turns view transitions off; browsers without support simply navigate.
 - **Links:** Cold Brew 0.82rem labels with a 44px hit area; hover and focus turn them Cinnamon Roast Deep. No underline, no pill highlight.
 - **Footer:** brand name left, RSS/GitHub/LinkedIn right, muted 0.85rem, 44px targets.
 
@@ -344,7 +350,7 @@ A command palette on the topmost Fresh Filter sheet: serif heading, labelled 48p
 - **Do** treat the scene-plate frame-grow (0.3s ease-out) as the first named exception to 180ms; it is a size change that needs the longer travel. Any other motion longer than 180ms needs the same explicit justification.
 - **Do** keep the board intro single-shot: the intro line holds for about 4.6s and fades out (350ms), then the three rows settle upward over 400ms with an 80ms stagger, finishing near 5.2s; it plays once per tab session, any key, click, or focus skips it, and `prefers-reduced-motion` skips it entirely.
 - **Do** crop scene photos for the frame: the subject sits inside the central 100-300 window of the 400×400 crop so the 96px rest frame shows it whole, and the outer ring adds the context revealed on grow. Use only CC0 or equivalent photos, self-hosted, under 60KB, with the source embedded and listed in CREDITS.md.
-- **Do** keep the inner-page header to a back link plus theme and search; section navigation lives on the home board.
+- **Do** keep the inner-page header to the section label, theme, search, and the back arrow; section navigation lives on the home board.
 - **Do** edit `internal/web/styles/input.css` and `.templ` sources; `output.css` is generated.
 - **Do** keep coffee motifs in the site's framing (home, masthead, footer, empty and error states), where they say who wrote this, and keep them out of article bodies.
 
