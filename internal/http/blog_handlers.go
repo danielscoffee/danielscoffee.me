@@ -13,7 +13,7 @@ func (s *Server) homeHandler(w http.ResponseWriter, r *http.Request) {
 		s.renderNotFound(w, r)
 		return
 	}
-	http.Redirect(w, r, "/blog", http.StatusFound)
+	s.renderComponent(w, r, web.HomePage())
 }
 
 func (s *Server) blogIndexHandler(w http.ResponseWriter, r *http.Request) {

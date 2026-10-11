@@ -33,7 +33,7 @@
     const mode = normalize(value);
     root.setAttribute("data-theme", mode);
     const label = `Theme: ${labels[mode]}`;
-    button.textContent = labels[mode];
+    button.textContent = label;
     button.setAttribute("aria-label", label);
     button.dataset.themeMode = mode;
   };

@@ -73,7 +73,7 @@ Task states:
 
 ## Routes
 
-- `/` redirects to `/blog`
+- `/` shows the home page: a menu board linking to Blog, Projects, and About
 - `/blog` lists blog posts
 - `/post/{slug}` shows a blog post
 - `/tag/{tag}` lists posts by tag

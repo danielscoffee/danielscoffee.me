@@ -95,7 +95,8 @@ func TestBlogRoutes(t *testing.T) {
 		statusCode int
 		contains   string
 	}{
-		{path: "/", statusCode: http.StatusFound, contains: ""},
+		{path: "/", statusCode: http.StatusOK, contains: "danielscoffee"},
+		{path: "/no-such-page", statusCode: http.StatusNotFound, contains: "Page not found"},
 		{path: "/blog", statusCode: http.StatusOK, contains: "Blog"},
 		{path: "/about", statusCode: http.StatusOK, contains: "About Me"},
 		{path: "/projects", statusCode: http.StatusOK, contains: "Projects"},
@@ -121,11 +122,6 @@ func TestBlogRoutes(t *testing.T) {
 
 		if tc.contains != "" && !strings.Contains(w.Body.String(), tc.contains) {
 			t.Fatalf("path %s expected body to contain %q; got %q", tc.path, tc.contains, w.Body.String())
-		}
-		if tc.path == "/" {
-			if got := w.Header().Get("Location"); got != "/blog" {
-				t.Fatalf("expected redirect to /blog, got %q", got)
-			}
 		}
 	}
 }
@@ -187,11 +183,13 @@ func TestSiteShell(t *testing.T) {
 		`<main id="main-content"`,
 		`class="site-masthead"`,
 		`<a href="/" class="site-brand">danielscoffee</a>`,
+		`<details class="site-menu">`,
+		`<summary class="site-menu-toggle">Menu</summary>`,
 		`aria-label="Primary navigation"`,
-		`<details class="mobile-menu">`,
-		`<summary class="mobile-menu-toggle" aria-controls="mobile-menu-links header-actions">Menu</summary>`,
-		`<nav id="mobile-menu-links" class="mobile-menu-links" aria-label="Mobile navigation">`,
 		`<div id="header-actions" class="header-actions">`,
+		`href="https://github.com/danielscoffee"`,
+		`href="https://www.linkedin.com/in/daniel-reis-santos/"`,
+		`id="search-trigger"`,
 		`aria-label="Theme: System"`,
 		`aria-label="Open search"`,
 		`aria-labelledby="search-title"`,
@@ -201,6 +199,87 @@ func TestSiteShell(t *testing.T) {
 	})
 	if strings.Contains(body, `class="site-tagline"`) {
 		t.Error("site header should not contain tagline")
+	}
+	for _, removed := range []string{"mobile-menu", "site-nav-desktop"} {
+		if strings.Contains(body, removed) {
+			t.Errorf("site header should not contain %q", removed)
+		}
+	}
+}
+
+func TestHomePage(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/", nil))
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", w.Code)
+	}
+	if got := w.Header().Get("Content-Type"); !strings.HasPrefix(got, "text/html") {
+		t.Fatalf("expected text/html, got %q", got)
+	}
+
+	body := w.Body.String()
+	assertContainsAll(t, body, []string{
+		`<h1 id="board-title" class="board-title">danielscoffee</h1>`,
+		`Backend developer. Systems enjoyer. Production bug survivor.`,
+		`<a class="board-door" href="/blog">`,
+		`<a class="board-door" href="/projects">`,
+		`<a class="board-door" href="/about">`,
+		`src="/assets/img/scenes/cafe-table.jpg"`,
+		`src="/assets/img/scenes/pour-over.jpg"`,
+		`src="/assets/img/scenes/takeaway-cup.jpg"`,
+		`src="/assets/js/home-intro.js?v=1"`,
+		`src="/assets/js/theme-init.js?v=2"`,
+		`href="/assets/css/output.css?v=2"`,
+	})
+	blog := strings.Index(body, `href="/blog"`)
+	projects := strings.Index(body, `href="/projects"`)
+	about := strings.Index(body, `href="/about"`)
+	if !(blog < projects && projects < about) {
+		t.Errorf("expected doors in order Blog, Projects, About")
+	}
+	for _, absent := range []string{`class="site-masthead"`, `class="site-footer"`, `id="search-modal"`} {
+		if strings.Contains(body, absent) {
+			t.Errorf("home page should not contain %s", absent)
+		}
+	}
+	for _, tag := range strings.Split(body, "<script")[1:] {
+		end := strings.Index(tag, ">")
+		if end == -1 || !strings.Contains(tag[:end], "src=") {
+			t.Errorf("home page must not contain inline scripts: <script%s", tag)
+		}
+	}
+}
+
+func TestHomeAssetsAreServed(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/assets/js/home-intro.js", nil))
+	if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), "sessionStorage") {
+		t.Fatalf("home-intro.js: status %d, body %q", w.Code, w.Body.String())
+	}
+
+	for _, scene := range []string{"cafe-table", "pour-over", "takeaway-cup"} {
+		path := "/assets/img/scenes/" + scene + ".jpg"
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		if w.Code != http.StatusOK {
+			t.Fatalf("%s expected status 200, got %d", path, w.Code)
+		}
+		if got := w.Header().Get("Content-Type"); !strings.HasPrefix(got, "image/jpeg") {
+			t.Errorf("%s expected image/jpeg, got %q", path, got)
+		}
+		body := w.Body.Bytes()
+		if len(body) < 3 || body[0] != 0xFF || body[1] != 0xD8 || body[2] != 0xFF {
+			t.Errorf("%s is not a JPEG", path)
+		}
+		if len(body) > 60*1024 {
+			t.Errorf("%s is %d bytes; scene photos must stay under 60KB", path, len(body))
+		}
 	}
 }
 

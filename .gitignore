@@ -36,3 +36,9 @@ main
 # Tailwind CSS
 tailwindcss
 
+
+# Impeccable session artifacts (review screenshots, decision rounds)
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/questions/
+.impeccable/config.local.json

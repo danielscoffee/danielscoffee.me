@@ -1,18 +1,22 @@
 package web
 
+templ siteHead(pageTitle string, pageDescription string) {
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1"/>
+	<title>{ pageTitle }</title>
+	<meta name="description" content={ pageDescription }/>
+	<link rel="preload" href="/assets/fonts/source-serif-4-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+	<link rel="preload" href="/assets/fonts/source-sans-3-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+	<link href="/assets/css/output.css?v=2" rel="stylesheet"/>
+	<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS"/>
+	<script src="/assets/js/theme-init.js?v=2"></script>
+}
+
 templ Base(pageTitle string, pageDescription string) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full" data-theme="system">
 		<head>
-			<meta charset="utf-8"/>
-			<meta name="viewport" content="width=device-width,initial-scale=1"/>
-			<title>{ pageTitle }</title>
-			<meta name="description" content={ pageDescription }/>
-			<link rel="preload" href="/assets/fonts/source-serif-4-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
-			<link rel="preload" href="/assets/fonts/source-sans-3-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
-			<link href="/assets/css/output.css?v=2" rel="stylesheet"/>
-			<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS"/>
-			<script src="/assets/js/theme-init.js?v=2"></script>
+			@siteHead(pageTitle, pageDescription)
 			<script defer src="/assets/js/theme-toggle.js?v=2"></script>
 			<script defer src="/assets/js/search.js?v=2"></script>
 		</head>
@@ -21,25 +25,22 @@ templ Base(pageTitle string, pageDescription string) {
 			<header class="site-masthead">
 				<div class="masthead-inner">
 					<a href="/" class="site-brand">danielscoffee</a>
-					<nav class="site-nav site-nav-desktop" aria-label="Primary navigation">
-						<a href="/blog" class="site-nav-link">Blog</a>
-						<a href="/about" class="site-nav-link">About</a>
-						<a href="/projects" class="site-nav-link">Projects</a>
-					</nav>
-					<details class="mobile-menu">
-						<summary class="mobile-menu-toggle" aria-controls="mobile-menu-links header-actions">Menu</summary>
-						<nav id="mobile-menu-links" class="mobile-menu-links" aria-label="Mobile navigation">
-							<a href="/blog" class="site-nav-link">Blog</a>
-							<a href="/about" class="site-nav-link">About</a>
-							<a href="/projects" class="site-nav-link">Projects</a>
-						</nav>
+					<details class="site-menu">
+						<summary class="site-menu-toggle">Menu</summary>
+						<div id="site-menu-panel" class="site-menu-panel">
+							<nav class="site-nav" aria-label="Primary navigation">
+								<a href="/blog" class="site-nav-link">Blog</a>
+								<a href="/projects" class="site-nav-link">Projects</a>
+								<a href="/about" class="site-nav-link">About</a>
+							</nav>
+							<div id="header-actions" class="header-actions">
+								<a href="https://github.com/danielscoffee" class="social-link" rel="noreferrer" target="_blank">GitHub</a>
+								<a href="https://www.linkedin.com/in/daniel-reis-santos/" class="social-link" rel="noreferrer" target="_blank">LinkedIn</a>
+								<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">Theme: System</button>
+								<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">Search <span class="search-kbd">Ctrl+K</span></button>
+							</div>
+						</div>
 					</details>
-					<div id="header-actions" class="header-actions">
-						<a href="https://github.com/danielscoffee" class="social-link" rel="noreferrer" target="_blank">GitHub</a>
-						<a href="https://www.linkedin.com/in/daniel-reis-santos/" class="social-link" rel="noreferrer" target="_blank">LinkedIn</a>
-						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">System</button>
-						<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">Search <span class="search-kbd">Ctrl+K</span></button>
-					</div>
 				</div>
 			</header>
 			<main id="main-content" class="site-container">

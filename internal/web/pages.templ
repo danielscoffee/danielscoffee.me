@@ -16,16 +16,6 @@ templ TagPageIntro(tag, subtitle string) {
 	</header>
 }
 
-templ HomePage(posts []content.Post) {
-	@Base("Daniel's Site", "Personal website and blog") {
-		@PageIntro("Daniel's Site", "Personal notes on software, projects, and experiments.")
-		<section class="section-block">
-			<h2 class="section-title">Recent posts</h2>
-			@PostList(posts)
-		</section>
-	}
-}
-
 templ BlogIndexPage(posts []content.Post) {
 	@Base("Blog", "All blog posts") {
 		@PageIntro("Blog", "All writing in one place.")
