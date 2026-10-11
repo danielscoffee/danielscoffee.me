@@ -44,10 +44,31 @@
 
   render();
 
-  button.addEventListener("click", () => {
+  const switchTheme = () => {
     preference = effective() === "dark" ? "light" : "dark";
     writePreference(preference);
     render();
+  };
+
+  // Switching crossfades the whole page over 700ms so screen brightness
+  // ramps instead of flipping. Browsers with typed view transitions fade a
+  // snapshot of the page; the rest ease their colors under .theme-fading.
+  const fadeMs = 700;
+  const typedTransitions =
+    typeof document.startViewTransition === "function" &&
+    typeof CSS !== "undefined" &&
+    CSS.supports("selector(:active-view-transition-type(theme))");
+  let fadeTimer = 0;
+
+  button.addEventListener("click", () => {
+    if (typedTransitions) {
+      document.startViewTransition({ update: switchTheme, types: ["theme"] });
+      return;
+    }
+    root.classList.add("theme-fading");
+    switchTheme();
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(() => root.classList.remove("theme-fading"), fadeMs);
   });
 
   const handleSchemeChange = () => {

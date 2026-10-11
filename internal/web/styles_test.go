@@ -210,6 +210,45 @@ func TestBackLinkMasthead(t *testing.T) {
 	}
 }
 
+func TestThemeSwitchFades(t *testing.T) {
+	jsBytes, err := os.ReadFile("assets/js/theme-toggle.js")
+	if err != nil {
+		t.Fatalf("read theme-toggle.js: %v", err)
+	}
+	js := string(jsBytes)
+	for _, marker := range []string{
+		`document.startViewTransition({ update: switchTheme, types: ["theme"] })`,
+		`CSS.supports("selector(:active-view-transition-type(theme))")`,
+		`root.classList.add("theme-fading")`,
+		`const fadeMs = 700;`,
+	} {
+		if !strings.Contains(js, marker) {
+			t.Errorf("theme-toggle.js missing %q", marker)
+		}
+	}
+
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+	curve := "cubic-bezier(0.45, 0, 0.55, 1)"
+	fadeRule := regexp.MustCompile(`(?s)html:active-view-transition-type\(theme\)::view-transition-old\(root\),\nhtml:active-view-transition-type\(theme\)::view-transition-new\(root\) \{[^}]*\}`).FindString(css)
+	if !strings.Contains(fadeRule, "animation-duration: 700ms") || !strings.Contains(fadeRule, curve) {
+		t.Errorf("theme crossfade must run 700ms on %s: %q", curve, fadeRule)
+	}
+	fallback := regexp.MustCompile(`(?s)html\.theme-fading,\nhtml\.theme-fading \*,[^{]*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"transition-duration: 700ms", curve, "background-color", "color"} {
+		if !strings.Contains(fallback, marker) {
+			t.Errorf("theme fade fallback missing %q: %q", marker, fallback)
+		}
+	}
+	reducedAt := strings.Index(css, "@media (prefers-reduced-motion: reduce)")
+	if reducedAt < 0 || !strings.Contains(css[reducedAt:], "html.theme-fading *::after {\n\t\ttransition-duration: 700ms !important;") {
+		t.Error("the theme fade moves nothing and must survive reduced motion")
+	}
+}
+
 func TestBrandViewTransition(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {

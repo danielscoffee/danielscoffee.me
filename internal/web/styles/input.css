@@ -1322,6 +1322,30 @@
 	animation-duration: 220ms;
 }
 
+/* Theme switch (theme-toggle.js, transition type "theme"): one whole-page
+   crossfade, 700ms on a symmetric curve, so screen brightness ramps instead
+   of flipping. The brand joins the page snapshot instead of gliding. */
+html:active-view-transition-type(theme) .board-title-text,
+html:active-view-transition-type(theme) .site-back-label {
+	view-transition-name: none;
+}
+
+html:active-view-transition-type(theme)::view-transition-old(root),
+html:active-view-transition-type(theme)::view-transition-new(root) {
+	animation-duration: 700ms;
+	animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+/* Fallback without typed view transitions: colors ease, only while switching. */
+html.theme-fading,
+html.theme-fading *,
+html.theme-fading *::before,
+html.theme-fading *::after {
+	transition-property: background-color, color, border-color, text-decoration-color, fill, stroke, box-shadow;
+	transition-duration: 700ms;
+	transition-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
 	@view-transition {
 		navigation: none;
@@ -1341,5 +1365,15 @@
 	}
 	.board-row {
 		animation: none;
+	}
+
+	/* The theme fade moves nothing; it only softens the brightness change,
+	   so it stays under reduced motion. The view-transition path is not
+	   matched by the * rule above; this restores the fallback path. */
+	html.theme-fading,
+	html.theme-fading *,
+	html.theme-fading *::before,
+	html.theme-fading *::after {
+		transition-duration: 700ms !important;
 	}
 }

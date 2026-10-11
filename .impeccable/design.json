@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-11T01:36:06+00:00",
+  "generatedAt": "2026-10-11T02:21:28+00:00",
   "title": "Design System: danielscoffee",
   "extensions": {
     "colorMeta": {
@@ -536,6 +536,11 @@
         "name": "brand-view-transition",
         "value": "450ms cubic-bezier(0.2, 0, 0, 1); root crossfade 220ms",
         "purpose": "Cross-document view transition: the board title and the back-link label share view-transition-name site-brand. Off under reduced motion."
+      },
+      {
+        "name": "theme-crossfade",
+        "value": "700ms cubic-bezier(0.45, 0, 0.55, 1)",
+        "purpose": "Theme switch: whole-page crossfade via a same-document view transition typed 'theme' (fallback: colour transitions under html.theme-fading). Kept under reduced motion; it moves nothing."
       }
     ],
     "breakpoints": [
@@ -678,7 +683,8 @@
       "Do keep every interactive target at 44px minimum and keep the 3px Ember Focus outline visible.",
       "Do keep prose at the 68ch measure and in Source Serif 4.",
       "Do use 180ms ease for color, border, background, and lift transitions, and let `prefers-reduced-motion` collapse them.",
-      "Do treat the scene-plate frame-grow (0.3s ease-out) as the one named exception to 180ms; it is a size change that needs the longer travel. Any other motion longer than 180ms needs the same explicit justification.",
+      "Do keep the theme switch as a 700ms whole-page crossfade on `cubic-bezier(0.45, 0, 0.55, 1)`; it protects eyes from a full-screen brightness flip, and it is the second named exception to 180ms.",
+      "Do treat the scene-plate frame-grow (0.3s ease-out) as the first named exception to 180ms; it is a size change that needs the longer travel. Any other motion longer than 180ms needs the same explicit justification.",
       "Do keep the board intro single-shot: the intro line holds for about 4.6s and fades out (350ms), then the three rows settle upward over 400ms with an 80ms stagger, finishing near 5.2s; it plays once per tab session, any key, click, or focus skips it, and `prefers-reduced-motion` skips it entirely.",
       "Do crop scene photos for the frame: the subject sits inside the central 100-300 window of the 400×400 crop so the 96px rest frame shows it whole, and the outer ring adds the context revealed on grow. Use only CC0 or equivalent photos, self-hosted, under 60KB, with the source embedded and listed in CREDITS.md.",
       "Do keep the inner-page header to a back link plus theme and search; section navigation lives on the home board.",
