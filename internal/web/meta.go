@@ -24,8 +24,8 @@ func pageContext(ctx context.Context) PageContext {
 	return pc
 }
 
-// parentPath is where the masthead's back arrow leads when there is no
-// earlier page on this site to return to: one level up the site's tree.
+// parentPath is where the masthead's back arrow leads: one level up the
+// site's tree, whatever page the reader came from.
 func parentPath(ctx context.Context) string {
 	path := strings.TrimRight(pageContext(ctx).Path, "/")
 	switch {

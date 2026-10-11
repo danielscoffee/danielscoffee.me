@@ -808,7 +808,7 @@ a {
   color: rgb(var(--text));
 }
 
-/* Far right: an icon-only way back to the previous page. */
+/* Far right: an icon-only way one level up the site. */
 
 .site-back {
   display: inline-flex;

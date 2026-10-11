@@ -647,9 +647,10 @@ func TestMastheadBackFallback(t *testing.T) {
 	} {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
-		assertContainsAll(t, w.Body.String(), []string{
-			`<a href="` + parent + `" class="site-back" aria-label="Back">`,
-			`<script defer src="/assets/js/site-back.js?v=1"></script>`,
-		})
+		body := w.Body.String()
+		assertContainsAll(t, body, []string{`<a href="` + parent + `" class="site-back" aria-label="Back">`})
+		if strings.Contains(body, "site-back.js") {
+			t.Errorf("%s: the back arrow follows the hierarchy, not history; no script", path)
+		}
 	}
 }

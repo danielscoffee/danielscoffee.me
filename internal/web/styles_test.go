@@ -216,19 +216,6 @@ func TestBackLinkMasthead(t *testing.T) {
 	}
 }
 
-func TestSiteBackScript(t *testing.T) {
-	jsBytes, err := os.ReadFile("assets/js/site-back.js")
-	if err != nil {
-		t.Fatalf("read site-back.js: %v", err)
-	}
-	js := string(jsBytes)
-	for _, marker := range []string{`querySelector(".site-back")`, "document.referrer", "location.origin", "history.back()", "event.preventDefault()", "event.metaKey", "event.ctrlKey"} {
-		if !strings.Contains(js, marker) {
-			t.Errorf("site-back.js missing %q", marker)
-		}
-	}
-}
-
 func TestCodeCopyScript(t *testing.T) {
 	jsBytes, err := os.ReadFile("assets/js/code-copy.js")
 	if err != nil {
