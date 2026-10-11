@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-11T02:29:59+00:00",
+  "generatedAt": "2026-10-11T12:55:47+00:00",
   "title": "Design System: danielscoffee",
   "extensions": {
     "colorMeta": {
@@ -481,21 +481,6 @@
     },
     "shadows": [
       {
-        "name": "resting-sheet",
-        "value": "0 0.25rem 0.9rem rgb(var(--shadow-color) / 0.06)",
-        "purpose": "Cards and devlog tiles at rest."
-      },
-      {
-        "name": "lifted-sheet",
-        "value": "0 0.4rem 1.2rem rgb(var(--shadow-color) / 0.09)",
-        "purpose": "Card hover and focus-within, with translateY(-1px)."
-      },
-      {
-        "name": "board",
-        "value": "0 0.25rem 0.9rem rgb(var(--shadow-color) / 0.06)",
-        "purpose": "Menu board; weight comes from tone, not shadow."
-      },
-      {
         "name": "dialog",
         "value": "0 1.5rem 4rem rgb(var(--shadow-color) / 0.28)",
         "purpose": "Search dialog only, over a 58% roast-shadow backdrop."
@@ -580,20 +565,12 @@
       "css": ".ds-btn-outline { min-width: 44px; min-height: 44px; padding: 0 0.6rem; border: 1px solid rgb(var(--border)); border-radius: 0.375rem; background: transparent; color: rgb(var(--text)); font: 400 0.9rem \"Source Sans 3\", system-ui, sans-serif; cursor: pointer; transition: border-color 180ms ease, color 180ms ease; } .ds-btn-outline:hover { border-color: rgb(var(--accent)); color: rgb(var(--accent-strong)); } .ds-btn-outline:focus-visible { outline: 3px solid rgb(var(--focus)); outline-offset: 3px; }"
     },
     {
-      "name": "Editorial Card",
-      "kind": "card",
-      "refersTo": "card-editorial",
-      "description": "Filter-paper sheet for a post or project: serif title link, muted summary, date and tag chips; softly lifts on hover.",
-      "html": "<article class=\"ds-card\"><h3 class=\"ds-card-title\"><a href=\"#\">How I rebuilt the blog engine</a></h3><p class=\"ds-card-summary\">From a static generator to Go, templ, and a hand-written Neorg parser.</p><div class=\"ds-card-meta\"><time class=\"ds-card-date\">2026-05-19</time><a class=\"ds-chip\" href=\"#\">go</a><a class=\"ds-chip\" href=\"#\">devlog</a></div></article>",
-      "css": ".ds-card { display: flex; flex-direction: column; max-width: 28rem; padding: clamp(1.25rem, 3vw, 1.75rem); border: 1px solid rgb(var(--border)); border-radius: 0.75rem; background: rgb(var(--surface)); box-shadow: 0 0.25rem 0.9rem rgb(var(--shadow-color) / 0.06); transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; } .ds-card:hover { border-color: rgb(var(--accent) / 0.55); box-shadow: 0 0.4rem 1.2rem rgb(var(--shadow-color) / 0.09); transform: translateY(-1px); } .ds-card-title { margin: 0; font: 600 clamp(1.3rem, 3vw, 1.55rem) / 1.25 \"Source Serif 4\", Georgia, serif; letter-spacing: -0.015em; } .ds-card-title a { color: rgb(var(--accent-strong)); text-decoration: underline; text-decoration-color: rgb(var(--border)); text-decoration-thickness: 1px; text-underline-offset: 0.2em; } .ds-card-title a:hover, .ds-card-title a:focus-visible { color: rgb(var(--text)); text-decoration-color: currentColor; } .ds-card-summary { margin: 0.65rem 0 0; line-height: 1.7; color: rgb(var(--muted)); } .ds-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem 0.85rem; padding-top: 1rem; } .ds-card-date { font-size: 0.875rem; color: rgb(var(--muted)); } .ds-chip { border-radius: 0.375rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; text-decoration: none; background: rgb(var(--chip-bg)); color: rgb(var(--chip-text)); } .ds-chip:hover, .ds-chip:focus-visible { color: rgb(var(--accent-strong)); }"
-    },
-    {
-      "name": "Tag Chip",
-      "kind": "chip",
-      "refersTo": "tag-chip",
-      "description": "Latte-foam tag link to a tag page.",
-      "html": "<a class=\"ds-tag-chip\" href=\"#\">distributed-systems</a>",
-      "css": ".ds-tag-chip { display: inline-block; border-radius: 0.375rem; padding: 0.25rem 0.5rem; font: 400 0.75rem \"Source Sans 3\", system-ui, sans-serif; text-decoration: none; background: rgb(var(--chip-bg)); color: rgb(var(--chip-text)); transition: color 180ms ease; } .ds-tag-chip:hover, .ds-tag-chip:focus-visible { color: rgb(var(--accent-strong)); } .ds-tag-chip:focus-visible { outline: 3px solid rgb(var(--focus)); outline-offset: 3px; }"
+      "name": "Index List",
+      "kind": "custom",
+      "refersTo": "year-list",
+      "description": "Flat, year-grouped list (antfu.me style): an outlined year behind each group, then title rows with a muted date and reading time.",
+      "html": "<section class=\"ds-year\"><h2 class=\"ds-year-mark\">2026</h2><ul class=\"ds-entries\"><li><a class=\"ds-entry\" href=\"#\">Rebuilding danielscoffee.me</a> <span class=\"ds-entry-meta\">Oct 10 · 4 min</span></li><li><a class=\"ds-entry\" href=\"#\">Tuning the search ranker</a> <span class=\"ds-entry-meta\">May 15 · 3 min</span></li></ul></section>",
+      "css": ".ds-year { position: relative; padding-top: 6rem; } .ds-year-mark { position: absolute; top: 0; left: -0.06em; margin: 0; font: 600 8rem/1 \"Source Serif 4\", Georgia, serif; letter-spacing: -0.03em; color: transparent; -webkit-text-stroke: 1.5px rgb(var(--muted) / 0.6); pointer-events: none; } .ds-entries { position: relative; list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; } .ds-entries li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.75rem; } .ds-entry { color: rgb(var(--text)); font: 400 1.25rem/1.4 \"Source Serif 4\", Georgia, serif; text-decoration: none; transition: color 180ms ease; } .ds-entry:hover, .ds-entry:focus-visible { color: rgb(var(--accent-strong)); } .ds-entry-meta { color: rgb(var(--muted)); font: 400 0.875rem \"Source Sans 3\", system-ui, sans-serif; }"
     },
     {
       "name": "Search Input",
@@ -638,15 +615,15 @@
   ],
   "narrative": {
     "northStar": "The Roaster's Notebook",
-    "overview": "A working engineer's log kept on warm paper in espresso ink. The site reads like a notebook that lives next to the grinder: precise, honest, a little stained by use. Personality comes from the coffee identity and nowhere else: the palette is roasted, the dark mode is a darker roast rather than a black screen, and the brand mark is set in the same serif as the writing. Everything else is in service of reading long technical prose.\n\nThe home page is the notebook's cover: a single espresso menu board with three framed doors, set outside the masthead-and-footer shell used by every other page.\n\nDensity is calm. Index pages are a wide shell of paper cards; reading pages narrow to a 68-character measure. Components are warm and tactile: cards are sheets of filter paper with a faint warm shadow, chips are dabs of latte foam, and hover is a gentle physical lift rather than a color explosion. Controls stay quiet in muted sans until touched.\n\nThis system rejects three looks outright: generic SaaS (gradient heroes, glass cards, purple/blue tech palettes), the hacker terminal (neon on black, scanlines, matrix green), and the platform-default Medium/Substack template that carries no identity of its own.",
+    "overview": "A working engineer's log kept on warm paper in espresso ink. The site reads like a notebook that lives next to the grinder: precise, honest, a little stained by use. Personality comes from the coffee identity and nowhere else: the palette is roasted, the dark mode is a darker roast rather than a black screen, and the brand mark is set in the same serif as the writing. Everything else is in service of reading long technical prose.\n\nThe home page is the notebook's cover: a single espresso menu board with three framed doors, set outside the masthead-and-footer shell used by every other page.\n\nDensity is calm. Index pages are flat, year-grouped lists in the spirit of antfu.me; reading pages narrow to a 68-character measure. Hover is a quiet colour shift rather than a lift or a colour explosion. Controls stay quiet in muted sans until touched.\n\nThis system rejects three looks outright: generic SaaS (gradient heroes, glass cards, purple/blue tech palettes), the hacker terminal (neon on black, scanlines, matrix green), and the platform-default Medium/Substack template that carries no identity of its own.",
     "keyCharacteristics": [
       "Warm paper neutrals and espresso ink; a single cinnamon-roast accent.",
       "Dark mode is roasted brown, never neutral grey or black.",
       "Serif for what you read, sans for what you operate.",
-      "Flat paper surfaces, softly lifted; one deep shadow reserved for the search dialog.",
+      "Flat paper surfaces with no cards; one deep shadow reserved for the search dialog.",
       "Gently rounded corners, 44px touch targets, visible ember focus rings.",
       "Self-hosted fonts, no external runtime assets.",
-      "One signature surface, the menu board, carries the site's framing; inner pages stay paper."
+      "One signature surface, the home menu, carries the site's framing; it sits on the page itself, never in a panel."
     ],
     "rules": [
       {
@@ -675,8 +652,8 @@
         "section": "typography"
       },
       {
-        "name": "The Soft Lift Rule",
-        "body": "At rest, a sheet barely casts a shadow. Interaction lifts it by one pixel and a few percent of shadow. Only the search dialog floats.",
+        "name": "The Flat Page Rule",
+        "body": "Nothing on the page casts a shadow or lifts on hover: lists, menus, and headers sit on the paper. Only the search dialog floats above it.",
         "section": "elevation"
       },
       {
@@ -707,7 +684,7 @@
       "Don't use neutral grey or pure black surfaces in dark mode (The Roasted, Not Black Rule).",
       "Don't load fonts, images, or scripts from external origins at runtime, or add inline scripts; the CSP forbids it.",
       "Don't use scene plates or the menu board outside framing surfaces such as the home page.",
-      "Don't cast heavy shadows on anything but the search dialog (The Soft Lift Rule)."
+      "Don't add shadows, cards, or hover lifts to page content; only the search dialog floats (The Flat Page Rule)."
     ]
   }
 }

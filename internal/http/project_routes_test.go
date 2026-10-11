@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestProjectSubpostGrid(t *testing.T) {
+func TestProjectDevlogList(t *testing.T) {
 	s := testBlogServer()
 	h := s.RegisterRoutes()
 
@@ -20,18 +20,18 @@ func TestProjectSubpostGrid(t *testing.T) {
 	body := w.Body.String()
 	for _, marker := range []string{
 		`<section class="section-block">`, `<h2 class="section-title">Devlog`,
-		`<ul class="project-subposts-grid"`, `<li class="project-subpost-card">`,
-		`<a class="project-subpost-link" href="/projects/side-project/rebuild">`,
-		`<h3 class="project-subpost-title">Rebuild Notes</h3>`,
-		`<p class="project-subpost-summary">how I rebuilt it</p>`,
-		`<div class="project-subpost-date">`, `datetime="2026-05-10"`,
+		`<ul class="entry-list devlog-list">`,
+		`<a class="entry-link devlog-link" href="/projects/side-project/rebuild">Rebuild Notes</a>`,
+		`<span class="entry-meta"><time datetime="2026-05-10">May 10, 2026</time> · 1 min</span>`,
 	} {
 		if !strings.Contains(body, marker) {
-			t.Errorf("expected project subpost markup %q", marker)
+			t.Errorf("expected devlog list markup %q", marker)
 		}
 	}
-	if strings.Contains(body, "data-count") {
-		t.Error("project subpost grid must not expose item count")
+	for _, gone := range []string{"project-subpost-card", "how I rebuilt it", "year-mark"} {
+		if strings.Contains(body, gone) {
+			t.Errorf("flat devlog list should not contain %q", gone)
+		}
 	}
 }
 

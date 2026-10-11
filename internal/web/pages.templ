@@ -11,35 +11,39 @@ templ PageIntro(title, subtitle string) {
 
 // SectionIntro opens a section index. The masthead already names the
 // section, so the page heading is for screen readers only.
-templ SectionIntro(title, subtitle string) {
-	<header class="page-intro">
-		<h1 class="sr-only">{ title }</h1>
-		<p class="page-subtitle">{ subtitle }</p>
-	</header>
+templ SectionIntro(title string) {
+	<h1 class="sr-only">{ title }</h1>
 }
 
-templ TagPageIntro(tag, subtitle string) {
+templ TagPageIntro(tag string) {
 	<header class="page-intro">
 		<h1 class="page-title">Tagged with <span class="tag-emphasis">{ tag }</span></h1>
-		<p class="page-subtitle">{ subtitle }</p>
 	</header>
 }
 
 templ BlogIndexPage(posts []content.Post) {
 	@Base("Blog", "Every post on danielscoffee, newest first.", "blog") {
-		@SectionIntro("Blog", "All writing in one place.")
-		<section class="section-block">
-			<h2 class="section-title">Latest entries</h2>
-			@PostList(posts)
-		</section>
+		@SectionIntro("Blog")
+		@PostList(posts)
 	}
 }
 
-templ ArticleHeader(title, date string) {
+// ArticleHeader shows the title, then the date and any tags on one muted
+// line. Tags link to tagBase+tag ("/tag/" for posts, "/projects?tag=" for
+// projects).
+templ ArticleHeader(title, date string, tags []string, tagBase string) {
 	<header class="article-header post-header">
 		<h1 class="article-title post-title">{ title }</h1>
-		if date != "" {
-			@EditorialDate(date)
+		if date != "" || len(tags) > 0 {
+			<p class="article-meta">
+				if date != "" {
+					@EditorialDate(date)
+				}
+				for _, tag := range tags {
+					<span class="article-meta-sep" aria-hidden="true">·</span>
+					<a class="article-tag" href={ templ.SafeURL(tagBase + tag) }>{ tag }</a>
+				}
+			</p>
 		}
 	</header>
 }
@@ -58,21 +62,15 @@ templ AboutPage(page content.Page) {
 templ ProjectsIndexPage(projects []content.Project, tag string) {
 	if tag == "" {
 		@Base("Projects", "Projects and their devlogs, newest first.", "projects") {
-			@SectionIntro("Projects", "Build logs, notes, and shipped experiments.")
-			@projectsListSection(projects)
+			@SectionIntro("Projects")
+			@ProjectList(projects)
 		}
 	} else {
 		@Base("Projects tagged "+tag, "Projects on danielscoffee tagged "+tag+", with their devlogs.", "projects") {
-			@TagPageIntro(tag, "Filtered projects by topic.")
-			@projectsListSection(projects)
+			@TagPageIntro(tag)
+			@ProjectList(projects)
 		}
 	}
-}
-
-templ projectsListSection(projects []content.Project) {
-	<section class="section-block">
-		@ProjectList(projects)
-	</section>
 }
 
 // BackLink sits above a post, project, or devlog and returns to its parent
@@ -90,7 +88,7 @@ templ ProjectDetailPage(project content.Project) {
 	@Base(project.Title, project.Summary, "projects") {
 		@BackLink("/projects", "Projects")
 		<article class="article-shell post-prose">
-			@ArticleHeader(project.Title, project.Date)
+			@ArticleHeader(project.Title, project.Date, project.Tags, "/projects?tag=")
 			<div class="article-body">
 				@templ.Raw(string(project.BodyHTML))
 			</div>
@@ -98,23 +96,20 @@ templ ProjectDetailPage(project content.Project) {
 		if len(project.SubPosts) > 0 {
 			<section class="section-block">
 				<h2 class="section-title">Devlog &amp; notes</h2>
-				@ProjectSubPostGrid(project)
+				@DevlogList(project)
 			</section>
 		}
 	}
 }
 
-templ ProjectSubPostGrid(project content.Project) {
-	<ul class="project-subposts-grid">
+// DevlogList is the flat list of a project's devlogs: the title, then a
+// muted "Oct 10, 2026 · 3 min". No year marks, cards, or summaries.
+templ DevlogList(project content.Project) {
+	<ul class="entry-list devlog-list">
 		for _, sub := range project.SubPosts {
-			<li class="project-subpost-card">
-				<a class="project-subpost-link" href={ templ.SafeURL("/projects/" + project.Slug + "/" + sub.Slug) }>
-					<h3 class="project-subpost-title">{ sub.Title }</h3>
-					if sub.Summary != "" {
-						<p class="project-subpost-summary">{ sub.Summary }</p>
-					}
-					<div class="project-subpost-date">@EditorialDate(sub.Date)</div>
-				</a>
+			<li class="entry devlog-item">
+				<a class="entry-link devlog-link" href={ templ.SafeURL("/projects/" + project.Slug + "/" + sub.Slug) }>{ sub.Title }</a>
+				<span class="entry-meta"><time datetime={ sub.Date }>{ longDate(sub.Date) }</time> · { readingTime(sub.BodyMD) }</span>
 			</li>
 		}
 	</ul>
@@ -124,7 +119,7 @@ templ ProjectSubPostPage(project content.Project, sub content.ProjectSubPost) {
 	@Base(sub.Title, sub.Summary, "projects") {
 		@BackLink(templ.SafeURL("/projects/"+project.Slug), project.Title)
 		<article class="article-shell post-prose">
-			@ArticleHeader(sub.Title, sub.Date)
+			@ArticleHeader(sub.Title, sub.Date, nil, "")
 			<div class="article-body">
 				@templ.Raw(string(sub.BodyHTML))
 			</div>
@@ -135,15 +130,12 @@ templ ProjectSubPostPage(project content.Project, sub content.ProjectSubPost) {
 
 templ TagPage(tag string, posts []content.Post) {
 	@Base("Posts tagged "+tag, "Posts on danielscoffee tagged "+tag+".", "blog") {
-		@TagPageIntro(tag, "Filtered writing by topic.")
-		<section class="section-block">
-			<h2 class="section-title">Posts</h2>
-			if len(posts) == 0 {
-				<p class="empty-state">No posts found for this tag yet.</p>
-			} else {
-				@PostList(posts)
-			}
-		</section>
+		@TagPageIntro(tag)
+		if len(posts) == 0 {
+			<p class="empty-state">No posts found for this tag yet.</p>
+		} else {
+			@PostList(posts)
+		}
 	}
 }
 
@@ -151,57 +143,45 @@ templ EditorialDate(date string) {
 	<time class="editorial-date" datetime={ date }>{ date }</time>
 }
 
-templ PostTags(tags []string) {
-	if len(tags) > 0 {
-		<ul class="tag-list">
-			for _, tag := range tags {
-				<li><a class="tag-chip" href={ templ.SafeURL("/tag/" + tag) }>{ tag }</a></li>
-			}
-		</ul>
-	}
-}
-
-templ ProjectTags(tags []string) {
-	if len(tags) > 0 {
-		<ul class="tag-list">
-			for _, tag := range tags {
-				<li><a class="tag-chip" href={ templ.SafeURL("/projects?tag=" + tag) }>{ tag }</a></li>
-			}
-		</ul>
-	}
-}
-
+// PostList is a flat, year-grouped list in the antfu.me style: the title,
+// then a muted "Oct 10 · 6 min". No summaries, tags, or cards.
 templ PostList(posts []content.Post) {
-	<ul class="editorial-list post-list">
-		for _, post := range posts {
-			<li class="editorial-card post-item">
-				<h3 class="editorial-title"><a class="editorial-link post-link" href={ templ.SafeURL("/post/" + post.Slug) }>{ post.Title }</a></h3>
-				<p class="editorial-summary post-summary">{ post.Summary }</p>
-				<div class="editorial-meta post-meta-row">
-					@EditorialDate(post.Date)
-					@PostTags(post.Tags)
-				</div>
-			</li>
+	<div class="year-list post-list">
+		for _, group := range postsByYear(posts) {
+			<section class="year-group" aria-labelledby={ "year-" + group.Year }>
+				<h2 class="year-mark" id={ "year-" + group.Year }>{ group.Year }</h2>
+				<ul class="entry-list">
+					for _, post := range group.Posts {
+						<li class="entry post-item">
+							<a class="entry-link post-link" href={ templ.SafeURL("/post/" + post.Slug) }>{ post.Title }</a>
+							<span class="entry-meta"><time datetime={ post.Date }>{ shortDate(post.Date) }</time> · { readingTime(post.BodyMD) }</span>
+						</li>
+					}
+				</ul>
+			</section>
 		}
-	</ul>
+	</div>
 }
 
 templ ProjectList(projects []content.Project) {
 	if len(projects) == 0 {
 		<p class="empty-state">No projects found for this tag yet.</p>
 	} else {
-	<ul class="editorial-list project-list">
-		for _, project := range projects {
-			<li class="editorial-card project-item">
-				<h2 class="editorial-title"><a class="editorial-link project-link" href={ templ.SafeURL("/projects/" + project.Slug) }>{ project.Title }</a></h2>
-				<p class="editorial-summary project-summary">{ project.Summary }</p>
-				<div class="editorial-meta post-meta-row">
-					@EditorialDate(project.Date)
-					@ProjectTags(project.Tags)
-				</div>
-			</li>
-		}
-	</ul>
+		<div class="year-list project-list">
+			for _, group := range projectsByYear(projects) {
+				<section class="year-group" aria-labelledby={ "year-" + group.Year }>
+					<h2 class="year-mark" id={ "year-" + group.Year }>{ group.Year }</h2>
+					<ul class="entry-list">
+						for _, project := range group.Projects {
+							<li class="entry project-item">
+								<a class="entry-link project-link" href={ templ.SafeURL("/projects/" + project.Slug) }>{ project.Title }</a>
+								<span class="entry-meta"><time datetime={ project.Date }>{ shortDate(project.Date) }</time></span>
+							</li>
+						}
+					</ul>
+				</section>
+			}
+		</div>
 	}
 }
 
@@ -209,7 +189,7 @@ templ BlogPostPage(post content.Post) {
 	@Base(post.Title, post.Summary, "blog") {
 		@BackLink("/blog", "Blog")
 		<article class="article-shell post-prose">
-			@ArticleHeader(post.Title, post.Date)
+			@ArticleHeader(post.Title, post.Date, post.Tags, "/tag/")
 			<div class="article-body">
 				@templ.Raw(string(post.BodyHTML))
 			</div>

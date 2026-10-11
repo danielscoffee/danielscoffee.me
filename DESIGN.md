@@ -91,7 +91,6 @@ rounded:
   md: "0.75rem"
 spacing:
   gutter: "1rem"
-  card-padding: "clamp(1.25rem, 3vw, 1.75rem)"
   grid-gap: "1.25rem"
   section-gap: "2.5rem"
   touch-target: "44px"
@@ -123,21 +122,15 @@ components:
     textColor: "{colors.espresso-ink}"
     rounded: "{rounded.sm}"
     size: "44px"
-  card-editorial:
-    backgroundColor: "{colors.filter-paper}"
-    rounded: "{rounded.md}"
-    padding: "{spacing.card-padding}"
-  card-title-link:
-    textColor: "{colors.cinnamon-roast-deep}"
-    typography: "{typography.card-title}"
-  card-title-link-hover:
+  index-entry:
     textColor: "{colors.espresso-ink}"
-  tag-chip:
-    backgroundColor: "{colors.latte-foam}"
-    textColor: "{colors.mocha-label}"
-    rounded: "{rounded.sm}"
-    padding: "0.25rem 0.5rem"
-  tag-chip-hover:
+  index-entry-hover:
+    textColor: "{colors.cinnamon-roast-deep}"
+  index-entry-meta:
+    textColor: "{colors.cold-brew}"
+  article-tag:
+    textColor: "{colors.cold-brew}"
+  article-tag-hover:
     textColor: "{colors.cinnamon-roast-deep}"
   input-search:
     backgroundColor: "{colors.oat-paper}"
@@ -186,7 +179,7 @@ A working engineer's log kept on warm paper in espresso ink. The site reads like
 
 The home page is the notebook's cover: the brand and three photo doors set straight on the paper in the top-left corner, like a menu chalked onto the first page, outside the masthead-and-footer shell used by every other page.
 
-Density is calm. Index pages are a wide shell of paper cards; reading pages narrow to a 68-character measure. Components are warm and tactile: cards are sheets of filter paper with a faint warm shadow, chips are dabs of latte foam, and hover is a gentle physical lift rather than a color explosion. Controls stay quiet in muted sans until touched.
+Density is calm. Index pages are flat, year-grouped lists in the spirit of antfu.me; reading pages narrow to a 68-character measure. Hover is a quiet colour shift rather than a lift or a colour explosion. Controls stay quiet in muted sans until touched.
 
 This system rejects three looks outright: generic SaaS (gradient heroes, glass cards, purple/blue tech palettes), the hacker terminal (neon on black, scanlines, matrix green), and the platform-default Medium/Substack template that carries no identity of its own.
 
@@ -194,7 +187,7 @@ This system rejects three looks outright: generic SaaS (gradient heroes, glass c
 - Warm paper neutrals and espresso ink; a single cinnamon-roast accent.
 - Dark mode is roasted brown, never neutral grey or black.
 - Serif for what you read, sans for what you operate.
-- Flat paper surfaces, softly lifted; one deep shadow reserved for the search dialog.
+- Flat paper surfaces with no cards; one deep shadow reserved for the search dialog.
 - Gently rounded corners, 44px touch targets, visible ember focus rings.
 - Self-hosted fonts, no external runtime assets.
 - One signature surface, the home menu, carries the site's framing; it sits on the page itself, never in a panel.
@@ -218,7 +211,7 @@ All colors are stored as space-separated RGB channels in CSS custom properties (
 - **Espresso Ink / Cream** (`--text`): body text and headings.
 - **Cold Brew / Milky Tan** (`--muted`): nav links, dates, summaries, hints, footer.
 - **Kraft Line / Burnt Kraft** (`--border`): all hairlines, card borders, dividers, resting underlines.
-- **Latte Foam / Dark Latte Foam** (`--chip-bg`) with **Mocha Label / Dark Mocha Label** (`--chip-text`): tag chips, table headers, spoilers, inline math.
+- **Latte Foam / Dark Latte Foam** (`--chip-bg`) with **Mocha Label / Dark Mocha Label** (`--chip-text`): table headers, spoilers, inline math.
 - **Parchment Code / Grounds** (`--code-bg`) with **Code Ink / Dark Code Ink** (`--code-text`): inline code and code blocks.
 - **Roast Shadow** (`--shadow-color`): warm brown shadow base in light themes; pure black in dark themes.
 
@@ -262,7 +255,7 @@ A functional sub-palette (`--syntax-*` for Chroma highlighting, `--task-*` for N
 
 ## Layout
 
-Two shells: a **wide shell** (`min(100% - 2rem, 72rem)`) for the masthead, footer, and index grids, and a **reading measure** (68ch) for intros and prose. Index lists are an auto-fit grid of cards, `minmax(min(100%, 25rem), 1fr)` with a 1.25rem gap. Project devlogs use a fixed one/two/three-column grid at 640px and 900px, where the first devlog spans two columns and two rows.
+Two shells: a **wide shell** (`min(100% - 2rem, 72rem)`) for the masthead, footer, and index grids, and a **reading measure** (68ch) for intros and prose. Index lists (blog, projects, tag views) are flat and year-grouped: a large outlined year, then one row per entry, 1rem apart, with 2.5rem between years. Entries start at about 0.75 of the year's size, so its outline only grazes the first row. Project devlogs are a flat list without year marks: each row shows the full date ("Oct 10, 2026") and reading time.
 
 The home page has its own shell: no masthead, no footer. The menu spans the full page width inside `clamp(1.5rem, 5vw, 3rem)` of page padding (48px on desktop), anchored top-left, so the dotted leaders run to the right margin and a growing plate pushes only the rows below it. At ≤480px the dotted leader and route label hide.
 
@@ -272,16 +265,14 @@ Responsive behavior: inner pages use one masthead at every width: the section la
 
 ## Elevation & Depth
 
-Paper, softly lifted. Surfaces are flat sheets distinguished first by tone (Oat Paper → Filter Paper → Fresh Filter) and a Kraft Line hairline; shadows are faint, warm, and tinted with Roast Shadow, never grey.
+Flat. Surfaces are distinguished by tone (Oat Paper → Filter Paper → Fresh Filter) and Kraft Line hairlines, never by shadow. The one shadow in the system belongs to the search dialog, warm and tinted with Roast Shadow, never grey.
 
 ### Shadow Vocabulary
-- **Resting sheet** (`box-shadow: 0 0.25rem 0.9rem rgb(var(--shadow-color) / 0.06)`): cards and devlog tiles at rest.
-- **Lifted sheet** (`box-shadow: 0 0.4rem 1.2rem rgb(var(--shadow-color) / 0.09)`): card hover and focus-within, paired with `translateY(-1px)` on editorial cards.
 - **Home menu** (`box-shadow: none`): no panel and no shadow; it is part of the page (The Unboxed Menu Rule).
 - **Dialog** (`box-shadow: 0 1.5rem 4rem rgb(var(--shadow-color) / 0.28)`): the search dialog only, over a 58% Roast Shadow backdrop.
 
 ### Named Rules
-**The Soft Lift Rule.** At rest, a sheet barely casts a shadow. Interaction lifts it by one pixel and a few percent of shadow. Only the search dialog floats.
+**The Flat Page Rule.** Nothing on the page casts a shadow or lifts on hover: lists, menus, and headers sit on the paper. Only the search dialog floats above it.
 
 ## Shapes
 
@@ -300,17 +291,14 @@ Warm and tactile: controls feel like paper and ink you can touch, with restraint
 - **Hover / Focus:** text shifts to Cinnamon Roast Deep over 180ms; focus adds the 3px Ember Focus ring.
 - **Search trigger:** carries a `Ctrl+K` key hint in a hairline-bordered small-radius box at 0.65rem.
 
-### Chips
-- **Style:** Latte Foam fill, Mocha Label text at 0.75rem, small radius, 0.25rem × 0.5rem padding, no border.
-- **State:** hover/focus turns the text Cinnamon Roast Deep. Chips are links to tag pages.
+### Index List
+Flat and year-grouped, after antfu.me/posts. No cards, borders, summaries, or tag chips.
+- **Year mark:** the year as an `<h2>`, Source Serif 4 600 at clamp(4.5rem, 12vw, 8rem), transparent fill with a 1.5px Cold Brew outline at 60% alpha, positioned behind its group.
+- **Entry:** the title link in the editorial serif (400, clamp(1.1rem, 2.4vw, 1.25rem)) in Espresso Ink, turning Cinnamon Roast Deep on hover and focus; then the meta in muted sans at 0.875rem: "Oct 10 · 4 min" for posts (reading time at 200 words a minute from the source), the date alone for projects. Rows wrap the meta under the title on narrow screens.
+- **Page intro:** none visible. Blog and Projects keep a screen-reader `<h1>`; tag views show "Tagged with <tag>".
 
-### Cards / Containers
-- **Corner Style:** medium radius (0.75rem).
-- **Background:** Filter Paper.
-- **Shadow Strategy:** Resting sheet; Lifted sheet plus 1px rise on hover (see Elevation).
-- **Border:** 1px Kraft Line, shifting to Cinnamon Roast at 55% on hover.
-- **Internal Padding:** clamp(1.25rem, 3vw, 1.75rem).
-- **Anatomy:** serif title link (Cinnamon Roast Deep with a Kraft Line underline offset 0.2em, turning Espresso Ink with a currentColor underline on hover), muted summary at 60ch, then a metadata row pinned to the bottom with the date and tag chips.
+### Article Meta
+Under an article title: the date, then each tag as a plain muted link separated by "·" (posts link to `/tag/<tag>`, projects to `/projects?tag=<tag>`). Hover and focus turn a tag Cinnamon Roast Deep with an underline. This is where tags live now that index lists carry none.
 
 ### Inputs / Fields
 - **Style:** 48px tall, Oat Paper field set into the Fresh Filter dialog, 1px Kraft Line, small radius, 1rem text.
@@ -372,4 +360,4 @@ A command palette on the topmost Fresh Filter sheet: serif heading, labelled 48p
 - **Don't** use neutral grey or pure black surfaces in dark mode (The Roasted, Not Black Rule).
 - **Don't** load fonts, images, or scripts from external origins at runtime, or add inline scripts; the CSP forbids it.
 - **Don't** use scene plates or the menu board outside framing surfaces such as the home page.
-- **Don't** cast heavy shadows on anything but the search dialog (The Soft Lift Rule).
+- **Don't** add shadows, cards, or hover lifts to page content; only the search dialog floats (The Flat Page Rule).

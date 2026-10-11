@@ -101,7 +101,7 @@ func TestBlogRoutes(t *testing.T) {
 		{path: "/about", statusCode: http.StatusOK, contains: "About Me"},
 		{path: "/projects", statusCode: http.StatusOK, contains: "Projects"},
 		{path: "/projects/side-project", statusCode: http.StatusOK, contains: "Side Project"},
-		{path: "/projects/side-project", statusCode: http.StatusOK, contains: "project-subposts-grid"},
+		{path: "/projects/side-project", statusCode: http.StatusOK, contains: "devlog-list"},
 		{path: "/projects/side-project/rebuild", statusCode: http.StatusOK, contains: "Rebuild Notes"},
 		{path: "/projects/side-project/missing", statusCode: http.StatusNotFound, contains: "Page not found"},
 		{path: "/projects/missing", statusCode: http.StatusNotFound, contains: "Page not found"},
@@ -362,27 +362,26 @@ func TestEditorialIndexes(t *testing.T) {
 		{
 			path: "/blog",
 			markers: []string{
-				`class="page-intro"`, `<h1 class="sr-only">Blog</h1>`,
-				`class="editorial-list post-list"`, `class="editorial-card post-item"`,
-				`<time class="editorial-date" datetime="2026-04-26">2026-04-26</time>`,
-				`href="/post/hello-world"`, `href="/tag/go"`,
+				`<h1 class="sr-only">Blog</h1>`,
+				`<div class="year-list post-list">`, `<h2 class="year-mark" id="year-2026">2026</h2>`,
+				`<li class="entry post-item"><a class="entry-link post-link" href="/post/hello-world">Hello World</a>`,
+				`<span class="entry-meta"><time datetime="2026-04-26">Apr 26</time> · 1 min</span>`,
 			},
 		},
 		{
 			path: "/projects",
 			markers: []string{
-				`class="page-intro"`, `<h1 class="sr-only">Projects</h1>`,
-				`class="editorial-list project-list"`, `class="editorial-card project-item"`,
-				`<time class="editorial-date" datetime="2026-05-01">2026-05-01</time>`,
-				`href="/projects/side-project"`, `href="/projects?tag=go"`,
+				`<h1 class="sr-only">Projects</h1>`,
+				`<div class="year-list project-list">`,
+				`<a class="entry-link project-link" href="/projects/side-project">Side Project</a>`,
+				`<span class="entry-meta"><time datetime="2026-05-01">May 1</time></span>`,
 			},
 		},
 		{
 			path: "/tag/go",
 			markers: []string{
-				`class="page-intro"`, `Tagged with <span class="tag-emphasis">go</span>`,
-				`class="editorial-list post-list"`, `class="editorial-card post-item"`,
-				`datetime="2026-04-26"`, `href="/post/hello-world"`, `href="/tag/personal"`,
+				`Tagged with <span class="tag-emphasis">go</span>`,
+				`<div class="year-list post-list">`, `href="/post/hello-world"`,
 			},
 		},
 	}
@@ -395,14 +394,24 @@ func TestEditorialIndexes(t *testing.T) {
 		}
 		body := w.Body.String()
 		assertContainsAll(t, body, tc.markers)
-		if tc.path == "/tag/go" {
-			heading := `<h2 class="section-title">Posts</h2>`
-			headingIndex := strings.Index(body, heading)
-			cardIndex := strings.Index(body, `class="editorial-card post-item"`)
-			if headingIndex == -1 || cardIndex == -1 || headingIndex > cardIndex {
-				t.Fatalf("%s expected %q before post cards", tc.path, heading)
+		// Flat lists: no summaries, subtitles, tag chips, or cards.
+		for _, gone := range []string{"Ship the first post", "Small app", `class="page-subtitle"`, "tag-chip", "editorial-card"} {
+			if strings.Contains(body, gone) {
+				t.Errorf("%s should not contain %q", tc.path, gone)
 			}
 		}
+	}
+}
+
+func TestArticleTags(t *testing.T) {
+	h := testBlogServer().RegisterRoutes()
+	for path, want := range map[string]string{
+		"/post/hello-world":      `<a class="article-tag" href="/tag/go">go</a>`,
+		"/projects/side-project": `<a class="article-tag" href="/projects?tag=go">go</a>`,
+	} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		assertContainsAll(t, w.Body.String(), []string{`<p class="article-meta">`, want})
 	}
 }
 
@@ -465,15 +474,15 @@ func TestPagesExposeStyleHooks(t *testing.T) {
 	}{
 		{
 			path:    "/blog",
-			markers: []string{"page-subtitle", "section-title", "post-list", "post-item", "post-link", "tag-chip"},
+			markers: []string{"year-list", "year-mark", "post-list", "post-item", "post-link", "entry-meta"},
 		},
 		{
 			path:    "/blog",
-			markers: []string{"page-subtitle", "post-list", "post-meta-row"},
+			markers: []string{"entry-link", "entry-meta"},
 		},
 		{
 			path:    "/post/hello-world",
-			markers: []string{"article-shell", "article-header", "article-title", "article-body", "editorial-date"},
+			markers: []string{"article-shell", "article-header", "article-title", "article-body", "article-meta", "editorial-date"},
 		},
 		{
 			path:    "/projects",

@@ -419,10 +419,10 @@ func TestProjectContentStaysContained(t *testing.T) {
 	css := string(cssBytes)
 
 	selectors := map[string]string{
-		"article shell":        `\.article-shell,\s*\.post-prose`,
-		"article body":         `\.article-body`,
-		"section block":        `\.section-block`,
-		"project subpost grid": `\.project-subposts-grid`,
+		"article shell": `\.article-shell,\s*\.post-prose`,
+		"article body":  `\.article-body`,
+		"section block": `\.section-block`,
+		"index entry":   `\.entry`,
 	}
 	for name, selector := range selectors {
 		rule := regexp.MustCompile(`(?s)` + selector + `\s*\{[^}]*\}`).FindString(css)
@@ -441,58 +441,24 @@ func TestProjectContentStaysContained(t *testing.T) {
 	}
 }
 
-func TestProjectSubpostGrid(t *testing.T) {
+func TestDevlogListIsFlat(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
 		t.Fatalf("read styles: %v", err)
 	}
 	css := string(cssBytes)
-	for _, forbidden := range []string{"[data-count=", "nth-child(6n+1)", "nth-child(6n + 1)", "nth-child(6n+"} {
-		if strings.Contains(css, forbidden) {
-			t.Errorf("count-specific project grid CSS forbidden: %q", forbidden)
+	for _, gone := range []string{".project-subposts-grid", ".project-subpost-card", "grid-row: span 2"} {
+		if strings.Contains(css, gone) {
+			t.Errorf("devlogs are a flat list now; %q must be removed", gone)
 		}
 	}
-	for _, marker := range []string{".project-subposts-grid", "grid-template-columns: minmax(0, 1fr)", "repeat(2, minmax(0, 1fr))", "repeat(3, minmax(0, 1fr))", "grid-column: span 2", "grid-row: span 2", ".project-subpost-card", ".project-subpost-link", "min-height: 44px", ":focus-within"} {
-		if !strings.Contains(css, marker) {
-			t.Errorf("expected bento project grid CSS %q", marker)
-		}
+	linkRule := regexp.MustCompile(`(?s)\t\.entry-link \{[^}]*\}`).FindString(css)
+	if !strings.Contains(linkRule, "overflow-wrap: anywhere") {
+		t.Errorf("long entry titles must wrap: %s", linkRule)
 	}
-}
-
-func TestProjectSubpostLongContentWraps(t *testing.T) {
-	cssBytes, err := os.ReadFile("styles/input.css")
-	if err != nil {
-		t.Fatalf("read styles: %v", err)
-	}
-
-	for selector, property := range map[string]string{
-		`.project-subpost-link`:    `min-width\s*:\s*0`,
-		`.project-subpost-title`:   `overflow-wrap\s*:\s*anywhere`,
-		`.project-subpost-summary`: `overflow-wrap\s*:\s*anywhere`,
-	} {
-		rule := regexp.MustCompile(`(?s)` + regexp.QuoteMeta(selector) + `\s*\{[^}]*\}`).Find(cssBytes)
-		if rule == nil {
-			t.Errorf("%s rule missing", selector)
-			continue
-		}
-		if !regexp.MustCompile(property).Match(rule) {
-			t.Errorf("%s must contain %s", selector, property)
-		}
-	}
-}
-
-func TestProjectSubpostDatePreservesMutedContrast(t *testing.T) {
-	cssBytes, err := os.ReadFile("styles/input.css")
-	if err != nil {
-		t.Fatalf("read styles: %v", err)
-	}
-
-	dateRule := regexp.MustCompile(`(?s)\.project-subpost-date\s*\{[^}]*\}`).Find(cssBytes)
-	if dateRule == nil {
-		t.Fatal("project subpost date rule missing")
-	}
-	if strings.Contains(string(dateRule), "var(--muted)") && regexp.MustCompile(`\bopacity\s*:`).Match(dateRule) {
-		t.Fatal("project subpost date must not reduce muted text contrast with opacity")
+	metaRule := regexp.MustCompile(`(?s)\t\.entry-meta \{[^}]*\}`).FindString(css)
+	if !strings.Contains(metaRule, "var(--muted)") || strings.Contains(metaRule, "opacity") {
+		t.Errorf("entry meta must use the muted ink without opacity: %s", metaRule)
 	}
 }
 
@@ -608,10 +574,12 @@ func TestInputStyles(t *testing.T) {
 		"::selection",
 		".site-nav-link",
 		".theme-toggle",
-		".post-list",
-		".post-item",
+		".year-list",
+		".year-mark",
+		".entry-link",
+		".entry-meta",
 		".post-prose",
-		".tag-chip",
+		".article-tag",
 		"@media (prefers-reduced-motion: reduce)",
 	}
 

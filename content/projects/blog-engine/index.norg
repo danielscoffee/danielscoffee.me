@@ -32,7 +32,7 @@ Off-the-shelf tools gave me two of these three at best:
 ** What works
 *** DONE folder-based project loader with draft and duplicate-slug checks
 *** DONE nested routes for project devlogs
-*** DONE devlog grid with a featured first card
+*** DONE flat devlog list on each project page
 *** DONE search with `blog` and `projects` filters
 *** DONE RSS and sitemap entries for posts, projects, and devlogs
 *** DONE link validation, request limits, and pinned build inputs
@@ -44,7 +44,6 @@ Off-the-shelf tools gave me two of these three at best:
 
 ** Terms
 $ index.norg: the required entry file in each project folder; it holds the project metadata.
-$ devlog: any other `.norg` file in a project folder, listed in the grid below the project.
-$ featured card: on wide screens, the first devlog card spans two columns and two rows.
+$ devlog: any other `.norg` file in a project folder, listed below the project with its date and reading time.
 
 The whole engine is about 2,400 lines of Go and 2,200 lines of tests. The devlogs below cover how it got here.
