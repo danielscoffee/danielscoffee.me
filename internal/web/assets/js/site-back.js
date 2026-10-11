@@ -1,8 +1,8 @@
-// The arrow above a project or devlog returns to the previous page
-// when the reader came from this site. Arriving from elsewhere, or opening
-// it in a new tab, follows its href to the parent listing instead.
+// The masthead arrow returns to the previous page when the reader came from
+// this site. Arriving from elsewhere, or opening it in a new tab, follows its
+// href one level up the site instead.
 (() => {
-  const link = document.querySelector(".page-back");
+  const link = document.querySelector(".site-back");
   if (!link || history.length < 2) return;
 
   let fromThisSite = false;

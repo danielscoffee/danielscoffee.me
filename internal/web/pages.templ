@@ -73,20 +73,8 @@ templ ProjectsIndexPage(projects []content.Project, tag string) {
 	}
 }
 
-// BackLink sits above a project or devlog: the masthead's drawn arrow
-// alone. page-back.js sends it to the previous page when that page was on
-// this site; otherwise href leads to the parent listing.
-templ BackLink(href templ.SafeURL) {
-	<div class="page-breadcrumb">
-		<a class="page-back" href={ href } aria-label="Back">
-			<svg class="page-back-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 8H2.5"></path><path d="M7 3.5 2.5 8 7 12.5"></path></svg>
-		</a>
-	</div>
-}
-
 templ ProjectDetailPage(project content.Project) {
 	@Base(project.Title, project.Summary, "projects") {
-		@BackLink("/projects")
 		<article class="article-shell post-prose">
 			@ArticleHeader(project.Title, project.Date, project.Tags, "/projects?tag=")
 			<div class="article-body">
@@ -117,7 +105,6 @@ templ DevlogList(project content.Project) {
 
 templ ProjectSubPostPage(project content.Project, sub content.ProjectSubPost) {
 	@Base(sub.Title, sub.Summary, "projects") {
-		@BackLink(templ.SafeURL("/projects/" + project.Slug))
 		<article class="article-shell post-prose">
 			@ArticleHeader(sub.Title, sub.Date, nil, "")
 			<div class="article-body">

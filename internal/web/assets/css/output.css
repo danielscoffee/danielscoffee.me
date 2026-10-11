@@ -808,7 +808,7 @@ a {
   color: rgb(var(--text));
 }
 
-/* Far right: an icon-only way back to the home board. */
+/* Far right: an icon-only way back to the previous page. */
 
 .site-back {
   display: inline-flex;
@@ -1840,42 +1840,6 @@ a {
   .search-results {
     max-height: calc(100dvh - 17rem);
   }
-}
-
-/* Return link above posts, projects, and devlogs. */
-
-.page-breadcrumb {
-  margin: -0.75rem 0 0;
-}
-
-.page-breadcrumb + .article-shell {
-  margin-top: 1rem;
-}
-
-.page-back {
-  display: inline-flex;
-  width: 44px;
-  height: 44px;
-  align-items: center;
-  color: rgb(var(--muted));
-  transition: color 180ms ease;
-}
-
-.page-back-arrow {
-  width: 0.95rem;
-  height: 0.95rem;
-  flex: none;
-  transition: transform 180ms ease;
-}
-
-.page-back:hover,
-	.page-back:focus-visible {
-  color: rgb(var(--accent-strong));
-}
-
-.page-back:hover .page-back-arrow,
-	.page-back:focus-visible .page-back-arrow {
-  transform: translateX(-3px);
 }
 
 .sr-only {

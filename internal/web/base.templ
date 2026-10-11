@@ -39,7 +39,7 @@ templ Base(pageTitle string, pageDescription string, section string) {
 			<script defer src="/assets/js/theme-toggle.js?v=2"></script>
 			<script defer src="/assets/js/search.js?v=2"></script>
 			<script defer src="/assets/js/code-copy.js?v=1"></script>
-			<script defer src="/assets/js/page-back.js?v=1"></script>
+			<script defer src="/assets/js/site-back.js?v=1"></script>
 		</head>
 		<body class="site-shell">
 			<a class="skip-link" href="#main-content">Skip to content</a>
@@ -53,7 +53,7 @@ templ Base(pageTitle string, pageDescription string, section string) {
 					<div id="header-actions" class="header-actions">
 						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme" aria-live="polite" data-theme-storage-key="theme-preference">Theme</button>
 						<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">Search <span class="search-kbd">Ctrl+K</span></button>
-						<a href="/" class="site-back" aria-label="Back to home">
+						<a href={ templ.SafeURL(parentPath(ctx)) } class="site-back" aria-label="Back">
 							<svg class="site-back-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 8H2.5"></path><path d="M7 3.5 2.5 8 7 12.5"></path></svg>
 						</a>
 					</div>

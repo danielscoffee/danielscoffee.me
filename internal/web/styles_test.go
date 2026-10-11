@@ -216,26 +216,15 @@ func TestBackLinkMasthead(t *testing.T) {
 	}
 }
 
-func TestPageBackScript(t *testing.T) {
-	jsBytes, err := os.ReadFile("assets/js/page-back.js")
+func TestSiteBackScript(t *testing.T) {
+	jsBytes, err := os.ReadFile("assets/js/site-back.js")
 	if err != nil {
-		t.Fatalf("read page-back.js: %v", err)
+		t.Fatalf("read site-back.js: %v", err)
 	}
 	js := string(jsBytes)
-	for _, marker := range []string{"document.referrer", "location.origin", "history.back()", "event.preventDefault()", "event.metaKey", "event.ctrlKey"} {
+	for _, marker := range []string{`querySelector(".site-back")`, "document.referrer", "location.origin", "history.back()", "event.preventDefault()", "event.metaKey", "event.ctrlKey"} {
 		if !strings.Contains(js, marker) {
-			t.Errorf("page-back.js missing %q", marker)
-		}
-	}
-
-	cssBytes, err := os.ReadFile("styles/input.css")
-	if err != nil {
-		t.Fatalf("read styles: %v", err)
-	}
-	rule := regexp.MustCompile(`(?s)\t\.page-back\s*\{[^}]*\}`).FindString(string(cssBytes))
-	for _, marker := range []string{"width: 44px", "height: 44px"} {
-		if !strings.Contains(rule, marker) {
-			t.Errorf("arrow-only back link needs a 44px target, missing %q: %s", marker, rule)
+			t.Errorf("site-back.js missing %q", marker)
 		}
 	}
 }

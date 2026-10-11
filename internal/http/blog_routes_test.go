@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"regexp"
 	"strings"
 	"testing"
 
@@ -184,7 +183,7 @@ func TestSiteShell(t *testing.T) {
 		`<main id="main-content"`,
 		`class="site-masthead"`,
 		`<a href="/blog" class="site-section" data-section="blog">blog</a>`,
-		`<a href="/" class="site-back" aria-label="Back to home">`,
+		`<a href="/" class="site-back" aria-label="Back">`,
 		`<div id="header-actions" class="header-actions">`,
 		`href="https://github.com/danielscoffee"`,
 		`href="https://www.linkedin.com/in/daniel-reis-santos/"`,
@@ -428,7 +427,7 @@ func TestEditorialArticles(t *testing.T) {
 	}{
 		{path: "/post/hello-world", date: "2026-04-26", rawContent: `<h2>Hello</h2>`},
 		{path: "/projects/side-project", date: "2026-05-01", rawContent: `<p>overview</p>`},
-		{path: "/projects/side-project/rebuild", date: "2026-05-10", rawContent: `<p>rebuild body</p>`, breadcrumb: `href="/projects/side-project"`},
+		{path: "/projects/side-project/rebuild", date: "2026-05-10", rawContent: `<p>rebuild body</p>`, breadcrumb: `<a href="/projects/side-project" class="site-back" aria-label="Back">`},
 		{path: "/about", rawContent: `<p>about text</p>`},
 	}
 
@@ -621,28 +620,36 @@ func TestFavicon(t *testing.T) {
 	}
 }
 
-func TestBackLinks(t *testing.T) {
+func TestNoReturnArrowAboveArticles(t *testing.T) {
 	h := testBlogServer().RegisterRoutes()
-	for path, want := range map[string]string{
-		"/projects/side-project":         `<a class="page-back" href="/projects" aria-label="Back">`,
-		"/projects/side-project/rebuild": `<a class="page-back" href="/projects/side-project" aria-label="Back">`,
-	} {
+	for _, path := range []string{"/post/hello-world", "/projects/side-project", "/projects/side-project/rebuild"} {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
 		body := w.Body.String()
-		assertContainsAll(t, body, []string{`<div class="page-breadcrumb">`, want, `<script defer src="/assets/js/page-back.js?v=1"></script>`})
-		if strings.Index(body, `class="page-breadcrumb"`) > strings.Index(body, `<article class="article-shell`) {
-			t.Errorf("%s: the return link must sit above the article", path)
-		}
-		link := regexp.MustCompile(`(?s)<a class="page-back".*?</a>`).FindString(body)
-		if text := strings.TrimSpace(regexp.MustCompile(`(?s)<[^>]*>`).ReplaceAllString(link, "")); text != "" {
-			t.Errorf("%s: the return link must be the arrow alone, got text %q", path, text)
+		for _, gone := range []string{`class="page-back"`, `class="page-breadcrumb"`, "page-back.js"} {
+			if strings.Contains(body, gone) {
+				t.Errorf("%s: return arrow above the article must be gone, found %q", path, gone)
+			}
 		}
 	}
+}
 
-	w := httptest.NewRecorder()
-	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/post/hello-world", nil))
-	if strings.Contains(w.Body.String(), `class="page-back"`) {
-		t.Error("blog posts must not carry a return arrow above the body")
+func TestMastheadBackFallback(t *testing.T) {
+	h := testBlogServer().RegisterRoutes()
+	for path, parent := range map[string]string{
+		"/blog":                          "/",
+		"/about":                         "/",
+		"/projects":                      "/",
+		"/post/hello-world":              "/blog",
+		"/tag/go":                        "/blog",
+		"/projects/side-project":         "/projects",
+		"/projects/side-project/rebuild": "/projects/side-project",
+	} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		assertContainsAll(t, w.Body.String(), []string{
+			`<a href="` + parent + `" class="site-back" aria-label="Back">`,
+			`<script defer src="/assets/js/site-back.js?v=1"></script>`,
+		})
 	}
 }
