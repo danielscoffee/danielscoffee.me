@@ -145,8 +145,8 @@ func TestSecurityAndCacheHeaders(t *testing.T) {
 
 	asset := httptest.NewRecorder()
 	h.ServeHTTP(asset, httptest.NewRequest(http.MethodGet, "/assets/js/search.js", nil))
-	if got := asset.Header().Get("Cache-Control"); got != "public, no-cache" {
-		t.Fatalf("expected static assets to revalidate, got %q", got)
+	if got := asset.Header().Get("Cache-Control"); got != "public, max-age=0, s-maxage=86400" {
+		t.Fatalf("expected static assets cached at the edge and revalidated by browsers, got %q", got)
 	}
 }
 

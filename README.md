@@ -286,7 +286,7 @@ Draft project indexes are skipped with all subposts. Draft subposts are skipped 
 ## Security Notes
 
 - Security headers include `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, and `X-Frame-Options`.
-- Static assets use long-lived cache headers.
+- Static assets send `Cache-Control: public, max-age=0, s-maxage=86400`: a CDN keeps them for a day, browsers revalidate. Set the CDN to purge everything on deploy.
 - Responses are gzip-compressed when clients advertise `Accept-Encoding: gzip`.
 - Image rendering only accepts HTTPS image URLs whose host contains `cdn`.
 - Parsed content HTML is rendered with `templ.Raw`, so parser output must remain trusted and tested.

@@ -57,9 +57,12 @@ func (s *Server) securityHeadersMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// staticCacheMiddleware lets a shared cache (Railway's CDN) keep assets for a
+// day while browsers revalidate against it. Asset URLs are not fingerprinted,
+// so the CDN must purge everything on deploy.
 func staticCacheMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "public, no-cache")
+		w.Header().Set("Cache-Control", "public, max-age=0, s-maxage=86400")
 		next.ServeHTTP(w, r)
 	})
 }
