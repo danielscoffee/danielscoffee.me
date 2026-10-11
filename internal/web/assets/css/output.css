@@ -1269,6 +1269,13 @@ a {
   overflow-wrap: anywhere;
 }
 
+/* Pages whose title lives in the masthead (About) start at the same
+	   height as the section indexes. */
+
+.article-shell:not(:has(.article-header)) {
+  margin-top: 0;
+}
+
 .article-header,
 	.post-header {
   margin-bottom: 2rem;
@@ -1861,6 +1868,18 @@ a {
   color: rgb(var(--accent-strong));
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 .fixed {

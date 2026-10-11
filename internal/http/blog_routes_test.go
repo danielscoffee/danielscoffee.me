@@ -361,7 +361,7 @@ func TestEditorialIndexes(t *testing.T) {
 		{
 			path: "/blog",
 			markers: []string{
-				`class="page-intro"`, `<h1 class="page-title">Blog</h1>`,
+				`class="page-intro"`, `<h1 class="sr-only">Blog</h1>`,
 				`class="editorial-list post-list"`, `class="editorial-card post-item"`,
 				`<time class="editorial-date" datetime="2026-04-26">2026-04-26</time>`,
 				`href="/post/hello-world"`, `href="/tag/go"`,
@@ -370,7 +370,7 @@ func TestEditorialIndexes(t *testing.T) {
 		{
 			path: "/projects",
 			markers: []string{
-				`class="page-intro"`, `<h1 class="page-title">Projects</h1>`,
+				`class="page-intro"`, `<h1 class="sr-only">Projects</h1>`,
 				`class="editorial-list project-list"`, `class="editorial-card project-item"`,
 				`<time class="editorial-date" datetime="2026-05-01">2026-05-01</time>`,
 				`href="/projects/side-project"`, `href="/projects?tag=go"`,
@@ -429,7 +429,16 @@ func TestEditorialArticles(t *testing.T) {
 				t.Fatalf("expected status 200, got %d", w.Code)
 			}
 			body := w.Body.String()
-			assertContainsAll(t, body, []string{`<article class="article-shell`, `class="article-header`, `class="article-body`, tc.rawContent})
+			assertContainsAll(t, body, []string{`<article class="article-shell`, `class="article-body`, tc.rawContent})
+			if tc.path == "/about" {
+				// The masthead names the section, so About's heading is screen-reader only.
+				assertContainsAll(t, body, []string{`<h1 class="sr-only">About Me</h1>`})
+				if strings.Contains(body, `class="article-header`) {
+					t.Fatal("about page should not repeat a visible title under the masthead")
+				}
+			} else {
+				assertContainsAll(t, body, []string{`class="article-header`})
+			}
 			if tc.date != "" {
 				assertContainsAll(t, body, []string{`<time class="editorial-date" datetime="` + tc.date + `">` + tc.date + `</time>`})
 			}
@@ -455,11 +464,11 @@ func TestPagesExposeStyleHooks(t *testing.T) {
 	}{
 		{
 			path:    "/blog",
-			markers: []string{"page-title", "page-subtitle", "section-title", "post-list", "post-item", "post-link", "tag-chip"},
+			markers: []string{"page-subtitle", "section-title", "post-list", "post-item", "post-link", "tag-chip"},
 		},
 		{
 			path:    "/blog",
-			markers: []string{"page-title", "post-list", "post-meta-row"},
+			markers: []string{"page-subtitle", "post-list", "post-meta-row"},
 		},
 		{
 			path:    "/post/hello-world",

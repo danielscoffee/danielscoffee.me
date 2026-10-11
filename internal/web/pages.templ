@@ -9,6 +9,15 @@ templ PageIntro(title, subtitle string) {
 	</header>
 }
 
+// SectionIntro opens a section index. The masthead already names the
+// section, so the page heading is for screen readers only.
+templ SectionIntro(title, subtitle string) {
+	<header class="page-intro">
+		<h1 class="sr-only">{ title }</h1>
+		<p class="page-subtitle">{ subtitle }</p>
+	</header>
+}
+
 templ TagPageIntro(tag, subtitle string) {
 	<header class="page-intro">
 		<h1 class="page-title">Tagged with <span class="tag-emphasis">{ tag }</span></h1>
@@ -18,7 +27,7 @@ templ TagPageIntro(tag, subtitle string) {
 
 templ BlogIndexPage(posts []content.Post) {
 	@Base("Blog", "All blog posts", "blog") {
-		@PageIntro("Blog", "All writing in one place.")
+		@SectionIntro("Blog", "All writing in one place.")
 		<section class="section-block">
 			<h2 class="section-title">Latest entries</h2>
 			@PostList(posts)
@@ -38,7 +47,7 @@ templ ArticleHeader(title, date string) {
 templ AboutPage(page content.Page) {
 	@Base(page.Title, page.Summary, "about") {
 		<article class="article-shell post-prose">
-			@ArticleHeader(page.Title, "")
+			<h1 class="sr-only">{ page.Title }</h1>
 			<div class="article-body">
 				@templ.Raw(string(page.BodyHTML))
 			</div>
@@ -48,7 +57,7 @@ templ AboutPage(page content.Page) {
 
 templ ProjectsIndexPage(projects []content.Project) {
 	@Base("Projects", "Project notes and builds", "projects") {
-		@PageIntro("Projects", "Build logs, notes, and shipped experiments.")
+		@SectionIntro("Projects", "Build logs, notes, and shipped experiments.")
 		<section class="section-block">
 			@ProjectList(projects)
 		</section>

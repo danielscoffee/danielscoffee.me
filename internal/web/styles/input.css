@@ -680,6 +680,12 @@
 		overflow-wrap: anywhere;
 	}
 
+	/* Pages whose title lives in the masthead (About) start at the same
+	   height as the section indexes. */
+	.article-shell:not(:has(.article-header)) {
+		margin-top: 0;
+	}
+
 	.article-header,
 	.post-header {
 		margin-bottom: 2rem;
