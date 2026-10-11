@@ -2,6 +2,7 @@ package norg
 
 import (
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -210,6 +211,64 @@ func TestParseNorg_FencedCode(t *testing.T) {
 	}
 }
 
+func TestParseNorg_CodeBlockChrome(t *testing.T) {
+	for _, tc := range []struct {
+		name, body, key, label string
+		mark                   string
+	}{
+		{"known", "@code go\nfmt.Println(1)\n@end", "go", "Go", `fill="currentColor"`},
+		{"alias", "@code golang\nfmt.Println(1)\n@end", "go", "Go", `fill="currentColor"`},
+		{"fence", "```sh\necho hi\n```", "bash", "Bash", `fill="currentColor"`},
+		{"unknown", "@code norg\n* heading\n@end", "other", "norg", `stroke="currentColor"`},
+		{"none", "@code\nplain\n@end", "text", "Code", `stroke="currentColor"`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, rendered, err := Parse(norgWithBody(tc.body))
+			if err != nil {
+				t.Fatalf("parse: %v", err)
+			}
+			for _, want := range []string{
+				`<figure class="code-block" data-lang="` + tc.key + `">`,
+				`<figcaption class="code-block-bar"><span class="code-lang"><svg class="code-lang-icon" viewBox="0 0 24 24"`,
+				tc.mark,
+				`<span class="code-lang-name">` + tc.label + `</span>`,
+				`<button class="code-copy" type="button" aria-label="Copy ` + tc.label + ` code" hidden>`,
+				`<span class="code-copy-text">Copy</span></button></figcaption>`,
+				`tabindex="0"`,
+				`</pre></figure>`,
+			} {
+				if !strings.Contains(rendered, want) {
+					t.Fatalf("expected %q in %s", want, rendered)
+				}
+			}
+		})
+	}
+}
+
+func TestParseNorg_CodeBlockLabelIsEscaped(t *testing.T) {
+	_, _, rendered, err := Parse(norgWithBody("@code <b>x\n1\n@end"))
+	if err != nil {
+		t.Fatalf("parse: %v", err)
+	}
+	if strings.Contains(rendered, "<b>x") || !strings.Contains(rendered, `<span class="code-lang-name">&lt;b&gt;x</span>`) {
+		t.Fatalf("language label must be escaped: %s", rendered)
+	}
+}
+
+func TestCodeLanguageMarksAreSafePathData(t *testing.T) {
+	safe := regexp.MustCompile(`^[MmLlHhVvCcSsQqTtAaZz0-9.,\- ]+$`)
+	for key, lang := range codeLanguages {
+		if lang.label == "" || !safe.MatchString(lang.path) {
+			t.Errorf("%s: mark must be plain SVG path data with a label", key)
+		}
+	}
+	for alias, key := range codeLanguageAliases {
+		if _, ok := codeLanguages[key]; !ok {
+			t.Errorf("alias %s points at unknown language %s", alias, key)
+		}
+	}
+}
+
 func TestParseNorg_UnclosedCodeBlockFails(t *testing.T) {
 	raw := `@document.meta
 title: X
@@ -257,6 +316,32 @@ date: 2026-05-01
 	}
 	if !strings.Contains(err.Error(), "invalid task state") {
 		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestParseNorg_InlineCode(t *testing.T) {
+	for _, tc := range []struct {
+		name, body, want, notWant string
+	}{
+		{"plain", "Run `go test ./...` now.", "Run <code>go test ./...</code> now.", "<em>"},
+		{"slashes stay literal", "`/` redirected to `/blog`", "<code>/</code> redirected to <code>/blog</code>", "<em>"},
+		{"html escaped", "`<a href>`", "<code>&lt;a href&gt;</code>", "<a href>"},
+		{"no modifiers inside", "`*not bold*`", "<code>*not bold*</code>", "<strong>"},
+		{"italic skips code", "/italic `a/b` still/", "<em>italic <code>a/b</code> still</em>", ""},
+		{"lone backtick", "a lone ` backtick", "a lone ` backtick", "<code>"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, rendered, err := Parse(norgWithBody(tc.body))
+			if err != nil {
+				t.Fatalf("parse: %v", err)
+			}
+			if !strings.Contains(rendered, tc.want) {
+				t.Fatalf("expected %q in %s", tc.want, rendered)
+			}
+			if tc.notWant != "" && strings.Contains(rendered, tc.notWant) {
+				t.Fatalf("did not expect %q in %s", tc.notWant, rendered)
+			}
+		})
 	}
 }
 

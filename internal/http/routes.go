@@ -31,8 +31,18 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("/rss.xml", s.rssHandler)
 	mux.HandleFunc("/sitemap.xml", s.sitemapHandler)
 	mux.HandleFunc("/robots.txt", s.robotsHandler)
+	mux.HandleFunc("/llms.txt", s.llmsHandler)
 
-	return s.requestLoggingMiddleware(s.securityHeadersMiddleware(s.compressionMiddleware(mux)))
+	return s.requestLoggingMiddleware(s.securityHeadersMiddleware(s.compressionMiddleware(s.pageContextMiddleware(mux))))
+}
+
+// pageContextMiddleware hands templates the public base URL (only when
+// SITE_URL is configured) and the request path, for canonical and share URLs.
+func (s *Server) pageContextMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := web.WithPageContext(r.Context(), web.PageContext{BaseURL: s.canonicalBase, Path: r.URL.Path})
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func (s *Server) securityHeadersMiddleware(next http.Handler) http.Handler {

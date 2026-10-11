@@ -1,0 +1,713 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-11T02:29:59+00:00",
+  "title": "Design System: danielscoffee",
+  "extensions": {
+    "colorMeta": {
+      "oat-paper": {
+        "role": "neutral",
+        "displayName": "Oat Paper",
+        "canonical": "rgb(250 246 238)",
+        "oklch": "oklch(97.4% 0.011 84.6)",
+        "tonalRamp": [
+          "#0d0b06",
+          "#28251f",
+          "#45423b",
+          "#64615a",
+          "#85827b",
+          "#a8a59d",
+          "#cdc9c1",
+          "#f2eee6"
+        ]
+      },
+      "filter-paper": {
+        "role": "neutral",
+        "displayName": "Filter Paper",
+        "canonical": "rgb(255 251 244)",
+        "oklch": "oklch(98.9% 0.010 81.8)",
+        "tonalRamp": [
+          "#0d0b07",
+          "#282520",
+          "#45423c",
+          "#64615b",
+          "#85827c",
+          "#a8a49e",
+          "#ccc9c2",
+          "#f2eee7"
+        ]
+      },
+      "fresh-filter": {
+        "role": "neutral",
+        "displayName": "Fresh Filter",
+        "canonical": "rgb(255 253 248)",
+        "oklch": "oklch(99.4% 0.007 88.6)",
+        "tonalRamp": [
+          "#0c0b08",
+          "#262521",
+          "#43423e",
+          "#63615d",
+          "#84827e",
+          "#a7a5a0",
+          "#cbc9c4",
+          "#f0eee9"
+        ]
+      },
+      "espresso-ink": {
+        "role": "neutral",
+        "displayName": "Espresso Ink",
+        "canonical": "rgb(54 35 25)",
+        "oklch": "oklch(27.7% 0.034 48.6)",
+        "tonalRamp": [
+          "#160601",
+          "#332016",
+          "#513d32",
+          "#725c50",
+          "#947d71",
+          "#b89f93",
+          "#ddc3b6",
+          "#feeae0"
+        ]
+      },
+      "cold-brew": {
+        "role": "neutral",
+        "displayName": "Cold Brew",
+        "canonical": "rgb(105 82 68)",
+        "oklch": "oklch(45.8% 0.038 52.8)",
+        "tonalRamp": [
+          "#170600",
+          "#342013",
+          "#523d2f",
+          "#735c4d",
+          "#957d6e",
+          "#b99f8f",
+          "#dec3b3",
+          "#ffeade"
+        ]
+      },
+      "kraft-line": {
+        "role": "neutral",
+        "displayName": "Kraft Line",
+        "canonical": "rgb(213 193 174)",
+        "oklch": "oklch(82.3% 0.035 65.9)",
+        "tonalRamp": [
+          "#150800",
+          "#312212",
+          "#4f3e2e",
+          "#6f5e4d",
+          "#917f6d",
+          "#b5a18f",
+          "#d9c5b2",
+          "#feebd8"
+        ]
+      },
+      "cinnamon-roast": {
+        "role": "primary",
+        "displayName": "Cinnamon Roast",
+        "canonical": "rgb(159 75 35)",
+        "oklch": "oklch(51.2% 0.124 43.9)",
+        "tonalRamp": [
+          "#1a0400",
+          "#411501",
+          "#6f2901",
+          "#99451c",
+          "#be6740",
+          "#e58a63",
+          "#ffb596",
+          "#feeae1"
+        ]
+      },
+      "cinnamon-roast-deep": {
+        "role": "primary",
+        "displayName": "Cinnamon Roast Deep",
+        "canonical": "rgb(121 52 24)",
+        "oklch": "oklch(41.5% 0.105 41.2)",
+        "tonalRamp": [
+          "#1a0400",
+          "#431300",
+          "#6e2a0c",
+          "#924a2f",
+          "#b76c4f",
+          "#dd8e71",
+          "#ffb599",
+          "#feeae2"
+        ]
+      },
+      "ember-focus": {
+        "role": "primary",
+        "displayName": "Ember Focus",
+        "canonical": "rgb(173 81 32)",
+        "oklch": "oklch(54.3% 0.135 45.4)",
+        "tonalRamp": [
+          "#190500",
+          "#411600",
+          "#6e2a01",
+          "#9c420a",
+          "#c36436",
+          "#e98859",
+          "#ffb694",
+          "#ffe9e0"
+        ]
+      },
+      "latte-foam": {
+        "role": "neutral",
+        "displayName": "Latte Foam",
+        "canonical": "rgb(241 229 211)",
+        "oklch": "oklch(92.7% 0.027 78.2)",
+        "tonalRamp": [
+          "#110a01",
+          "#2c2316",
+          "#4a4032",
+          "#6a6050",
+          "#8b8170",
+          "#afa392",
+          "#d3c7b6",
+          "#f9eddb"
+        ]
+      },
+      "mocha-label": {
+        "role": "neutral",
+        "displayName": "Mocha Label",
+        "canonical": "rgb(91 58 40)",
+        "oklch": "oklch(38.3% 0.055 49.1)",
+        "tonalRamp": [
+          "#180500",
+          "#3a1c0a",
+          "#5a3927",
+          "#7b5845",
+          "#9e7965",
+          "#c39b87",
+          "#e8bfaa",
+          "#ffeadf"
+        ]
+      },
+      "parchment-code": {
+        "role": "neutral",
+        "displayName": "Parchment Code",
+        "canonical": "rgb(239 229 215)",
+        "oklch": "oklch(92.6% 0.022 76.5)",
+        "tonalRamp": [
+          "#100a03",
+          "#2b2419",
+          "#494135",
+          "#686054",
+          "#8a8174",
+          "#ada496",
+          "#d1c8ba",
+          "#f7eddf"
+        ]
+      },
+      "code-ink": {
+        "role": "neutral",
+        "displayName": "Code Ink",
+        "canonical": "rgb(66 42 29)",
+        "oklch": "oklch(31.1% 0.042 49.1)",
+        "tonalRamp": [
+          "#180500",
+          "#361f12",
+          "#553b2e",
+          "#765a4c",
+          "#987b6c",
+          "#bc9e8e",
+          "#e1c2b2",
+          "#feeadf"
+        ]
+      },
+      "roast-shadow": {
+        "role": "neutral",
+        "displayName": "Roast Shadow",
+        "canonical": "rgb(63 40 27)",
+        "oklch": "oklch(30.2% 0.041 50.1)",
+        "tonalRamp": [
+          "#180500",
+          "#351f12",
+          "#543c2e",
+          "#755b4c",
+          "#977c6d",
+          "#bb9e8e",
+          "#e0c2b2",
+          "#ffeadf"
+        ]
+      },
+      "roasted-ground": {
+        "role": "neutral",
+        "displayName": "Roasted Ground",
+        "canonical": "rgb(27 20 16)",
+        "oklch": "oklch(19.9% 0.014 51.3)",
+        "tonalRamp": [
+          "#100a06",
+          "#2b231f",
+          "#48403b",
+          "#685f5a",
+          "#8a807b",
+          "#ada39d",
+          "#d1c7c1",
+          "#f7ece6"
+        ]
+      },
+      "dark-roast": {
+        "role": "neutral",
+        "displayName": "Dark Roast",
+        "canonical": "rgb(38 28 23)",
+        "oklch": "oklch(23.7% 0.018 47.9)",
+        "tonalRamp": [
+          "#120905",
+          "#2d221d",
+          "#4b3f3a",
+          "#6a5e58",
+          "#8c7f79",
+          "#afa29b",
+          "#d4c6bf",
+          "#faebe4"
+        ]
+      },
+      "medium-roast": {
+        "role": "neutral",
+        "displayName": "Medium Roast",
+        "canonical": "rgb(50 37 29)",
+        "oklch": "oklch(27.7% 0.024 53.0)",
+        "tonalRamp": [
+          "#130803",
+          "#2f221a",
+          "#4d3f36",
+          "#6d5e55",
+          "#8f7f75",
+          "#b2a197",
+          "#d7c5bb",
+          "#fdeae0"
+        ]
+      },
+      "cream": {
+        "role": "neutral",
+        "displayName": "Cream",
+        "canonical": "rgb(244 231 211)",
+        "oklch": "oklch(93.3% 0.030 78.8)",
+        "tonalRamp": [
+          "#120900",
+          "#2d2314",
+          "#4b4030",
+          "#6b5f4e",
+          "#8c816e",
+          "#afa390",
+          "#d4c7b4",
+          "#faedd9"
+        ]
+      },
+      "milky-tan": {
+        "role": "neutral",
+        "displayName": "Milky Tan",
+        "canonical": "rgb(190 166 143)",
+        "oklch": "oklch(74.0% 0.043 65.9)",
+        "tonalRamp": [
+          "#150800",
+          "#33210d",
+          "#523d29",
+          "#725d48",
+          "#947e68",
+          "#b8a089",
+          "#ddc4ad",
+          "#feebd8"
+        ]
+      },
+      "burnt-kraft": {
+        "role": "neutral",
+        "displayName": "Burnt Kraft",
+        "canonical": "rgb(91 70 57)",
+        "oklch": "oklch(41.3% 0.036 53.2)",
+        "tonalRamp": [
+          "#160700",
+          "#332014",
+          "#513d30",
+          "#725c4e",
+          "#947d6f",
+          "#b89f91",
+          "#ddc3b4",
+          "#feeade"
+        ]
+      },
+      "caramel-crema": {
+        "role": "primary",
+        "displayName": "Caramel Crema",
+        "canonical": "rgb(226 151 86)",
+        "oklch": "oklch(73.9% 0.121 60.1)",
+        "tonalRamp": [
+          "#160700",
+          "#3a1c00",
+          "#633502",
+          "#8f4e00",
+          "#b66f2b",
+          "#dc9251",
+          "#ffb87d",
+          "#feeadb"
+        ]
+      },
+      "caramel-crema-light": {
+        "role": "primary",
+        "displayName": "Caramel Crema Light",
+        "canonical": "rgb(244 184 119)",
+        "oklch": "oklch(82.4% 0.107 67.6)",
+        "tonalRamp": [
+          "#140800",
+          "#371f00",
+          "#5f3800",
+          "#895302",
+          "#ad7533",
+          "#d29857",
+          "#f8bc7b",
+          "#feebd7"
+        ]
+      },
+      "caramel-focus": {
+        "role": "primary",
+        "displayName": "Caramel Focus",
+        "canonical": "rgb(236 159 91)",
+        "oklch": "oklch(76.5% 0.125 60.7)",
+        "tonalRamp": [
+          "#150700",
+          "#3a1d01",
+          "#623502",
+          "#8f4f00",
+          "#b76e26",
+          "#dd914d",
+          "#ffb87c",
+          "#ffeada"
+        ]
+      },
+      "dark-latte-foam": {
+        "role": "neutral",
+        "displayName": "Dark Latte Foam",
+        "canonical": "rgb(61 44 34)",
+        "oklch": "oklch(31.0% 0.031 51.7)",
+        "tonalRamp": [
+          "#150702",
+          "#312117",
+          "#503e33",
+          "#705d52",
+          "#927e72",
+          "#b5a094",
+          "#dac4b7",
+          "#feeadf"
+        ]
+      },
+      "dark-mocha-label": {
+        "role": "neutral",
+        "displayName": "Dark Mocha Label",
+        "canonical": "rgb(225 199 171)",
+        "oklch": "oklch(84.4% 0.048 69.2)",
+        "tonalRamp": [
+          "#140800",
+          "#342008",
+          "#533d25",
+          "#735d43",
+          "#967e63",
+          "#b9a085",
+          "#dec4a8",
+          "#ffebd5"
+        ]
+      },
+      "grounds-code": {
+        "role": "neutral",
+        "displayName": "Grounds",
+        "canonical": "rgb(22 16 13)",
+        "oklch": "oklch(18.0% 0.012 48.0)",
+        "tonalRamp": [
+          "#0f0a07",
+          "#2a2320",
+          "#48403d",
+          "#675f5b",
+          "#89807c",
+          "#aca39f",
+          "#d0c7c3",
+          "#f6ece8"
+        ]
+      },
+      "dark-code-ink": {
+        "role": "neutral",
+        "displayName": "Dark Code Ink",
+        "canonical": "rgb(238 216 190)",
+        "oklch": "oklch(89.4% 0.042 71.9)",
+        "tonalRamp": [
+          "#130900",
+          "#32210c",
+          "#503e28",
+          "#715e47",
+          "#937f67",
+          "#b6a188",
+          "#dbc5ac",
+          "#feebd5"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "brand": {
+        "displayName": "Brand",
+        "purpose": "The danielscoffee masthead mark only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page and article titles. Currently sans by drift; see DESIGN.md Typography."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section headings on index pages."
+      },
+      "board-title": {
+        "displayName": "Board Title",
+        "purpose": "Home menu board title, serif."
+      },
+      "board-row": {
+        "displayName": "Board Row",
+        "purpose": "Door names and the intro line on the home menu board."
+      },
+      "card-title": {
+        "displayName": "Card Title",
+        "purpose": "Post and project card titles."
+      },
+      "body-prose": {
+        "displayName": "Body Prose",
+        "purpose": "Article bodies at a 68ch measure."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "UI copy, summaries, subtitles."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Nav links, toggles, social links. 500 resolves to the shipped 400 cut."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Code blocks and inline code."
+      }
+    },
+    "shadows": [
+      {
+        "name": "resting-sheet",
+        "value": "0 0.25rem 0.9rem rgb(var(--shadow-color) / 0.06)",
+        "purpose": "Cards and devlog tiles at rest."
+      },
+      {
+        "name": "lifted-sheet",
+        "value": "0 0.4rem 1.2rem rgb(var(--shadow-color) / 0.09)",
+        "purpose": "Card hover and focus-within, with translateY(-1px)."
+      },
+      {
+        "name": "board",
+        "value": "0 0.25rem 0.9rem rgb(var(--shadow-color) / 0.06)",
+        "purpose": "Menu board; weight comes from tone, not shadow."
+      },
+      {
+        "name": "dialog",
+        "value": "0 1.5rem 4rem rgb(var(--shadow-color) / 0.28)",
+        "purpose": "Search dialog only, over a 58% roast-shadow backdrop."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "180ms ease",
+        "purpose": "Color, border, background, shadow, and 1px lift transitions."
+      },
+      {
+        "name": "frame-grow",
+        "value": "0.3s ease-out",
+        "purpose": "Scene plate width/height 96px to 192px on hover and focus-visible. Deliberate exception to 180ms; held while the intro plays; none on touch."
+      },
+      {
+        "name": "board-intro-out",
+        "value": "350ms ease-out, 4.6s delay",
+        "purpose": "Intro line fades out once per session."
+      },
+      {
+        "name": "board-row-in",
+        "value": "400ms cubic-bezier(0.16, 1, 0.3, 1), 4.65s delay, 80ms stagger",
+        "purpose": "Rows settle up 0.5rem; sequence ends near 5.2s. Skipped on repeat visits, on any key/click/focus, and under reduced motion."
+      },
+      {
+        "name": "ease-reveal",
+        "value": "160ms ease",
+        "purpose": "Spoiler text reveal."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "All animation and transition durations under prefers-reduced-motion: reduce."
+      },
+      {
+        "name": "section-view-transition",
+        "value": "450ms cubic-bezier(0.2, 0, 0, 1); root crossfade 220ms",
+        "purpose": "Cross-document view transition: each door name on / shares view-transition-name section-<name> with the matching section label, gliding 450ms while the page crossfades 220ms; unpartnered names fade at 220ms. Off under reduced motion."
+      },
+      {
+        "name": "theme-crossfade",
+        "value": "700ms cubic-bezier(0.45, 0, 0.55, 1)",
+        "purpose": "Theme switch: whole-page crossfade via a same-document view transition typed 'theme' (fallback: colour transitions under html.theme-fading). Kept under reduced motion; it moves nothing."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "xs",
+        "value": "480px"
+      },
+      {
+        "name": "sm",
+        "value": "560px"
+      },
+      {
+        "name": "md",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "900px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Borderless masthead action (theme toggle, search trigger) with a key hint.",
+      "html": "<button class=\"ds-btn-ghost\" type=\"button\">Search <span class=\"ds-kbd\">Ctrl+K</span></button>",
+      "css": ".ds-btn-ghost { display: inline-flex; min-height: 44px; align-items: center; padding: 0.35rem 0.55rem; border: 0; background: transparent; color: rgb(var(--muted)); font: 500 0.82rem \"Source Sans 3\", system-ui, sans-serif; cursor: pointer; transition: color 180ms ease; } .ds-btn-ghost:hover, .ds-btn-ghost:focus-visible { color: rgb(var(--accent-strong)); } .ds-btn-ghost:focus-visible { outline: 3px solid rgb(var(--focus)); outline-offset: 3px; } .ds-kbd { margin-left: 0.35rem; padding: 0.08rem 0.3rem; border: 1px solid rgb(var(--border)); border-radius: 0.375rem; font-size: 0.65rem; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Small-radius 44px square outlined button; used for the search dialog close.",
+      "html": "<button class=\"ds-btn-outline\" type=\"button\">Close</button>",
+      "css": ".ds-btn-outline { min-width: 44px; min-height: 44px; padding: 0 0.6rem; border: 1px solid rgb(var(--border)); border-radius: 0.375rem; background: transparent; color: rgb(var(--text)); font: 400 0.9rem \"Source Sans 3\", system-ui, sans-serif; cursor: pointer; transition: border-color 180ms ease, color 180ms ease; } .ds-btn-outline:hover { border-color: rgb(var(--accent)); color: rgb(var(--accent-strong)); } .ds-btn-outline:focus-visible { outline: 3px solid rgb(var(--focus)); outline-offset: 3px; }"
+    },
+    {
+      "name": "Editorial Card",
+      "kind": "card",
+      "refersTo": "card-editorial",
+      "description": "Filter-paper sheet for a post or project: serif title link, muted summary, date and tag chips; softly lifts on hover.",
+      "html": "<article class=\"ds-card\"><h3 class=\"ds-card-title\"><a href=\"#\">How I rebuilt the blog engine</a></h3><p class=\"ds-card-summary\">From a static generator to Go, templ, and a hand-written Neorg parser.</p><div class=\"ds-card-meta\"><time class=\"ds-card-date\">2026-05-19</time><a class=\"ds-chip\" href=\"#\">go</a><a class=\"ds-chip\" href=\"#\">devlog</a></div></article>",
+      "css": ".ds-card { display: flex; flex-direction: column; max-width: 28rem; padding: clamp(1.25rem, 3vw, 1.75rem); border: 1px solid rgb(var(--border)); border-radius: 0.75rem; background: rgb(var(--surface)); box-shadow: 0 0.25rem 0.9rem rgb(var(--shadow-color) / 0.06); transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; } .ds-card:hover { border-color: rgb(var(--accent) / 0.55); box-shadow: 0 0.4rem 1.2rem rgb(var(--shadow-color) / 0.09); transform: translateY(-1px); } .ds-card-title { margin: 0; font: 600 clamp(1.3rem, 3vw, 1.55rem) / 1.25 \"Source Serif 4\", Georgia, serif; letter-spacing: -0.015em; } .ds-card-title a { color: rgb(var(--accent-strong)); text-decoration: underline; text-decoration-color: rgb(var(--border)); text-decoration-thickness: 1px; text-underline-offset: 0.2em; } .ds-card-title a:hover, .ds-card-title a:focus-visible { color: rgb(var(--text)); text-decoration-color: currentColor; } .ds-card-summary { margin: 0.65rem 0 0; line-height: 1.7; color: rgb(var(--muted)); } .ds-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem 0.85rem; padding-top: 1rem; } .ds-card-date { font-size: 0.875rem; color: rgb(var(--muted)); } .ds-chip { border-radius: 0.375rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; text-decoration: none; background: rgb(var(--chip-bg)); color: rgb(var(--chip-text)); } .ds-chip:hover, .ds-chip:focus-visible { color: rgb(var(--accent-strong)); }"
+    },
+    {
+      "name": "Tag Chip",
+      "kind": "chip",
+      "refersTo": "tag-chip",
+      "description": "Latte-foam tag link to a tag page.",
+      "html": "<a class=\"ds-tag-chip\" href=\"#\">distributed-systems</a>",
+      "css": ".ds-tag-chip { display: inline-block; border-radius: 0.375rem; padding: 0.25rem 0.5rem; font: 400 0.75rem \"Source Sans 3\", system-ui, sans-serif; text-decoration: none; background: rgb(var(--chip-bg)); color: rgb(var(--chip-text)); transition: color 180ms ease; } .ds-tag-chip:hover, .ds-tag-chip:focus-visible { color: rgb(var(--accent-strong)); } .ds-tag-chip:focus-visible { outline: 3px solid rgb(var(--focus)); outline-offset: 3px; }"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "48px oat-paper field set into the search dialog; focus turns the border cinnamon with an ember outline.",
+      "html": "<label class=\"ds-search-label\" for=\"ds-search\">Search posts and projects</label><input id=\"ds-search\" class=\"ds-search-input\" type=\"search\" placeholder=\"Try: blog accessibility\">",
+      "css": ".ds-search-label { display: block; margin-bottom: 0.4rem; font: 600 0.85rem \"Source Sans 3\", system-ui, sans-serif; color: rgb(var(--text)); } .ds-search-input { width: 100%; min-height: 48px; border: 1px solid rgb(var(--border)); border-radius: 0.375rem; background: rgb(var(--bg)); color: rgb(var(--text)); padding: 0.7rem 0.85rem; font: 400 1rem \"Source Sans 3\", system-ui, sans-serif; } .ds-search-input:focus { border-color: rgb(var(--accent)); outline: 2px solid rgb(var(--focus)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Menu Board",
+      "kind": "custom",
+      "refersTo": "menu-board",
+      "description": "The home menu: brand title and photo doors set straight on the page, top-left, with dotted leaders; frames grow 96px to 192px on hover.",
+      "html": "<section class=\"ds-board\"><h2 class=\"ds-board-title\">danielscoffee</h2><ul class=\"ds-board-rows\"><li><a class=\"ds-board-door\" href=\"#\"><span class=\"ds-plate\"><img src=\"/assets/img/scenes/cafe-table.jpg\" alt=\"\" width=\"192\" height=\"192\"></span><span class=\"ds-door-name\">Blog</span><span class=\"ds-leader\"></span><span class=\"ds-route\">/blog</span></a></li></ul></section>",
+      "css": ".ds-board { width: 100%; color: rgb(var(--text)); } .ds-board-title { color: rgb(var(--accent-strong)); margin: 0; padding-bottom: 0.85rem; font: 600 clamp(2rem, 5vw, 2.5rem) / 1.1 \"Source Serif 4\", Georgia, serif; letter-spacing: -0.015em; } .ds-board-rows { list-style: none; margin: 0.5rem 0 0; padding: 0; } .ds-board-door { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; min-height: 44px; padding-block: 0.75rem; color: inherit; text-decoration: none; } .ds-board-door:focus-visible { outline: 3px solid rgb(var(--focus)); outline-offset: 4px; } .ds-plate { position: relative; flex: none; width: 96px; height: 96px; overflow: hidden; background: rgb(var(--chip-bg)); transition: width 0.3s ease-out, height 0.3s ease-out; } .ds-plate svg { position: absolute; top: 50%; left: 50%; max-width: none; transform: translate(-50%, -50%); } .ds-board-door:hover .ds-plate, .ds-board-door:focus-visible .ds-plate { width: 192px; height: 192px; } .ds-door-name { font: 600 clamp(1.5rem, 4vw, 2rem) / 1.15 \"Source Serif 4\", Georgia, serif; letter-spacing: -0.015em; } .ds-leader { flex: 1 1 1.5rem; min-width: 1.5rem; margin-top: 0.7rem; border-bottom: 2px dotted rgb(var(--muted) / 0.6); transition: border-color 180ms ease; } .ds-route { color: rgb(var(--muted)); font: 400 0.82rem \"Source Sans 3\", system-ui, sans-serif; letter-spacing: 0.02em; transition: color 180ms ease; } .ds-board-door:hover .ds-route, .ds-board-door:focus-visible .ds-route { color: rgb(var(--text)); } .ds-board-door:hover .ds-leader, .ds-board-door:focus-visible .ds-leader { border-bottom-color: rgb(var(--text) / 0.8); }"
+    },
+    {
+      "name": "Search Dialog",
+      "kind": "custom",
+      "refersTo": "dialog-search",
+      "description": "Signature command palette: topmost fresh-filter sheet with the only deep shadow in the system.",
+      "html": "<div class=\"ds-dialog\"><div class=\"ds-dialog-head\"><h2>Search site</h2><button class=\"ds-dialog-close\" type=\"button\">Close</button></div><input class=\"ds-dialog-input\" type=\"search\" placeholder=\"Try: blog accessibility\"><ul class=\"ds-dialog-results\"><li><a href=\"#\"><span class=\"ds-dialog-type\">Project</span><span class=\"ds-dialog-title\">Search ranking devlog</span></a></li></ul></div>",
+      "css": ".ds-dialog { width: min(42rem, 100%); display: grid; gap: 0.8rem; padding: 1.15rem; border: 1px solid rgb(var(--border)); border-radius: 0.75rem; background: rgb(var(--surface-raised)); color: rgb(var(--text)); box-shadow: 0 1.5rem 4rem rgb(var(--shadow-color) / 0.28); } .ds-dialog-head { display: flex; align-items: center; justify-content: space-between; } .ds-dialog-head h2 { margin: 0; font: 600 1.25rem \"Source Serif 4\", Georgia, serif; } .ds-dialog-close { min-width: 44px; min-height: 44px; border: 1px solid rgb(var(--border)); border-radius: 0.375rem; background: transparent; color: rgb(var(--text)); } .ds-dialog-input { min-height: 48px; border: 1px solid rgb(var(--border)); border-radius: 0.375rem; background: rgb(var(--bg)); color: rgb(var(--text)); padding: 0.7rem 0.85rem; font-size: 1rem; } .ds-dialog-input:focus { border-color: rgb(var(--accent)); outline: 2px solid rgb(var(--focus)); outline-offset: 2px; } .ds-dialog-results { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; } .ds-dialog-results a { display: block; min-height: 44px; padding: 0.65rem 0.75rem; border: 1px solid rgb(var(--border)); border-radius: 0.375rem; background: rgb(var(--surface)); color: rgb(var(--text)); text-decoration: none; } .ds-dialog-results a:hover, .ds-dialog-results a:focus-visible { border-color: rgb(var(--accent)); } .ds-dialog-type { display: block; font-size: 0.72rem; color: rgb(var(--muted)); text-transform: uppercase; letter-spacing: 0.03em; } .ds-dialog-title { display: block; margin-top: 0.2rem; font-size: 0.92rem; font-weight: 600; }"
+    },
+    {
+      "name": "Section Header",
+      "kind": "nav",
+      "refersTo": "site-section",
+      "description": "Inner-page masthead: section label at left, theme and search, icon-only back arrow at the far right.",
+      "html": "<header class=\"ds-masthead\"><a class=\"ds-section\" href=\"#\">blog</a><span class=\"ds-actions\"><button class=\"ds-ghost\" type=\"button\">Theme: Light</button><button class=\"ds-ghost\" type=\"button\">Search</button><a class=\"ds-back\" href=\"#\" aria-label=\"Back to home\"><svg class=\"ds-back-arrow\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 8H2.5\"/><path d=\"M7 3.5 2.5 8 7 12.5\"/></svg></a></span></header>",
+      "css": ".ds-masthead { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4.5rem; } .ds-section { display: inline-flex; min-height: 44px; align-items: center; color: rgb(var(--accent-strong)); font: 600 1.05rem \"Source Serif 4\", Georgia, serif; text-decoration: none; } .ds-section:hover, .ds-section:focus-visible { color: rgb(var(--text)); } .ds-actions { display: flex; align-items: center; gap: 0.2rem; margin-left: auto; } .ds-ghost { display: inline-flex; min-height: 44px; align-items: center; padding: 0.35rem 0.55rem; border: 0; background: transparent; color: rgb(var(--muted)); font: 500 0.82rem \"Source Sans 3\", system-ui, sans-serif; } .ds-back { display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center; color: rgb(var(--muted)); transition: color 180ms ease; } .ds-back-arrow { width: 1.1rem; height: 1.1rem; transition: transform 180ms ease; } .ds-back:hover, .ds-back:focus-visible { color: rgb(var(--accent-strong)); } .ds-back:hover .ds-back-arrow, .ds-back:focus-visible .ds-back-arrow { transform: translateX(-3px); } .ds-masthead a:focus-visible { outline: 3px solid rgb(var(--focus)); outline-offset: 3px; }"
+    },
+    {
+      "name": "Code Block",
+      "kind": "custom",
+      "refersTo": "code-block",
+      "description": "Highlighted code under a caption bar with a monochrome language mark, the language name, and a copy button.",
+      "html": "<figure class=\"ds-code\"><figcaption class=\"ds-code-bar\"><span class=\"ds-code-lang\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 7l-5 5 5 5\"/><path d=\"M16 7l5 5-5 5\"/><path d=\"M13.5 4l-3 16\"/></svg>Go</span><button class=\"ds-code-copy\" type=\"button\">Copy</button></figcaption><pre>fmt.Println(\"brewing\")</pre></figure>",
+      "css": ".ds-code { margin: 0; border: 1px solid rgb(var(--border)); border-radius: 0.5rem; background: rgb(var(--code-bg)); color: rgb(var(--code-text)); } .ds-code-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 0.35rem 0 0.9rem; border-bottom: 1px solid rgb(var(--border)); color: rgb(var(--muted)); font: 500 0.82rem \"Source Sans 3\", system-ui, sans-serif; } .ds-code-lang { display: inline-flex; min-height: 44px; align-items: center; gap: 0.5rem; } .ds-code-lang svg { width: 1rem; height: 1rem; } .ds-code-copy { min-height: 44px; padding: 0 0.55rem; border: 0; background: transparent; color: rgb(var(--muted)); font: inherit; cursor: pointer; transition: color 180ms ease; } .ds-code-copy:hover, .ds-code-copy:focus-visible { color: rgb(var(--accent-strong)); } .ds-code pre { margin: 0; padding: 1rem; font: 0.875rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Roaster's Notebook",
+    "overview": "A working engineer's log kept on warm paper in espresso ink. The site reads like a notebook that lives next to the grinder: precise, honest, a little stained by use. Personality comes from the coffee identity and nowhere else: the palette is roasted, the dark mode is a darker roast rather than a black screen, and the brand mark is set in the same serif as the writing. Everything else is in service of reading long technical prose.\n\nThe home page is the notebook's cover: a single espresso menu board with three framed doors, set outside the masthead-and-footer shell used by every other page.\n\nDensity is calm. Index pages are a wide shell of paper cards; reading pages narrow to a 68-character measure. Components are warm and tactile: cards are sheets of filter paper with a faint warm shadow, chips are dabs of latte foam, and hover is a gentle physical lift rather than a color explosion. Controls stay quiet in muted sans until touched.\n\nThis system rejects three looks outright: generic SaaS (gradient heroes, glass cards, purple/blue tech palettes), the hacker terminal (neon on black, scanlines, matrix green), and the platform-default Medium/Substack template that carries no identity of its own.",
+    "keyCharacteristics": [
+      "Warm paper neutrals and espresso ink; a single cinnamon-roast accent.",
+      "Dark mode is roasted brown, never neutral grey or black.",
+      "Serif for what you read, sans for what you operate.",
+      "Flat paper surfaces, softly lifted; one deep shadow reserved for the search dialog.",
+      "Gently rounded corners, 44px touch targets, visible ember focus rings.",
+      "Self-hosted fonts, no external runtime assets.",
+      "One signature surface, the menu board, carries the site's framing; inner pages stay paper."
+    ],
+    "rules": [
+      {
+        "name": "The Unboxed Menu Rule",
+        "body": "The home menu is never put in a panel, card, or block, and draws no rules or hairlines. The title and doors sit directly on the page, anchored top-left with leaders running to the right margin, and the scene plates are square, borderless, and shadowless, in the spirit of borretti.me.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Roast Rule",
+        "body": "Cinnamon Roast (Caramel Crema in the dark) is the only accent hue in the interface. A second chrome accent dilutes the identity; syntax and task colors stay inside content.",
+        "section": "colors"
+      },
+      {
+        "name": "The Roasted, Not Black Rule",
+        "body": "Dark surfaces are browns with warm undertones (`27 20 16` and up). Neutral greys and pure black are prohibited on surfaces.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink and Label Rule",
+        "body": "The serif carries what you read (prose, card titles, the brand); the sans carries what you operate (navigation, metadata, controls, dates).",
+        "section": "typography"
+      },
+      {
+        "name": "The Measure Rule",
+        "body": "Running prose never exceeds 68ch.",
+        "section": "typography"
+      },
+      {
+        "name": "The Soft Lift Rule",
+        "body": "At rest, a sheet barely casts a shadow. Interaction lifts it by one pixel and a few percent of shadow. Only the search dialog floats.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Gentle Corner Rule",
+        "body": "Two radii do the work: 6px for things you press, 12px for things you read. The home menu's scene plates are the one square exception.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do apply color as `rgb(var(--token))` or `rgb(var(--token) / alpha)`; never hard-code a channel value in a component.",
+      "Do define every new token for light, dark, and system-dark at once.",
+      "Do keep every interactive target at 44px minimum and keep the 3px Ember Focus outline visible.",
+      "Do keep prose at the 68ch measure and in Source Serif 4.",
+      "Do use 180ms ease for color, border, background, and lift transitions, and let `prefers-reduced-motion` collapse them.",
+      "Do keep the theme switch as a 700ms whole-page crossfade on `cubic-bezier(0.45, 0, 0.55, 1)`; it protects eyes from a full-screen brightness flip, and it is the second named exception to 180ms.",
+      "Do treat the scene-plate frame-grow (0.3s ease-out) as the first named exception to 180ms; it is a size change that needs the longer travel. Any other motion longer than 180ms needs the same explicit justification.",
+      "Do keep the board intro single-shot: the intro line holds for about 4.6s and fades out (350ms), then the three rows settle upward over 400ms with an 80ms stagger, finishing near 5.2s; it plays once per tab session, any key, click, or focus skips it, and `prefers-reduced-motion` skips it entirely.",
+      "Do crop scene photos for the frame: the subject sits inside the central 100-300 window of the 400×400 crop so the 96px rest frame shows it whole, and the outer ring adds the context revealed on grow. Use only CC0 or equivalent photos, self-hosted, under 60KB, with the source embedded and listed in CREDITS.md.",
+      "Do keep the inner-page header to the section label, theme, search, and the back arrow; section navigation lives on the home board.",
+      "Do edit `internal/web/styles/input.css` and `.templ` sources; `output.css` is generated.",
+      "Do keep coffee motifs in the site's framing (home, masthead, footer, empty and error states), where they say who wrote this, and keep them out of article bodies."
+    ],
+    "donts": [
+      "Don't use generic SaaS styling: gradient heroes, glassmorphism cards, purple/blue tech palettes, centered marketing blocks.",
+      "Don't use a hacker-terminal look: neon on black, monospace everything, scanlines, matrix green.",
+      "Don't settle for a platform-default Medium/Substack reading template with no identity of its own.",
+      "Don't introduce a second accent hue in site chrome (The One Roast Rule).",
+      "Don't use neutral grey or pure black surfaces in dark mode (The Roasted, Not Black Rule).",
+      "Don't load fonts, images, or scripts from external origins at runtime, or add inline scripts; the CSP forbids it.",
+      "Don't use scene plates or the menu board outside framing surfaces such as the home page.",
+      "Don't cast heavy shadows on anything but the search dialog (The Soft Lift Rule)."
+    ]
+  }
+}

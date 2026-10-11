@@ -1,8 +1,6 @@
 (() => {
   const key = "theme-preference";
-  const modes = ["system", "light", "dark"];
   const labels = {
-    system: "System",
     light: "Light",
     dark: "Dark",
   };
@@ -11,13 +9,16 @@
   const button = document.getElementById("theme-toggle");
   if (!button) return;
 
-  const normalize = (value) => (modes.includes(value) ? value : "system");
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
 
+  // A saved light/dark choice wins; with none, the page follows the OS
+  // (data-theme="system") and the button shows what that resolves to.
   const readPreference = () => {
     try {
-      return normalize(localStorage.getItem(key));
+      const stored = localStorage.getItem(key);
+      return stored === "light" || stored === "dark" ? stored : null;
     } catch {
-      return normalize(root.getAttribute("data-theme"));
+      return null;
     }
   };
 
@@ -29,31 +30,49 @@
     }
   };
 
-  const apply = (value) => {
-    const mode = normalize(value);
-    root.setAttribute("data-theme", mode);
+  let preference = readPreference();
+  const effective = () => preference || (media.matches ? "dark" : "light");
+
+  const render = () => {
+    root.setAttribute("data-theme", preference || "system");
+    const mode = effective();
     const label = `Theme: ${labels[mode]}`;
-    button.textContent = labels[mode];
+    button.textContent = label;
     button.setAttribute("aria-label", label);
     button.dataset.themeMode = mode;
   };
 
-  const cycle = (value) => {
-    const idx = modes.indexOf(normalize(value));
-    return modes[(idx + 1) % modes.length];
+  render();
+
+  const switchTheme = () => {
+    preference = effective() === "dark" ? "light" : "dark";
+    writePreference(preference);
+    render();
   };
 
-  apply(readPreference());
+  // Switching crossfades the whole page over 700ms so screen brightness
+  // ramps instead of flipping. Browsers with typed view transitions fade a
+  // snapshot of the page; the rest ease their colors under .theme-fading.
+  const fadeMs = 700;
+  const typedTransitions =
+    typeof document.startViewTransition === "function" &&
+    typeof CSS !== "undefined" &&
+    CSS.supports("selector(:active-view-transition-type(theme))");
+  let fadeTimer = 0;
 
   button.addEventListener("click", () => {
-    const next = cycle(readPreference());
-    writePreference(next);
-    apply(next);
+    if (typedTransitions) {
+      document.startViewTransition({ update: switchTheme, types: ["theme"] });
+      return;
+    }
+    root.classList.add("theme-fading");
+    switchTheme();
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(() => root.classList.remove("theme-fading"), fadeMs);
   });
 
-  const media = window.matchMedia("(prefers-color-scheme: dark)");
   const handleSchemeChange = () => {
-    if (readPreference() === "system") apply("system");
+    if (!preference) render();
   };
 
   if (typeof media.addEventListener === "function") {

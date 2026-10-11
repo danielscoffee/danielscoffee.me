@@ -13,7 +13,7 @@ func (s *Server) homeHandler(w http.ResponseWriter, r *http.Request) {
 		s.renderNotFound(w, r)
 		return
 	}
-	http.Redirect(w, r, "/blog", http.StatusFound)
+	s.renderComponent(w, r, web.HomePage())
 }
 
 func (s *Server) blogIndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -26,10 +26,11 @@ func (s *Server) aboutHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) projectsIndexHandler(w http.ResponseWriter, r *http.Request) {
 	projects := s.projectStore.All()
-	if tag := strings.TrimSpace(r.URL.Query().Get("tag")); tag != "" {
+	tag := strings.TrimSpace(r.URL.Query().Get("tag"))
+	if tag != "" {
 		projects = s.projectStore.ByTag(tag)
 	}
-	s.renderComponent(w, r, web.ProjectsIndexPage(projects))
+	s.renderComponent(w, r, web.ProjectsIndexPage(projects, tag))
 }
 
 func (s *Server) projectsTreeHandler(w http.ResponseWriter, r *http.Request) {

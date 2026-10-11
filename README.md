@@ -58,7 +58,7 @@ draft: false
 Body content.
 ```
 
-Supported body features include headings, paragraphs, ordered/unordered lists, task states, tables, blockquotes, definition lists, inline formatting, code blocks with Chroma highlighting, and CDN-hosted images.
+Supported body features include headings, paragraphs, ordered/unordered lists, task states, tables, blockquotes, definition lists, inline formatting and inline code, code blocks with Chroma highlighting (each with a language label, a Simple Icons mark, and a copy button), and CDN-hosted images.
 
 Slugs and tags must use lowercase letters, numbers, and single hyphens. Dates must use `YYYY-MM-DD`.
 
@@ -73,7 +73,7 @@ Task states:
 
 ## Routes
 
-- `/` redirects to `/blog`
+- `/` shows the home page: a menu board linking to Blog, Projects, and About
 - `/blog` lists blog posts
 - `/post/{slug}` shows a blog post
 - `/tag/{tag}` lists posts by tag
@@ -120,7 +120,7 @@ Environment variables:
 | Variable | Default | Description |
 | --- | --- | --- |
 | `PORT` | `8080` | HTTP port |
-| `SITE_URL` | `http://localhost:<PORT>` | Absolute base URL for feeds/sitemap |
+| `SITE_URL` | `http://localhost:<PORT>` | Public base URL for feeds, sitemap, and robots.txt, plus canonical and share (Open Graph) URLs. Required in production: when unset, pages omit canonical and share URLs and the app logs a warning. |
 | `APP_ENV` | `local` in `.env.example` | Runtime environment label for compose/deploy |
 | `LOG_FORMAT` | `json` | `json` or `text` |
 | `LOG_LEVEL` | `info` | zerolog level such as `debug`, `info`, `warn`, `error` |

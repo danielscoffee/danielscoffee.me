@@ -213,11 +213,16 @@
 	.masthead-inner {
 		min-height: 4.5rem;
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 1.25rem;
+		justify-content: space-between;
+		gap: 0.25rem 1rem;
+		padding-block: 0.875rem;
 	}
 
-	.site-brand {
+	/* Left: the current section, linking to its index. It shares a
+	   view-transition name with the matching door name on /. */
+	.site-section {
 		display: inline-flex;
 		min-height: 44px;
 		align-items: center;
@@ -226,57 +231,42 @@
 		text-decoration: none;
 		white-space: nowrap;
 	}
-	.mobile-menu {
-		display: none;
+	.site-section:hover,
+	.site-section:focus-visible {
+		color: rgb(var(--text));
 	}
-	.mobile-menu-toggle {
-		display: flex;
-		width: fit-content;
-		min-height: 44px;
+
+	/* Far right: an icon-only way back to the home board. */
+	.site-back {
+		display: inline-flex;
+		width: 44px;
+		height: 44px;
 		align-items: center;
-		margin-left: auto;
-		padding: 0.35rem 0.55rem;
-		cursor: pointer;
-		list-style: none;
+		justify-content: center;
 		color: rgb(var(--muted));
-		font: 500 0.82rem var(--font-ui);
+		transition: color 180ms ease;
 	}
-	.mobile-menu-toggle::-webkit-details-marker {
-		display: none;
+	.site-back-arrow {
+		width: 1.1rem;
+		height: 1.1rem;
+		flex: none;
+		transition: transform 180ms ease;
 	}
-	.mobile-menu-toggle::after {
-		content: "+";
-		margin-left: 0.4rem;
+	.site-back:hover,
+	.site-back:focus-visible {
+		color: rgb(var(--accent-strong));
 	}
-	.mobile-menu[open] .mobile-menu-toggle::after {
-		content: "−";
+	.site-back:hover .site-back-arrow,
+	.site-back:focus-visible .site-back-arrow {
+		transform: translateX(-3px);
 	}
-	.mobile-menu-links {
-		display: grid;
-		gap: 0.1rem;
-		margin-top: 0.25rem;
-		padding-bottom: 0.5rem;
-	}
-	.mobile-menu-links .site-nav-link {
-		width: 100%;
-		justify-content: flex-start;
-	}
-	.site-nav,
 	.header-actions {
 		display: flex;
 		align-items: center;
-		flex-wrap: wrap;
-	}
-	.site-nav {
-		margin-right: auto;
-		gap: 0.25rem;
-	}
-	.header-actions {
-		justify-content: flex-end;
 		gap: 0.2rem;
+		margin-left: auto;
 	}
 	.site-nav-link,
-	.social-link,
 	.theme-toggle {
 		display: inline-flex;
 		min-height: 44px;
@@ -289,15 +279,9 @@
 		text-decoration: none;
 		white-space: nowrap;
 	}
-	.site-brand:hover,
-	.site-brand:focus-visible {
-		color: rgb(var(--text));
-	}
 	.site-nav-link:hover,
-	.social-link:hover,
 	.theme-toggle:hover,
 	.site-nav-link:focus-visible,
-	.social-link:focus-visible,
 	.theme-toggle:focus-visible {
 		color: rgb(var(--accent-strong));
 	}
@@ -347,68 +331,10 @@
 		justify-content: center;
 	}
 
-	@media (max-width: 900px) {
-		.masthead-inner {
-			padding: 0.65rem 0;
-			flex-wrap: wrap;
-			gap: 0.15rem 0.75rem;
-		}
-		.site-nav {
-			flex: 1 1 auto;
-		}
-		.header-actions {
-			flex: 1 1 20rem;
-		}
-	}
 	@media (max-width: 560px) {
 		.masthead-inner,
 		.footer-inner {
 			width: calc(100% - 1.25rem);
-		}
-		.masthead-inner {
-			display: grid;
-			grid-template-columns: 1fr;
-			align-items: start;
-		}
-		.site-brand,
-		.mobile-menu {
-			grid-area: 1 / 1;
-		}
-		.site-brand {
-			position: relative;
-			z-index: 1;
-			justify-self: start;
-		}
-		.site-nav-desktop {
-			display: none;
-		}
-		.mobile-menu {
-			display: block;
-			width: 100%;
-		}
-		.mobile-menu-toggle {
-			position: relative;
-			z-index: 2;
-		}
-		.header-actions {
-			display: none;
-			grid-row: 2;
-			justify-content: flex-start;
-		}
-		.masthead-inner:has(.mobile-menu[open]) .header-actions {
-			display: grid;
-			grid-template-columns: 1fr;
-			gap: 0.1rem;
-		}
-		.header-actions .theme-toggle {
-			width: 100%;
-			justify-content: flex-start;
-		}
-		#theme-toggle {
-			justify-content: flex-start;
-		}
-		.social-link {
-			display: none;
 		}
 		.footer-inner {
 			align-items: center;
@@ -421,6 +347,166 @@
 			flex-wrap: nowrap;
 			gap: 0.5rem;
 		}
+	}
+
+	.home-shell {
+		height: auto;
+		min-height: 100%;
+		min-height: 100dvh;
+		display: block;
+		padding: clamp(1.5rem, 5vw, 3rem);
+	}
+
+	/* No panel: the title and doors sit straight on the page, anchored to
+	   the top-left corner as on borretti.me, so a growing frame only pushes
+	   the rows below it. */
+	.home-main {
+		width: 100%;
+		min-width: 0;
+	}
+
+	/* Full page width so each dotted leader runs to the right margin. */
+	.menu-board {
+		width: 100%;
+		color: rgb(var(--text));
+	}
+
+	.board-title {
+		margin: 0;
+		padding-bottom: 0.85rem;
+		color: rgb(var(--accent-strong));
+		font: 600 clamp(2rem, 5vw, 2.5rem) / 1.1 var(--font-editorial);
+		letter-spacing: -0.015em;
+		overflow-wrap: anywhere;
+	}
+
+	.board-body {
+		display: grid;
+		margin-top: 0.5rem;
+	}
+
+	.board-intro,
+	.board-doors {
+		grid-area: 1 / 1;
+		min-width: 0;
+	}
+
+	.board-intro {
+		align-self: center;
+		max-width: 26ch;
+		margin: 0;
+		color: rgb(var(--text));
+		font: 600 clamp(1.5rem, 4vw, 2rem) / 1.25 var(--font-editorial);
+		letter-spacing: -0.015em;
+		text-wrap: balance;
+		pointer-events: none;
+	}
+
+	.board-rows {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.board-door {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem 1rem;
+		min-height: 44px;
+		padding-block: 0.75rem;
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.board-door:focus-visible {
+		outline: 3px solid rgb(var(--focus));
+		outline-offset: 4px;
+	}
+
+	/* Borretti frame-grow: the scene stays 192px and centred while the
+	   frame opens around it. 300ms ease-out is the brief's deliberate
+	   exception to the 180ms default. */
+	.door-frame {
+		position: relative;
+		flex: none;
+		width: 96px;
+		height: 96px;
+		overflow: hidden;
+		background: rgb(var(--chip-bg));
+		transition: width 0.3s ease-out, height 0.3s ease-out;
+	}
+
+	.door-frame img {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 192px;
+		height: 192px;
+		max-width: none;
+		transform: translate(-50%, -50%);
+	}
+
+	.door-name {
+		min-width: 0;
+		font: 600 clamp(1.5rem, 4vw, 2rem) / 1.15 var(--font-editorial);
+		letter-spacing: -0.015em;
+		overflow-wrap: anywhere;
+	}
+
+	.door-leader {
+		flex: 1 1 1.5rem;
+		min-width: 1.5rem;
+		align-self: center;
+		margin-top: 0.7rem;
+		border-bottom: 2px dotted rgb(var(--muted) / 0.6);
+		transition: border-color 180ms ease;
+	}
+
+	.door-route {
+		color: rgb(var(--muted));
+		font: 400 0.82rem var(--font-ui);
+		letter-spacing: 0.02em;
+		white-space: nowrap;
+		transition: color 180ms ease;
+	}
+
+	.board-door:is(:hover, :focus-visible) .door-route {
+		color: rgb(var(--text));
+	}
+
+	.board-door:is(:hover, :focus-visible) .door-leader {
+		border-bottom-color: rgb(var(--text) / 0.8);
+	}
+
+	.board-intro {
+		animation: board-intro-out 350ms ease-out 4.6s both;
+	}
+
+	.board-row {
+		animation: board-row-in 400ms cubic-bezier(0.16, 1, 0.3, 1) 4.65s both;
+	}
+
+	.board-row-2 {
+		animation-delay: 4.73s;
+	}
+
+	.board-row-3 {
+		animation-delay: 4.81s;
+	}
+
+	.board-body:focus-within .board-intro,
+	.board-body:focus-within .board-row {
+		animation-delay: 0s;
+		animation-duration: 0s;
+	}
+
+	:root[data-intro="skip"] .board-intro {
+		display: none;
+	}
+
+	:root[data-intro="skip"] .board-row {
+		animation: none;
 	}
 
 	.page-intro,
@@ -594,6 +680,12 @@
 		overflow-wrap: anywhere;
 	}
 
+	/* Pages whose title lives in the masthead (About) start at the same
+	   height as the section indexes. */
+	.article-shell:not(:has(.article-header)) {
+		margin-top: 0;
+	}
+
 	.article-header,
 	.post-header {
 		margin-bottom: 2rem;
@@ -648,9 +740,16 @@
 		color: rgb(var(--text));
 	}
 
+	/* Tailwind's preflight strips list markers; prose lists need them back. */
 	.post-prose ul,
 	.post-prose ol {
 		padding-left: 1.45em;
+	}
+	.post-prose ul {
+		list-style: disc;
+	}
+	.post-prose ol {
+		list-style: decimal;
 	}
 
 	.post-prose li + li {
@@ -803,6 +902,86 @@
 		padding: 0;
 	}
 
+	/* Code blocks: a caption bar with the language mark and a copy button
+	   above the highlighted code. The figure owns the frame. */
+	.post-prose .code-block {
+		margin: 1.5rem 0;
+		border: 1px solid rgb(var(--border));
+		border-radius: 0.5rem;
+		background-color: rgb(var(--code-bg));
+	}
+
+	.post-prose .code-block pre {
+		margin: 0;
+		border: 0;
+		border-radius: 0 0 calc(0.5rem - 1px) calc(0.5rem - 1px);
+	}
+
+	.post-prose .code-block-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 0 0.35rem 0 0.9rem;
+		border-bottom: 1px solid rgb(var(--border));
+		color: rgb(var(--muted));
+		font: 500 0.82rem var(--font-ui);
+	}
+
+	.post-prose .code-lang {
+		display: inline-flex;
+		min-height: 44px;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.post-prose .code-lang-icon {
+		width: 1rem;
+		height: 1rem;
+		flex: none;
+	}
+
+	.post-prose .code-copy {
+		display: inline-flex;
+		min-height: 44px;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0 0.55rem;
+		border: 0;
+		border-radius: var(--radius-sm);
+		background: transparent;
+		color: rgb(var(--muted));
+		font: inherit;
+		cursor: pointer;
+		transition: color 180ms ease;
+	}
+
+	/* Preflight's [hidden] rule loses to the display above. */
+	.post-prose .code-copy[hidden] {
+		display: none;
+	}
+
+	.post-prose .code-copy:hover,
+	.post-prose .code-copy:focus-visible,
+	.post-prose .code-copy[data-state] {
+		color: rgb(var(--accent-strong));
+	}
+
+	.post-prose .code-copy-icon {
+		width: 0.95rem;
+		height: 0.95rem;
+		flex: none;
+	}
+
+	.post-prose .code-copy-icon-check,
+	.post-prose .code-copy[data-state="copied"] .code-copy-icon-copy {
+		display: none;
+	}
+
+	.post-prose .code-copy[data-state="copied"] .code-copy-icon-check {
+		display: block;
+	}
+
 	.post-prose img,
 	.post-prose .post-image {
 		display: block;
@@ -882,21 +1061,23 @@
 		padding-left: 0;
 	}
 
+	/* Hanging indent instead of flex: inline code inside a task stays in
+	   the text flow rather than becoming its own flex item. */
 	.post-prose ul.task-list li {
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
+		position: relative;
+		padding-left: calc(12ch + 0.5rem);
 	}
 
 	.post-prose ul.task-list li::before {
 		content: "[TODO]";
-		display: inline-block;
+		position: absolute;
+		left: 0;
+		top: 0;
 		min-width: 12ch;
 		font-size: 1em;
 		font-weight: 500;
 		letter-spacing: 0;
 		color: rgb(var(--task-todo));
-		line-height: 1.5;
 	}
 
 	.post-prose ul.task-list li[data-task-state="doing"]::before {
@@ -1147,25 +1328,167 @@
 		font-size: 0.78rem;
 	}
 
-	.project-subpost-breadcrumb {
-		margin: 0 0 1rem;
+	/* Return link above posts, projects, and devlogs. */
+	.page-breadcrumb {
+		margin: -0.75rem 0 0;
 	}
 
-	.project-subpost-back {
-		font-family: var(--font-code);
-		font-size: 0.78rem;
+	.page-breadcrumb + .article-shell {
+		margin-top: 1rem;
+	}
+
+	.page-back {
+		display: inline-flex;
+		min-height: 44px;
+		align-items: center;
+		gap: 0.45rem;
 		color: rgb(var(--muted));
+		font: 500 0.82rem var(--font-ui);
 		text-decoration: none;
+		transition: color 180ms ease;
 	}
 
-	.project-subpost-back:hover {
+	.page-back-arrow {
+		width: 0.95rem;
+		height: 0.95rem;
+		flex: none;
+		transition: transform 180ms ease;
+	}
+
+	.page-back:hover,
+	.page-back:focus-visible {
 		color: rgb(var(--accent-strong));
-		text-decoration: underline;
-		text-underline-offset: 3px;
+	}
+
+	.page-back:hover .page-back-arrow,
+	.page-back:focus-visible .page-back-arrow {
+		transform: translateX(-3px);
 	}
 }
 
+@keyframes board-intro-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+		visibility: hidden;
+	}
+}
+
+@keyframes board-row-in {
+	from {
+		opacity: 0;
+		transform: translateY(0.5rem);
+	}
+}
+
+/* data-intro="play" (set by home-intro.js) holds frames shut while the
+   intro runs, so a pointer resting over an unseen door cannot grow it. */
+@media (hover: hover) {
+	:root:not([data-intro="play"]) .board-door:hover .door-frame,
+	.board-door:focus-visible .door-frame {
+		width: 192px;
+		height: 192px;
+	}
+}
+
+@media (hover: none) {
+	.door-frame {
+		width: 128px;
+		height: 128px;
+		transition: none;
+	}
+	.search-kbd {
+		display: none;
+	}
+}
+
+@media (max-width: 480px) {
+	.door-leader,
+	.door-route {
+		display: none;
+	}
+	.board-door {
+		gap: 0.75rem 0.85rem;
+	}
+}
+
+/* Cross-document view transition (Chromium, Safari 18.2+; others just
+   navigate). Each door name on / shares a name with the section label on
+   that section's pages, so "Blog" glides into the header while the rest
+   fades, and back again. */
+@view-transition {
+	navigation: auto;
+}
+
+.door-name[data-section="blog"],
+.site-section[data-section="blog"] {
+	view-transition-name: section-blog;
+}
+
+.door-name[data-section="projects"],
+.site-section[data-section="projects"] {
+	view-transition-name: section-projects;
+}
+
+.door-name[data-section="about"],
+.site-section[data-section="about"] {
+	view-transition-name: section-about;
+}
+
+::view-transition-group(section-blog),
+::view-transition-group(section-projects),
+::view-transition-group(section-about) {
+	animation-duration: 450ms;
+	animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Door names with no partner on the other page (Projects and About when
+   you open Blog) fade with the page instead of lingering over it. */
+::view-transition-old(section-blog):only-child,
+::view-transition-old(section-projects):only-child,
+::view-transition-old(section-about):only-child,
+::view-transition-new(section-blog):only-child,
+::view-transition-new(section-projects):only-child,
+::view-transition-new(section-about):only-child {
+	animation-duration: 220ms;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 220ms;
+}
+
+/* Theme switch (theme-toggle.js, transition type "theme"): one whole-page
+   crossfade, 700ms on a symmetric curve, so screen brightness ramps instead
+   of flipping. Section labels join the page snapshot instead of gliding. */
+html:active-view-transition-type(theme) .door-name,
+html:active-view-transition-type(theme) .site-section {
+	view-transition-name: none;
+}
+
+html:active-view-transition-type(theme)::view-transition-old(root),
+html:active-view-transition-type(theme)::view-transition-new(root) {
+	animation-duration: 700ms;
+	animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+/* Fallback without typed view transitions: colors ease, only while switching. */
+html.theme-fading,
+html.theme-fading *,
+html.theme-fading *::before,
+html.theme-fading *::after {
+	transition-property: background-color, color, border-color, text-decoration-color, fill, stroke, box-shadow;
+	transition-duration: 700ms;
+	transition-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
+	@view-transition {
+		navigation: none;
+	}
+
 	*,
 	*::before,
 	*::after {
@@ -1173,5 +1496,22 @@
 		animation-iteration-count: 1 !important;
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
+	}
+
+	.board-intro {
+		display: none;
+	}
+	.board-row {
+		animation: none;
+	}
+
+	/* The theme fade moves nothing; it only softens the brightness change,
+	   so it stays under reduced motion. The view-transition path is not
+	   matched by the * rule above; this restores the fallback path. */
+	html.theme-fading,
+	html.theme-fading *,
+	html.theme-fading *::before,
+	html.theme-fading *::after {
+		transition-duration: 700ms !important;
 	}
 }

@@ -8,6 +8,7 @@
 
 	let timer = null;
 	let controller = null;
+	let returnFocus = null;
 
 	const cancelSearch = () => {
 		clearTimeout(timer);
@@ -18,7 +19,10 @@
 	};
 
 	const open = () => {
-		if (!modal.open) modal.showModal();
+		if (!modal.open) {
+			returnFocus = document.activeElement;
+			modal.showModal();
+		}
 		input.focus();
 		input.select();
 	};
@@ -120,7 +124,11 @@
 		cancelSearch();
 		input.value = "";
 		results.replaceChildren();
-		trigger.focus();
+		// The trigger lives in the collapsible site menu; when that menu is
+		// closed (Ctrl+K), return focus to wherever the user was instead.
+		if (trigger.offsetParent) trigger.focus();
+		else if (returnFocus instanceof HTMLElement && returnFocus.isConnected) returnFocus.focus();
+		returnFocus = null;
 	});
 	modal.addEventListener("click", (event) => {
 		const rect = modal.getBoundingClientRect();

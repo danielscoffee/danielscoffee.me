@@ -1,0 +1,41 @@
+package web
+
+templ HomePage() {
+	<!DOCTYPE html>
+	<html lang="en" class="h-full" data-theme="system">
+		<head>
+			@siteHead("danielscoffee", "Daniel's notebook: backend writing, projects, and devlogs.", true)
+			<script src="/assets/js/home-intro.js?v=1"></script>
+		</head>
+		<body class="home-shell">
+			<main id="main-content" class="home-main">
+				<section class="menu-board" aria-labelledby="board-title">
+					<h1 id="board-title" class="board-title">danielscoffee</h1>
+					<div class="board-body">
+						<p class="board-intro">Backend developer. Systems enjoyer. Production bug survivor.</p>
+						<nav class="board-doors" aria-label="Site sections">
+							<ul class="board-rows">
+								@boardDoor("board-row board-row-1", "blog", "cafe-table", "Blog")
+								@boardDoor("board-row board-row-2", "projects", "pour-over", "Projects")
+								@boardDoor("board-row board-row-3", "about", "takeaway-cup", "About")
+							</ul>
+						</nav>
+					</div>
+				</section>
+			</main>
+		</body>
+	</html>
+}
+
+templ boardDoor(rowClass, section, scene, name string) {
+	<li class={ rowClass }>
+		<a class="board-door" href={ templ.SafeURL("/" + section) }>
+			<span class="door-frame" aria-hidden="true">
+				<img src={ "/assets/img/scenes/" + scene + ".jpg" } alt="" width="192" height="192" decoding="async"/>
+			</span>
+			<span class="door-name" data-section={ section }>{ name }</span>
+			<span class="door-leader" aria-hidden="true"></span>
+			<span class="door-route" aria-hidden="true">{ "/" + section }</span>
+		</a>
+	</li>
+}

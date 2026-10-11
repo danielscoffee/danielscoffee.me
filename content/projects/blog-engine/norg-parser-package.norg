@@ -1,0 +1,46 @@
+@document.meta
+title: "Devlog 2026-07-25: the parser gets its own package"
+slug: norg-parser-package
+date: 2026-07-25
+summary: Splitting a 1,015-line parser file into five focused files behind one exported function.
+tags: [devlog, neorg, refactor]
+draft: false
+@end
+
+The Neorg parser lived in one file, `internal/content/norg_parser.go`, and it had grown to 1,015 lines. Metadata, block scanning, inline formatting, link checks, tables, and syntax highlighting all shared one namespace. I split it up without changing the HTML it renders.
+
+** The boundary
+The new `internal/content/norg` package exports one type and one function:
+
+@code go
+type Meta struct {
+    Title   string
+    Slug    string
+    Date    string
+    Summary string
+    Tags    []string
+    Draft   bool
+}
+
+func Parse(raw string) (Meta, string, string, error)
+@end
+
+`Parse` returns the metadata, the source body, and the rendered HTML. The content package converts `Meta` into posts and projects, and nothing else in the app knows a parser exists.
+
+** The files
+@table
+| File | Job |
+| - | - |
+| `parser.go` | `Parse` and the node types |
+| `metadata.go` | the `@document.meta` block and its validation |
+| `blocks.go` | headings, lists, tasks, quotes, definitions, code, tables |
+| `inline.go` | bold, italic, links, images, URL checks |
+| `render.go` | HTML output and Chroma highlighting |
+@end
+
+** What I did not do
+No interfaces, no plugin registry, no new dependencies. The tests moved next to the package first, and I watched them fail before I moved a single function.
+
+The line count barely moved: 1,015 before, 1,019 after. I wanted five files I can read one at a time, and I got them.
+
+The same day I moved deploys to Railway and started publishing the Docker image to GHCR.

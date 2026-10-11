@@ -1,44 +1,60 @@
 package web
 
-templ Base(pageTitle string, pageDescription string) {
+// siteHead renders the shared head. Share tags go on every indexable page;
+// the canonical, og:url, and og:image need an absolute URL, so they appear
+// only when SITE_URL is configured. Error pages pass indexable=false.
+templ siteHead(pageTitle string, pageDescription string, indexable bool) {
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width,initial-scale=1"/>
+	<title>{ pageTitle }</title>
+	<meta name="description" content={ pageDescription }/>
+	if indexable {
+		if canonical := canonicalURL(ctx); canonical != "" {
+			<link rel="canonical" href={ templ.SafeURL(canonical) }/>
+			<meta property="og:url" content={ canonical }/>
+			<meta property="og:image" content={ absoluteURL(ctx, shareImagePath) }/>
+			<meta property="og:image:width" content="1200"/>
+			<meta property="og:image:height" content="630"/>
+			<meta property="og:image:alt" content={ shareImageAlt }/>
+		}
+		<meta property="og:type" content="website"/>
+		<meta property="og:site_name" content={ siteName }/>
+		<meta property="og:title" content={ pageTitle }/>
+		<meta property="og:description" content={ pageDescription }/>
+		<meta name="twitter:card" content="summary_large_image"/>
+	}
+	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"/>
+	<link rel="preload" href="/assets/fonts/source-serif-4-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+	<link rel="preload" href="/assets/fonts/source-sans-3-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
+	<link href="/assets/css/output.css?v=2" rel="stylesheet"/>
+	<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS"/>
+	<script src="/assets/js/theme-init.js?v=2"></script>
+}
+
+templ Base(pageTitle string, pageDescription string, section string) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full" data-theme="system">
 		<head>
-			<meta charset="utf-8"/>
-			<meta name="viewport" content="width=device-width,initial-scale=1"/>
-			<title>{ pageTitle }</title>
-			<meta name="description" content={ pageDescription }/>
-			<link rel="preload" href="/assets/fonts/source-serif-4-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
-			<link rel="preload" href="/assets/fonts/source-sans-3-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
-			<link href="/assets/css/output.css?v=2" rel="stylesheet"/>
-			<link rel="alternate" type="application/rss+xml" href="/rss.xml" title="RSS"/>
-			<script src="/assets/js/theme-init.js?v=2"></script>
+			@siteHead(pageTitle+pageTitleSuffix, pageDescription, section != "")
 			<script defer src="/assets/js/theme-toggle.js?v=2"></script>
 			<script defer src="/assets/js/search.js?v=2"></script>
+			<script defer src="/assets/js/code-copy.js?v=1"></script>
 		</head>
 		<body class="site-shell">
 			<a class="skip-link" href="#main-content">Skip to content</a>
 			<header class="site-masthead">
 				<div class="masthead-inner">
-					<a href="/" class="site-brand">danielscoffee</a>
-					<nav class="site-nav site-nav-desktop" aria-label="Primary navigation">
-						<a href="/blog" class="site-nav-link">Blog</a>
-						<a href="/about" class="site-nav-link">About</a>
-						<a href="/projects" class="site-nav-link">Projects</a>
-					</nav>
-					<details class="mobile-menu">
-						<summary class="mobile-menu-toggle" aria-controls="mobile-menu-links header-actions">Menu</summary>
-						<nav id="mobile-menu-links" class="mobile-menu-links" aria-label="Mobile navigation">
-							<a href="/blog" class="site-nav-link">Blog</a>
-							<a href="/about" class="site-nav-link">About</a>
-							<a href="/projects" class="site-nav-link">Projects</a>
-						</nav>
-					</details>
+					if section != "" {
+						<a href={ templ.SafeURL("/" + section) } class="site-section" data-section={ section }>{ section }</a>
+					} else {
+						<a href="/" class="site-section">danielscoffee</a>
+					}
 					<div id="header-actions" class="header-actions">
-						<a href="https://github.com/danielscoffee" class="social-link" rel="noreferrer" target="_blank">GitHub</a>
-						<a href="https://www.linkedin.com/in/daniel-reis-santos/" class="social-link" rel="noreferrer" target="_blank">LinkedIn</a>
-						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">System</button>
+						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme" aria-live="polite" data-theme-storage-key="theme-preference">Theme</button>
 						<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">Search <span class="search-kbd">Ctrl+K</span></button>
+						<a href="/" class="site-back" aria-label="Back to home">
+							<svg class="site-back-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 8H2.5"></path><path d="M7 3.5 2.5 8 7 12.5"></path></svg>
+						</a>
 					</div>
 				</div>
 			</header>

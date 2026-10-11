@@ -25,7 +25,20 @@ func (s *Server) sitemapHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) robotsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	_, _ = fmt.Fprintf(w, "User-agent: *\nAllow: /\nSitemap: %s/sitemap.xml\n", strings.TrimRight(s.siteURL, "/"))
+	_, _ = fmt.Fprint(w, buildRobots(s.siteURL))
+}
+
+// buildRobots allows every crawler, AI crawlers included, and keeps them off
+// the JSON search endpoint and the health check.
+func buildRobots(siteURL string) string {
+	base := strings.TrimRight(siteURL, "/")
+	return "User-agent: *\n" +
+		"Allow: /\n" +
+		"Disallow: /search\n" +
+		"Disallow: /health\n" +
+		"\n" +
+		"# Site map for language models and agents: " + base + "/llms.txt\n" +
+		"Sitemap: " + base + "/sitemap.xml\n"
 }
 
 type rssDocument struct {

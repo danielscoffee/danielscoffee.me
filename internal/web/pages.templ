@@ -9,6 +9,15 @@ templ PageIntro(title, subtitle string) {
 	</header>
 }
 
+// SectionIntro opens a section index. The masthead already names the
+// section, so the page heading is for screen readers only.
+templ SectionIntro(title, subtitle string) {
+	<header class="page-intro">
+		<h1 class="sr-only">{ title }</h1>
+		<p class="page-subtitle">{ subtitle }</p>
+	</header>
+}
+
 templ TagPageIntro(tag, subtitle string) {
 	<header class="page-intro">
 		<h1 class="page-title">Tagged with <span class="tag-emphasis">{ tag }</span></h1>
@@ -16,19 +25,9 @@ templ TagPageIntro(tag, subtitle string) {
 	</header>
 }
 
-templ HomePage(posts []content.Post) {
-	@Base("Daniel's Site", "Personal website and blog") {
-		@PageIntro("Daniel's Site", "Personal notes on software, projects, and experiments.")
-		<section class="section-block">
-			<h2 class="section-title">Recent posts</h2>
-			@PostList(posts)
-		</section>
-	}
-}
-
 templ BlogIndexPage(posts []content.Post) {
-	@Base("Blog", "All blog posts") {
-		@PageIntro("Blog", "All writing in one place.")
+	@Base("Blog", "Every post on danielscoffee, newest first.", "blog") {
+		@SectionIntro("Blog", "All writing in one place.")
 		<section class="section-block">
 			<h2 class="section-title">Latest entries</h2>
 			@PostList(posts)
@@ -46,9 +45,9 @@ templ ArticleHeader(title, date string) {
 }
 
 templ AboutPage(page content.Page) {
-	@Base(page.Title, page.Summary) {
+	@Base(page.Title, page.Summary, "about") {
 		<article class="article-shell post-prose">
-			@ArticleHeader(page.Title, "")
+			<h1 class="sr-only">{ page.Title }</h1>
 			<div class="article-body">
 				@templ.Raw(string(page.BodyHTML))
 			</div>
@@ -56,17 +55,40 @@ templ AboutPage(page content.Page) {
 	}
 }
 
-templ ProjectsIndexPage(projects []content.Project) {
-	@Base("Projects", "Project notes and builds") {
-		@PageIntro("Projects", "Build logs, notes, and shipped experiments.")
-		<section class="section-block">
-			@ProjectList(projects)
-		</section>
+templ ProjectsIndexPage(projects []content.Project, tag string) {
+	if tag == "" {
+		@Base("Projects", "Projects and their devlogs, newest first.", "projects") {
+			@SectionIntro("Projects", "Build logs, notes, and shipped experiments.")
+			@projectsListSection(projects)
+		}
+	} else {
+		@Base("Projects tagged "+tag, "Projects on danielscoffee tagged "+tag+", with their devlogs.", "projects") {
+			@TagPageIntro(tag, "Filtered projects by topic.")
+			@projectsListSection(projects)
+		}
 	}
 }
 
+templ projectsListSection(projects []content.Project) {
+	<section class="section-block">
+		@ProjectList(projects)
+	</section>
+}
+
+// BackLink sits above a post, project, or devlog and returns to its parent
+// listing, with the same drawn arrow as the masthead.
+templ BackLink(href templ.SafeURL, label string) {
+	<nav class="page-breadcrumb" aria-label="Breadcrumb">
+		<a class="page-back" href={ href }>
+			<svg class="page-back-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 8H2.5"></path><path d="M7 3.5 2.5 8 7 12.5"></path></svg>
+			{ label }
+		</a>
+	</nav>
+}
+
 templ ProjectDetailPage(project content.Project) {
-	@Base(project.Title, project.Summary) {
+	@Base(project.Title, project.Summary, "projects") {
+		@BackLink("/projects", "Projects")
 		<article class="article-shell post-prose">
 			@ArticleHeader(project.Title, project.Date)
 			<div class="article-body">
@@ -99,21 +121,20 @@ templ ProjectSubPostGrid(project content.Project) {
 }
 
 templ ProjectSubPostPage(project content.Project, sub content.ProjectSubPost) {
-	@Base(sub.Title, sub.Summary) {
-		<nav class="project-subpost-breadcrumb">
-			<a class="project-subpost-back" href={ templ.SafeURL("/projects/" + project.Slug) }>&larr; { project.Title }</a>
-		</nav>
+	@Base(sub.Title, sub.Summary, "projects") {
+		@BackLink(templ.SafeURL("/projects/"+project.Slug), project.Title)
 		<article class="article-shell post-prose">
 			@ArticleHeader(sub.Title, sub.Date)
 			<div class="article-body">
 				@templ.Raw(string(sub.BodyHTML))
 			</div>
+			@templ.JSONScript("article-data", blogPostingJSONLD(ctx, sub.Title, sub.Date)).WithType("application/ld+json")
 		</article>
 	}
 }
 
 templ TagPage(tag string, posts []content.Post) {
-	@Base("Tag: "+tag, "Posts filtered by tag") {
+	@Base("Posts tagged "+tag, "Posts on danielscoffee tagged "+tag+".", "blog") {
 		@TagPageIntro(tag, "Filtered writing by topic.")
 		<section class="section-block">
 			<h2 class="section-title">Posts</h2>
@@ -185,18 +206,20 @@ templ ProjectList(projects []content.Project) {
 }
 
 templ BlogPostPage(post content.Post) {
-	@Base(post.Title, post.Summary) {
+	@Base(post.Title, post.Summary, "blog") {
+		@BackLink("/blog", "Blog")
 		<article class="article-shell post-prose">
 			@ArticleHeader(post.Title, post.Date)
 			<div class="article-body">
 				@templ.Raw(string(post.BodyHTML))
 			</div>
+			@templ.JSONScript("article-data", blogPostingJSONLD(ctx, post.Title, post.Date)).WithType("application/ld+json")
 		</article>
 	}
 }
 
 templ NotFoundPage() {
-	@Base("Page not found", "The requested page could not be found") {
+	@Base("Page not found", "The requested page could not be found", "") {
 		<section class="error-page">
 			<p class="page-subtitle">404</p>
 			@PageIntro("Page not found", "This page wandered off, or the link is wrong.")
@@ -206,7 +229,7 @@ templ NotFoundPage() {
 }
 
 templ ServerErrorPage() {
-	@Base("Something broke", "An internal server error occurred") {
+	@Base("Something broke", "An internal server error occurred", "") {
 		<section class="error-page">
 			<p class="page-subtitle">500</p>
 			@PageIntro("Something broke", "Server hit a problem. Try again in a minute.")

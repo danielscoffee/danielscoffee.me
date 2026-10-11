@@ -7,17 +7,16 @@ tags: [go, neorg, refactor]
 draft: false
 @end
 
-* How I rebuilt the blog engine
-The old version was a pile of Markdown files glued together with a templating helper. It worked, but it was hard to extend with project devlogs, tags, and search.
+The old version was a pile of Markdown files glued together with a templating helper. It worked, but every new feature meant more glue: project devlogs, tags, search. So I set four goals and started over.
 
 ** Goals
 1. One source format: *Neorg*
-2. One binary deploy
-3. Folder-based projects, not flat files
-4. Search that actually understands content types
+2. One binary to deploy
+3. Projects as folders, not flat files
+4. Search that knows a post from a project
 
 ** Loading pipeline
-The loader walks `content/projects/<slug>/` and treats `index.norg` as the project entry point. Every other `.norg` file becomes a subpost.
+The loader walks `content/projects/<slug>/` and treats `index.norg` as the project entry point. Every other `.norg` file in the folder becomes a devlog.
 
 @code go
 func LoadProjects(dir string) ([]Project, error) {
@@ -32,21 +31,20 @@ func LoadProjects(dir string) ([]Project, error) {
 }
 @end
 
+A missing projects folder returns an empty list. Anything else that goes wrong returns an error, and the app refuses to start. I would rather see a broken file at boot than serve half a site.
+
 ** Routing trick
-Go's `net/http` ServeMux picks the longest matching pattern. Registering both `/projects` (exact) and `/projects/` (prefix) lets the same prefix family serve three URL shapes:
+Go's `net/http` ServeMux picks the longest matching pattern. Registering both `/projects` (exact) and `/projects/` (prefix) lets one handler family serve three URL shapes:
 
 @table
 | URL | Handler |
 | - | - |
 | /projects | index |
 | /projects/{slug} | project detail |
-| /projects/{slug}/{post} | subpost detail |
+| /projects/{slug}/{post} | devlog detail |
 @end
 
-** Inline formatting sanity check
-Just to prove the parser handles *bold*, /italic/, _underline_, !spoiler! and inline math $E = mc^2$ in the wild.
+** The rule I kept
+Parse once at startup, then answer every request from memory. No database, no cache to invalidate, nothing that changes between deploys.
 
-> Lesson learned: parse once at startup, query in-memory at request time. No DB, no cache invalidation, no surprises.
-
-#priority high
-The next devlog covers the bento grid layout.
+The next devlog covers the devlog grid and the nested routes.

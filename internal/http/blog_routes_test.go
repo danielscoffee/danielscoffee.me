@@ -95,7 +95,8 @@ func TestBlogRoutes(t *testing.T) {
 		statusCode int
 		contains   string
 	}{
-		{path: "/", statusCode: http.StatusFound, contains: ""},
+		{path: "/", statusCode: http.StatusOK, contains: "danielscoffee"},
+		{path: "/no-such-page", statusCode: http.StatusNotFound, contains: "Page not found"},
 		{path: "/blog", statusCode: http.StatusOK, contains: "Blog"},
 		{path: "/about", statusCode: http.StatusOK, contains: "About Me"},
 		{path: "/projects", statusCode: http.StatusOK, contains: "Projects"},
@@ -121,11 +122,6 @@ func TestBlogRoutes(t *testing.T) {
 
 		if tc.contains != "" && !strings.Contains(w.Body.String(), tc.contains) {
 			t.Fatalf("path %s expected body to contain %q; got %q", tc.path, tc.contains, w.Body.String())
-		}
-		if tc.path == "/" {
-			if got := w.Header().Get("Location"); got != "/blog" {
-				t.Fatalf("expected redirect to /blog, got %q", got)
-			}
 		}
 	}
 }
@@ -186,13 +182,13 @@ func TestSiteShell(t *testing.T) {
 		`class="skip-link" href="#main-content"`,
 		`<main id="main-content"`,
 		`class="site-masthead"`,
-		`<a href="/" class="site-brand">danielscoffee</a>`,
-		`aria-label="Primary navigation"`,
-		`<details class="mobile-menu">`,
-		`<summary class="mobile-menu-toggle" aria-controls="mobile-menu-links header-actions">Menu</summary>`,
-		`<nav id="mobile-menu-links" class="mobile-menu-links" aria-label="Mobile navigation">`,
+		`<a href="/blog" class="site-section" data-section="blog">blog</a>`,
+		`<a href="/" class="site-back" aria-label="Back to home">`,
 		`<div id="header-actions" class="header-actions">`,
-		`aria-label="Theme: System"`,
+		`href="https://github.com/danielscoffee"`,
+		`href="https://www.linkedin.com/in/daniel-reis-santos/"`,
+		`id="search-trigger"`,
+		`aria-label="Theme"`,
 		`aria-label="Open search"`,
 		`aria-labelledby="search-title"`,
 		`<button class="search-close" type="submit">Close</button>`,
@@ -201,6 +197,90 @@ func TestSiteShell(t *testing.T) {
 	})
 	if strings.Contains(body, `class="site-tagline"`) {
 		t.Error("site header should not contain tagline")
+	}
+	for _, removed := range []string{"mobile-menu", "site-nav-desktop", "site-menu", `aria-label="Primary navigation"`, `class="social-link"`} {
+		if strings.Contains(body, removed) {
+			t.Errorf("site header should not contain %q", removed)
+		}
+	}
+}
+
+func TestHomePage(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/", nil))
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", w.Code)
+	}
+	if got := w.Header().Get("Content-Type"); !strings.HasPrefix(got, "text/html") {
+		t.Fatalf("expected text/html, got %q", got)
+	}
+
+	body := w.Body.String()
+	assertContainsAll(t, body, []string{
+		`<h1 id="board-title" class="board-title">danielscoffee</h1>`,
+		`<span class="door-name" data-section="blog">Blog</span>`,
+		`<span class="door-name" data-section="projects">Projects</span>`,
+		`<span class="door-name" data-section="about">About</span>`,
+		`Backend developer. Systems enjoyer. Production bug survivor.`,
+		`<a class="board-door" href="/blog">`,
+		`<a class="board-door" href="/projects">`,
+		`<a class="board-door" href="/about">`,
+		`src="/assets/img/scenes/cafe-table.jpg"`,
+		`src="/assets/img/scenes/pour-over.jpg"`,
+		`src="/assets/img/scenes/takeaway-cup.jpg"`,
+		`src="/assets/js/home-intro.js?v=1"`,
+		`src="/assets/js/theme-init.js?v=2"`,
+		`href="/assets/css/output.css?v=2"`,
+	})
+	blog := strings.Index(body, `href="/blog"`)
+	projects := strings.Index(body, `href="/projects"`)
+	about := strings.Index(body, `href="/about"`)
+	if !(blog < projects && projects < about) {
+		t.Errorf("expected doors in order Blog, Projects, About")
+	}
+	for _, absent := range []string{`class="site-masthead"`, `class="site-footer"`, `id="search-modal"`} {
+		if strings.Contains(body, absent) {
+			t.Errorf("home page should not contain %s", absent)
+		}
+	}
+	for _, tag := range strings.Split(body, "<script")[1:] {
+		end := strings.Index(tag, ">")
+		if end == -1 || !strings.Contains(tag[:end], "src=") {
+			t.Errorf("home page must not contain inline scripts: <script%s", tag)
+		}
+	}
+}
+
+func TestHomeAssetsAreServed(t *testing.T) {
+	s := testBlogServer()
+	h := s.RegisterRoutes()
+
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/assets/js/home-intro.js", nil))
+	if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), "sessionStorage") {
+		t.Fatalf("home-intro.js: status %d, body %q", w.Code, w.Body.String())
+	}
+
+	for _, scene := range []string{"cafe-table", "pour-over", "takeaway-cup"} {
+		path := "/assets/img/scenes/" + scene + ".jpg"
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		if w.Code != http.StatusOK {
+			t.Fatalf("%s expected status 200, got %d", path, w.Code)
+		}
+		if got := w.Header().Get("Content-Type"); !strings.HasPrefix(got, "image/jpeg") {
+			t.Errorf("%s expected image/jpeg, got %q", path, got)
+		}
+		body := w.Body.Bytes()
+		if len(body) < 3 || body[0] != 0xFF || body[1] != 0xD8 || body[2] != 0xFF {
+			t.Errorf("%s is not a JPEG", path)
+		}
+		if len(body) > 60*1024 {
+			t.Errorf("%s is %d bytes; scene photos must stay under 60KB", path, len(body))
+		}
 	}
 }
 
@@ -222,6 +302,7 @@ func TestBaseTemplateIncludesThemeControls(t *testing.T) {
 		`src="/assets/js/theme-init.js?v=2"`,
 		`src="/assets/js/theme-toggle.js?v=2"`,
 		`src="/assets/js/search.js?v=2"`,
+		`src="/assets/js/code-copy.js?v=1"`,
 		`theme-preference`,
 		`search-modal`,
 	})
@@ -281,7 +362,7 @@ func TestEditorialIndexes(t *testing.T) {
 		{
 			path: "/blog",
 			markers: []string{
-				`class="page-intro"`, `<h1 class="page-title">Blog</h1>`,
+				`class="page-intro"`, `<h1 class="sr-only">Blog</h1>`,
 				`class="editorial-list post-list"`, `class="editorial-card post-item"`,
 				`<time class="editorial-date" datetime="2026-04-26">2026-04-26</time>`,
 				`href="/post/hello-world"`, `href="/tag/go"`,
@@ -290,7 +371,7 @@ func TestEditorialIndexes(t *testing.T) {
 		{
 			path: "/projects",
 			markers: []string{
-				`class="page-intro"`, `<h1 class="page-title">Projects</h1>`,
+				`class="page-intro"`, `<h1 class="sr-only">Projects</h1>`,
 				`class="editorial-list project-list"`, `class="editorial-card project-item"`,
 				`<time class="editorial-date" datetime="2026-05-01">2026-05-01</time>`,
 				`href="/projects/side-project"`, `href="/projects?tag=go"`,
@@ -349,7 +430,16 @@ func TestEditorialArticles(t *testing.T) {
 				t.Fatalf("expected status 200, got %d", w.Code)
 			}
 			body := w.Body.String()
-			assertContainsAll(t, body, []string{`<article class="article-shell`, `class="article-header`, `class="article-body`, tc.rawContent})
+			assertContainsAll(t, body, []string{`<article class="article-shell`, `class="article-body`, tc.rawContent})
+			if tc.path == "/about" {
+				// The masthead names the section, so About's heading is screen-reader only.
+				assertContainsAll(t, body, []string{`<h1 class="sr-only">About Me</h1>`})
+				if strings.Contains(body, `class="article-header`) {
+					t.Fatal("about page should not repeat a visible title under the masthead")
+				}
+			} else {
+				assertContainsAll(t, body, []string{`class="article-header`})
+			}
 			if tc.date != "" {
 				assertContainsAll(t, body, []string{`<time class="editorial-date" datetime="` + tc.date + `">` + tc.date + `</time>`})
 			}
@@ -375,11 +465,11 @@ func TestPagesExposeStyleHooks(t *testing.T) {
 	}{
 		{
 			path:    "/blog",
-			markers: []string{"page-title", "page-subtitle", "section-title", "post-list", "post-item", "post-link", "tag-chip"},
+			markers: []string{"page-subtitle", "section-title", "post-list", "post-item", "post-link", "tag-chip"},
 		},
 		{
 			path:    "/blog",
-			markers: []string{"page-title", "post-list", "post-meta-row"},
+			markers: []string{"page-subtitle", "post-list", "post-meta-row"},
 		},
 		{
 			path:    "/post/hello-world",
@@ -428,5 +518,112 @@ func TestHealthRoute(t *testing.T) {
 
 	if !strings.Contains(w.Body.String(), `"status":"up"`) {
 		t.Fatalf("expected health body to contain status up, got %q", w.Body.String())
+	}
+}
+
+func TestPageMetadata(t *testing.T) {
+	s := testBlogServer()
+	s.canonicalBase = "https://example.com"
+	h := s.RegisterRoutes()
+
+	get := func(path string) string {
+		t.Helper()
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		return w.Body.String()
+	}
+
+	t.Run("share and canonical tags", func(t *testing.T) {
+		assertContainsAll(t, get("/blog"), []string{
+			`<title>Blog · danielscoffee</title>`,
+			`<meta name="description" content="Every post on danielscoffee, newest first.">`,
+			`<link rel="canonical" href="https://example.com/blog">`,
+			`<meta property="og:url" content="https://example.com/blog">`,
+			`<meta property="og:image" content="https://example.com/assets/img/og-default.jpg">`,
+			`<meta property="og:title" content="Blog · danielscoffee">`,
+			`<meta property="og:description" content="Every post on danielscoffee, newest first.">`,
+			`<meta name="twitter:card" content="summary_large_image">`,
+		})
+	})
+
+	t.Run("filtered projects name their tag and point home", func(t *testing.T) {
+		body := get("/projects?tag=go")
+		assertContainsAll(t, body, []string{
+			`<title>Projects tagged go · danielscoffee</title>`,
+			`content="Projects on danielscoffee tagged go, with their devlogs."`,
+			`Tagged with <span class="tag-emphasis">go</span>`,
+			`<link rel="canonical" href="https://example.com/projects">`,
+		})
+	})
+
+	t.Run("tag pages have their own title and description", func(t *testing.T) {
+		assertContainsAll(t, get("/tag/go"), []string{
+			`<title>Posts tagged go · danielscoffee</title>`,
+			`content="Posts on danielscoffee tagged go."`,
+		})
+	})
+
+	t.Run("posts carry BlogPosting data", func(t *testing.T) {
+		assertContainsAll(t, get("/post/hello-world"), []string{
+			`<script id="article-data" type="application/ld+json">`,
+			`"@type":"BlogPosting"`,
+			`"headline":"Hello World"`,
+			`"datePublished":"2026-04-26"`,
+			`"url":"https://example.com/post/hello-world"`,
+		})
+	})
+
+	t.Run("error pages are not shareable", func(t *testing.T) {
+		body := get("/no-such-page")
+		for _, tag := range []string{`rel="canonical"`, `property="og:`, `twitter:card`} {
+			if strings.Contains(body, tag) {
+				t.Errorf("404 page should not carry %s", tag)
+			}
+		}
+	})
+}
+
+func TestPageMetadataWithoutSiteURL(t *testing.T) {
+	h := testBlogServer().RegisterRoutes()
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/blog", nil))
+	body := w.Body.String()
+	if strings.Contains(body, `rel="canonical"`) || strings.Contains(body, `property="og:url"`) || strings.Contains(body, `property="og:image"`) {
+		t.Fatal("without SITE_URL the head must not guess absolute URLs")
+	}
+	assertContainsAll(t, body, []string{`<meta property="og:title" content="Blog · danielscoffee">`, `<meta name="twitter:card" content="summary_large_image">`})
+}
+
+func TestFavicon(t *testing.T) {
+	h := testBlogServer().RegisterRoutes()
+	for _, path := range []string{"/", "/blog"} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		assertContainsAll(t, w.Body.String(), []string{`<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">`})
+	}
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/assets/favicon.svg", nil))
+	if w.Code != http.StatusOK || !strings.HasPrefix(w.Header().Get("Content-Type"), "image/svg+xml") {
+		t.Fatalf("favicon: status %d, type %q", w.Code, w.Header().Get("Content-Type"))
+	}
+	if body := w.Body.String(); !strings.Contains(body, `viewBox="0 0 32 32"`) || strings.Contains(body, "<script") {
+		t.Fatalf("favicon must be a plain 32x32 SVG: %s", body)
+	}
+}
+
+func TestBackLinks(t *testing.T) {
+	h := testBlogServer().RegisterRoutes()
+	for path, want := range map[string]string{
+		"/post/hello-world":              `<a class="page-back" href="/blog">`,
+		"/projects/side-project":         `<a class="page-back" href="/projects">`,
+		"/projects/side-project/rebuild": `<a class="page-back" href="/projects/side-project">`,
+	} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		body := w.Body.String()
+		assertContainsAll(t, body, []string{`<nav class="page-breadcrumb" aria-label="Breadcrumb">`, want})
+		if strings.Index(body, `class="page-breadcrumb"`) > strings.Index(body, `<article class="article-shell`) {
+			t.Errorf("%s: the return link must sit above the article", path)
+		}
 	}
 }

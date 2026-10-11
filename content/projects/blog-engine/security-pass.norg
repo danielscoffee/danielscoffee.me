@@ -1,0 +1,39 @@
+@document.meta
+title: "Devlog 2026-07-11: security pass"
+slug: security-pass
+date: 2026-07-11
+summary: One govulncheck finding, then link validation, request limits, and pinned build inputs.
+tags: [devlog, security, go]
+draft: false
+@end
+
+I ran `govulncheck` on a quiet Saturday and it flagged `GO-2026-5856`, a reachable vulnerability in the `crypto/tls` package of Go 1.26.4. Bumping to 1.26.5 fixed it. While I had the hood open, I went looking for the next problem.
+
+** Parser output is trusted HTML
+The templates render parsed content with `templ.Raw`, so the parser decides what reaches the page. Links now go through a check before they become `<a href>`:
+- relative paths, `http`, `https`, and `mailto` pass
+- protocol-relative URLs like `//evil.example` fail
+- any other scheme fails, `javascript:` included
+
+A bad link fails the parse, and a failed parse stops the app at startup.
+
+** Bounding requests
+@table
+| Limit | Value |
+| - | - |
+| search query | 256 bytes, then `400` |
+| raw query string | 512 bytes, then `400` |
+| request headers | 1 MiB, read within 5 seconds |
+| writes | 30 seconds |
+@end
+
+I also fixed the gzip middleware. It used to flush an empty gzip stream on responses that should not have been compressed at all. And every response now carries HSTS and a Permissions-Policy that turns off the camera, microphone, and geolocation.
+
+** Pinning the build
+*** DONE Go 1.26.5 everywhere: `go.mod`, Dockerfile, CI
+*** DONE Tailwind binary checked against its official SHA-256
+*** DONE GitHub Actions pinned to commit SHAs
+*** DONE test workflow token cut down to read access
+*** DONE GoReleaser pinned to a major version
+
+Every behavior change started as a failing test. I finished with `go test -race`, `go vet`, and a clean `govulncheck` run, all inside one afternoon.

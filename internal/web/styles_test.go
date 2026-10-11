@@ -74,20 +74,23 @@ func TestThemeScriptKeepsModesStorageAndCompactText(t *testing.T) {
 		t.Fatalf("read theme-toggle.js: %v", err)
 	}
 	js := string(jsBytes)
-	for _, marker := range []string{`"theme-preference"`, `"system", "light", "dark"`, "matchMedia", "localStorage", "button.textContent = labels[mode]", `button.setAttribute("aria-label", label)`} {
+	for _, marker := range []string{`"theme-preference"`, `"(prefers-color-scheme: dark)"`, `preference || "system"`, "matchMedia", "localStorage", "button.textContent = label", `button.setAttribute("aria-label", label)`} {
 		if !strings.Contains(js, marker) {
 			t.Errorf("theme-toggle.js missing %q", marker)
 		}
+	}
+	if strings.Contains(js, `"System"`) {
+		t.Error("theme toggle must switch light/dark only; following the OS is the default, not a button state")
 	}
 }
 
 func TestThemeRenderedShellStartsCompactWithFullLabel(t *testing.T) {
 	var output bytes.Buffer
-	if err := Base("Title", "Description").Render(context.Background(), &output); err != nil {
+	if err := Base("Title", "Description", "blog").Render(context.Background(), &output); err != nil {
 		t.Fatalf("render base: %v", err)
 	}
 	html := output.String()
-	if !strings.Contains(html, `id="theme-toggle"`) || !strings.Contains(html, `aria-label="Theme: System"`) || !strings.Contains(html, `>System</button>`) {
+	if !strings.Contains(html, `id="theme-toggle"`) || !strings.Contains(html, `aria-label="Theme"`) || !strings.Contains(html, `>Theme</button>`) {
 		t.Fatalf("theme control should render compact text and full accessible label: %s", html)
 	}
 	if !strings.Contains(html, `id="search-results" class="search-results" aria-live="polite"`) {
@@ -187,43 +190,224 @@ func TestFlatFullWidthMasthead(t *testing.T) {
 	}
 }
 
-func TestResponsiveMobileMenu(t *testing.T) {
+func TestBackLinkMasthead(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
 		t.Fatalf("read styles: %v", err)
 	}
 	css := string(cssBytes)
 
-	menuRules := regexp.MustCompile(`(?s)\.mobile-menu\s*\{[^}]*\}`).FindAllString(css, -1)
-	menuCSS := strings.Join(menuRules, "\n")
-	if !strings.Contains(menuCSS, "display: none") || !strings.Contains(menuCSS, "display: block") {
-		t.Errorf("mobile menu must hide on desktop and show on mobile: %v", menuRules)
-	}
-	toggleRule := regexp.MustCompile(`(?s)\.mobile-menu-toggle\s*\{[^}]*\}`).FindString(css)
-	for _, marker := range []string{"display: flex", "width: fit-content", "min-height: 44px", "margin-left: auto"} {
-		if !strings.Contains(toggleRule, marker) {
-			t.Errorf("mobile menu toggle missing %q: %s", marker, toggleRule)
+	sectionRule := regexp.MustCompile(`(?s)\t\.site-section\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"min-height: 44px", "var(--font-editorial)"} {
+		if !strings.Contains(sectionRule, marker) {
+			t.Errorf("section label missing %q: %s", marker, sectionRule)
 		}
 	}
-	mobileNavRule := regexp.MustCompile(`(?s)\.site-nav-desktop\s*\{[^}]*\}`).FindString(css)
-	if !strings.Contains(mobileNavRule, "display: none") {
-		t.Errorf("desktop nav must hide on mobile: %s", mobileNavRule)
-	}
-	actionRules := regexp.MustCompile(`(?s)\.header-actions\s*\{[^}]*\}`).FindAllString(css, -1)
-	if !strings.Contains(strings.Join(actionRules, "\n"), "display: none") {
-		t.Errorf("mobile actions must stay collapsed: %v", actionRules)
-	}
-	openActionsRule := regexp.MustCompile(`(?s)\.masthead-inner:has\(\.mobile-menu\[open\]\) \.header-actions\s*\{[^}]*\}`).FindString(css)
-	for _, marker := range []string{"display: grid", "grid-template-columns: 1fr"} {
-		if !strings.Contains(openActionsRule, marker) {
-			t.Errorf("open mobile menu actions missing %q: %s", marker, openActionsRule)
+	backRule := regexp.MustCompile(`(?s)\t\.site-back\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"width: 44px", "height: 44px"} {
+		if !strings.Contains(backRule, marker) {
+			t.Errorf("back arrow needs a 44px target, missing %q: %s", marker, backRule)
 		}
 	}
-	mobileActionRule := regexp.MustCompile(`(?s)\.header-actions \.theme-toggle\s*\{[^}]*\}`).FindString(css)
-	for _, marker := range []string{"width: 100%", "justify-content: flex-start"} {
-		if !strings.Contains(mobileActionRule, marker) {
-			t.Errorf("mobile menu action missing %q: %s", marker, mobileActionRule)
+	for _, removed := range []string{".site-nav-desktop", ".mobile-menu", ".site-menu", ".social-link"} {
+		if strings.Contains(css, removed) {
+			t.Errorf("old masthead selector %q must be removed", removed)
 		}
+	}
+}
+
+func TestCodeCopyScript(t *testing.T) {
+	jsBytes, err := os.ReadFile("assets/js/code-copy.js")
+	if err != nil {
+		t.Fatalf("read code-copy.js: %v", err)
+	}
+	js := string(jsBytes)
+	if strings.Contains(js, "innerHTML") {
+		t.Error("code-copy.js must not use innerHTML")
+	}
+	for _, marker := range []string{"navigator.clipboard.writeText", "button.hidden = false", `"aria-live", "polite"`, "selectNodeContents", "textContent"} {
+		if !strings.Contains(js, marker) {
+			t.Errorf("code-copy.js missing %q", marker)
+		}
+	}
+
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+	if !regexp.MustCompile(`\.code-copy\[hidden\] \{\n\t\tdisplay: none;`).MatchString(css) {
+		t.Error("the copy button must stay hidden until code-copy.js reveals it")
+	}
+	copyRule := regexp.MustCompile(`(?s)\t\.post-prose \.code-copy \{[^}]*\}`).FindString(css)
+	if !strings.Contains(copyRule, "min-height: 44px") {
+		t.Errorf("copy button needs a 44px target: %s", copyRule)
+	}
+}
+
+func TestThemeSwitchFades(t *testing.T) {
+	jsBytes, err := os.ReadFile("assets/js/theme-toggle.js")
+	if err != nil {
+		t.Fatalf("read theme-toggle.js: %v", err)
+	}
+	js := string(jsBytes)
+	for _, marker := range []string{
+		`document.startViewTransition({ update: switchTheme, types: ["theme"] })`,
+		`CSS.supports("selector(:active-view-transition-type(theme))")`,
+		`root.classList.add("theme-fading")`,
+		`const fadeMs = 700;`,
+	} {
+		if !strings.Contains(js, marker) {
+			t.Errorf("theme-toggle.js missing %q", marker)
+		}
+	}
+
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+	curve := "cubic-bezier(0.45, 0, 0.55, 1)"
+	fadeRule := regexp.MustCompile(`(?s)html:active-view-transition-type\(theme\)::view-transition-old\(root\),\nhtml:active-view-transition-type\(theme\)::view-transition-new\(root\) \{[^}]*\}`).FindString(css)
+	if !strings.Contains(fadeRule, "animation-duration: 700ms") || !strings.Contains(fadeRule, curve) {
+		t.Errorf("theme crossfade must run 700ms on %s: %q", curve, fadeRule)
+	}
+	fallback := regexp.MustCompile(`(?s)html\.theme-fading,\nhtml\.theme-fading \*,[^{]*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"transition-duration: 700ms", curve, "background-color", "color"} {
+		if !strings.Contains(fallback, marker) {
+			t.Errorf("theme fade fallback missing %q: %q", marker, fallback)
+		}
+	}
+	reducedAt := strings.Index(css, "@media (prefers-reduced-motion: reduce)")
+	if reducedAt < 0 || !strings.Contains(css[reducedAt:], "html.theme-fading *::after {\n\t\ttransition-duration: 700ms !important;") {
+		t.Error("the theme fade moves nothing and must survive reduced motion")
+	}
+}
+
+func TestBrandViewTransition(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+
+	if !regexp.MustCompile(`(?m)^@view-transition \{\n\tnavigation: auto;`).MatchString(css) {
+		t.Error("pages must opt in to cross-document view transitions")
+	}
+	for _, section := range []string{"blog", "projects", "about"} {
+		nameRule := regexp.MustCompile(`(?s)\.door-name\[data-section="` + section + `"\],\n\.site-section\[data-section="` + section + `"\] \{[^}]*\}`).FindString(css)
+		if !strings.Contains(nameRule, "view-transition-name: section-"+section) {
+			t.Errorf("door name and section label for %s must share a transition name: %q", section, nameRule)
+		}
+	}
+	reducedAt := strings.Index(css, "@media (prefers-reduced-motion: reduce)")
+	if reducedAt < 0 || !strings.Contains(css[reducedAt:], "@view-transition {\n\t\tnavigation: none;") {
+		t.Error("reduced motion must turn view transitions off")
+	}
+
+	cssOut, err := os.ReadFile("assets/css/output.css")
+	if err != nil {
+		t.Fatalf("read generated CSS: %v", err)
+	}
+	if !strings.Contains(string(cssOut), "@view-transition") {
+		t.Error("generated CSS must keep the @view-transition rule")
+	}
+}
+
+func TestHomeBoardStyles(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+
+	// The home doors sit straight on the page (no panel), top-left, so they
+	// use the page tokens and carry no board token family of their own.
+	if strings.Contains(css, "--board") {
+		t.Error("the home page has no board panel; --board tokens must not return")
+	}
+	boardRule := regexp.MustCompile(`(?s)\t\.menu-board\s*\{[^}]*\}`).FindString(css)
+	if strings.Contains(boardRule, "background") || strings.Contains(boardRule, "padding") || !strings.Contains(boardRule, "color: rgb(var(--text))") {
+		t.Errorf("menu board must be unboxed page text: %s", boardRule)
+	}
+	shellRule := regexp.MustCompile(`(?s)\t\.home-shell\s*\{[^}]*\}`).FindString(css)
+	if strings.Contains(shellRule, "place-items") || strings.Contains(shellRule, "center") {
+		t.Errorf("home must anchor to the top-left corner, not centre: %s", shellRule)
+	}
+
+	frameRule := regexp.MustCompile(`(?s)\.door-frame\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"width: 96px", "height: 96px", "overflow: hidden", "transition: width 0.3s ease-out, height 0.3s ease-out"} {
+		if !strings.Contains(frameRule, marker) {
+			t.Errorf("door frame missing %q: %s", marker, frameRule)
+		}
+	}
+	imgRule := regexp.MustCompile(`(?s)\.door-frame img\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"width: 192px", "height: 192px", "max-width: none", "transform: translate(-50%, -50%)"} {
+		if !strings.Contains(imgRule, marker) {
+			t.Errorf("door scene missing %q: %s", marker, imgRule)
+		}
+	}
+
+	hoverBlock := regexp.MustCompile(`(?s)@media \(hover: hover\)\s*\{.*?\n\}`).FindString(css)
+	if !strings.Contains(hoverBlock, "width: 192px") || !strings.Contains(hoverBlock, ":focus-visible .door-frame") {
+		t.Errorf("hover devices must grow frames to 192px on hover and focus: %s", hoverBlock)
+	}
+	touchBlock := regexp.MustCompile(`(?s)@media \(hover: none\)\s*\{.*?\n\}`).FindString(css)
+	if !strings.Contains(touchBlock, "width: 128px") || !strings.Contains(touchBlock, "transition: none") {
+		t.Errorf("touch devices must rest frames at 128px without growth: %s", touchBlock)
+	}
+	narrowBlock := regexp.MustCompile(`(?s)@media \(max-width: 480px\)\s*\{\n\t\.door-leader.*?\n\}`).FindString(css)
+	if !strings.Contains(narrowBlock, ".door-route") || !strings.Contains(narrowBlock, "display: none") {
+		t.Errorf("narrow screens must hide leader and route: %s", narrowBlock)
+	}
+
+	reducedAt := strings.Index(css, "@media (prefers-reduced-motion: reduce)")
+	if reducedAt < 0 {
+		t.Fatal("input.css is missing the prefers-reduced-motion block")
+	}
+	reduced := css[reducedAt:]
+	for _, marker := range []string{".board-intro {\n\t\tdisplay: none;", ".board-row {\n\t\tanimation: none;"} {
+		if !strings.Contains(reduced, marker) {
+			t.Errorf("reduced motion must skip the intro: missing %q", marker)
+		}
+	}
+	focusRule := regexp.MustCompile(`(?s)\.board-door:focus-visible\s*\{[^}]*\}`).FindString(css)
+	if !strings.Contains(focusRule, "outline: 3px solid rgb(var(--focus))") {
+		t.Errorf("board doors need the site focus ring: %s", focusRule)
+	}
+}
+
+func TestHomePageRendersBoardOnly(t *testing.T) {
+	var output bytes.Buffer
+	if err := HomePage().Render(context.Background(), &output); err != nil {
+		t.Fatalf("render home: %v", err)
+	}
+	html := output.String()
+	for _, marker := range []string{`class="menu-board"`, `class="board-door" href="/blog"`, `aria-hidden="true"`, `alt=""`} {
+		if !strings.Contains(html, marker) {
+			t.Errorf("home page missing %q", marker)
+		}
+	}
+	for _, absent := range []string{"site-masthead", "site-footer", "search-modal"} {
+		if strings.Contains(html, absent) {
+			t.Errorf("home page should not render %q", absent)
+		}
+	}
+}
+
+func TestHomeIntroScript(t *testing.T) {
+	jsBytes, err := os.ReadFile("assets/js/home-intro.js")
+	if err != nil {
+		t.Fatalf("read home-intro.js: %v", err)
+	}
+	js := string(jsBytes)
+	for _, marker := range []string{"sessionStorage", `dataset.intro = "skip"`, "keydown", "pointerdown", "focusin", "catch"} {
+		if !strings.Contains(js, marker) {
+			t.Errorf("home-intro.js missing %q", marker)
+		}
+	}
+	if strings.Contains(js, "innerHTML") {
+		t.Error("home-intro.js must not use innerHTML")
 	}
 }
 

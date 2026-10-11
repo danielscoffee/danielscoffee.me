@@ -89,6 +89,8 @@ func renderTextWithModifiers(raw string) string {
 			fmt.Fprintf(&b, "<span class=\"spoiler\">%s</span>", renderTextWithModifiers(inner))
 		case '$':
 			fmt.Fprintf(&b, "<span class=\"math-latex\">%s</span>", html.EscapeString(inner))
+		case '`':
+			fmt.Fprintf(&b, "<code>%s</code>", html.EscapeString(inner))
 		}
 		i = j + 1
 	}
@@ -96,7 +98,7 @@ func renderTextWithModifiers(raw string) string {
 }
 
 func isModifierDelimiter(ch byte) bool {
-	return strings.ContainsRune("*/_!$", rune(ch))
+	return strings.ContainsRune("*/_!$`", rune(ch))
 }
 
 func isEscaped(s string, index int) bool {
@@ -120,6 +122,12 @@ func findClosingModifier(s string, start int, delim byte) int {
 				return -1
 			}
 			return i
+		}
+		// Inline code is verbatim: other modifiers must not close inside it.
+		if delim != '`' && s[i] == '`' && !isEscaped(s, i) {
+			if end := findClosingModifier(s, i+1, '`'); end != -1 {
+				i = end
+			}
 		}
 	}
 	return -1
