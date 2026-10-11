@@ -624,7 +624,6 @@ func TestFavicon(t *testing.T) {
 func TestBackLinks(t *testing.T) {
 	h := testBlogServer().RegisterRoutes()
 	for path, want := range map[string]string{
-		"/post/hello-world":              `<a class="page-back" href="/blog" aria-label="Back">`,
 		"/projects/side-project":         `<a class="page-back" href="/projects" aria-label="Back">`,
 		"/projects/side-project/rebuild": `<a class="page-back" href="/projects/side-project" aria-label="Back">`,
 	} {
@@ -639,5 +638,11 @@ func TestBackLinks(t *testing.T) {
 		if text := strings.TrimSpace(regexp.MustCompile(`(?s)<[^>]*>`).ReplaceAllString(link, "")); text != "" {
 			t.Errorf("%s: the return link must be the arrow alone, got text %q", path, text)
 		}
+	}
+
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/post/hello-world", nil))
+	if strings.Contains(w.Body.String(), `class="page-back"`) {
+		t.Error("blog posts must not carry a return arrow above the body")
 	}
 }
