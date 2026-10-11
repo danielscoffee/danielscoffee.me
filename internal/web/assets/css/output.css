@@ -1501,6 +1501,88 @@ a {
   padding: 0;
 }
 
+/* Code blocks: a caption bar with the language mark and a copy button
+	   above the highlighted code. The figure owns the frame. */
+
+.post-prose .code-block {
+  margin: 1.5rem 0;
+  border: 1px solid rgb(var(--border));
+  border-radius: 0.5rem;
+  background-color: rgb(var(--code-bg));
+}
+
+.post-prose .code-block pre {
+  margin: 0;
+  border: 0;
+  border-radius: 0 0 calc(0.5rem - 1px) calc(0.5rem - 1px);
+}
+
+.post-prose .code-block-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0.35rem 0 0.9rem;
+  border-bottom: 1px solid rgb(var(--border));
+  color: rgb(var(--muted));
+  font: 500 0.82rem var(--font-ui);
+}
+
+.post-prose .code-lang {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.post-prose .code-lang-icon {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.post-prose .code-copy {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.55rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: rgb(var(--muted));
+  font: inherit;
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+
+/* Preflight's [hidden] rule loses to the display above. */
+
+.post-prose .code-copy[hidden] {
+  display: none;
+}
+
+.post-prose .code-copy:hover,
+	.post-prose .code-copy:focus-visible,
+	.post-prose .code-copy[data-state] {
+  color: rgb(var(--accent-strong));
+}
+
+.post-prose .code-copy-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: none;
+}
+
+.post-prose .code-copy-icon-check,
+	.post-prose .code-copy[data-state="copied"] .code-copy-icon-copy {
+  display: none;
+}
+
+.post-prose .code-copy[data-state="copied"] .code-copy-icon-check {
+  display: block;
+}
+
 .post-prose img,
 	.post-prose .post-image {
   display: block;

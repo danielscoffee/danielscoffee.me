@@ -216,6 +216,35 @@ func TestBackLinkMasthead(t *testing.T) {
 	}
 }
 
+func TestCodeCopyScript(t *testing.T) {
+	jsBytes, err := os.ReadFile("assets/js/code-copy.js")
+	if err != nil {
+		t.Fatalf("read code-copy.js: %v", err)
+	}
+	js := string(jsBytes)
+	if strings.Contains(js, "innerHTML") {
+		t.Error("code-copy.js must not use innerHTML")
+	}
+	for _, marker := range []string{"navigator.clipboard.writeText", "button.hidden = false", `"aria-live", "polite"`, "selectNodeContents", "textContent"} {
+		if !strings.Contains(js, marker) {
+			t.Errorf("code-copy.js missing %q", marker)
+		}
+	}
+
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+	if !regexp.MustCompile(`\.code-copy\[hidden\] \{\n\t\tdisplay: none;`).MatchString(css) {
+		t.Error("the copy button must stay hidden until code-copy.js reveals it")
+	}
+	copyRule := regexp.MustCompile(`(?s)\t\.post-prose \.code-copy \{[^}]*\}`).FindString(css)
+	if !strings.Contains(copyRule, "min-height: 44px") {
+		t.Errorf("copy button needs a 44px target: %s", copyRule)
+	}
+}
+
 func TestThemeSwitchFades(t *testing.T) {
 	jsBytes, err := os.ReadFile("assets/js/theme-toggle.js")
 	if err != nil {

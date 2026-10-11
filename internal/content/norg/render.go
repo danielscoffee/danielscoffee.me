@@ -62,7 +62,7 @@ func renderNorgHTML(nodes []norgNode) (string, error) {
 		case norgCode, norgTable:
 			body := n.tableHTML
 			if n.kind == norgCode {
-				body = renderHighlightedCode(n.lang, n.code)
+				body = renderCodeBlock(n.lang, n.code)
 			}
 			if attrs != "" {
 				fmt.Fprintf(&b, "<div%s>", attrs)

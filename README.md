@@ -58,7 +58,7 @@ draft: false
 Body content.
 ```
 
-Supported body features include headings, paragraphs, ordered/unordered lists, task states, tables, blockquotes, definition lists, inline formatting, code blocks with Chroma highlighting, and CDN-hosted images.
+Supported body features include headings, paragraphs, ordered/unordered lists, task states, tables, blockquotes, definition lists, inline formatting and inline code, code blocks with Chroma highlighting (each with a language label, a Simple Icons mark, and a copy button), and CDN-hosted images.
 
 Slugs and tags must use lowercase letters, numbers, and single hyphens. Dates must use `YYYY-MM-DD`.
 

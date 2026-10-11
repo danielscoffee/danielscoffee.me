@@ -336,6 +336,12 @@ A square, borderless window onto a 400×400 photograph of Daniel's coffee ritual
 - **Interaction:** on hover-capable devices the frame grows 96px → 192px over 0.3s ease-out on hover and focus-visible. Growth is held while the intro plays (`data-intro="play"`). Touch devices get static 128px frames with no transition.
 - **Use:** plates frame navigation surfaces such as the home board. They are not content images and do not appear in article bodies or cards.
 
+### Code Block
+A Parchment Code frame (1px Kraft Line, 0.5rem radius) holding a caption bar over the highlighted code.
+- **Bar:** the language mark (16px, monochrome `currentColor`, from Simple Icons, CC0) and the language name in the Label style, in Cold Brew. Unknown languages show a drawn `</>` mark and the name as written; no language shows "Code".
+- **Copy button:** ghost style, 44px tall, a 1.5-stroke copy icon plus "Copy". It ships `hidden` and `code-copy.js` reveals it, so readers without JavaScript never see a dead control. A click copies the code, swaps to a check and "Copied" in Cinnamon Roast Deep for 1.6s, and announces "Code copied" through a polite live region. If clipboard access fails, it selects the code instead.
+- **Rule:** logos stay monochrome. Brand colours would add hues to site chrome (The One Roast Rule).
+
 ### Search Dialog (signature)
 A command palette on the topmost Fresh Filter sheet: serif heading, labelled 48px input, filter hint (`blog`, `projects`), and a scrolling result list of small-radius Filter Paper rows with an uppercase type label, title, and summary. It opens with Ctrl/⌘+K, closes on Esc, and returns focus to the trigger.
 

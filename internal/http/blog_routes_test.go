@@ -302,6 +302,7 @@ func TestBaseTemplateIncludesThemeControls(t *testing.T) {
 		`src="/assets/js/theme-init.js?v=2"`,
 		`src="/assets/js/theme-toggle.js?v=2"`,
 		`src="/assets/js/search.js?v=2"`,
+		`src="/assets/js/code-copy.js?v=1"`,
 		`theme-preference`,
 		`search-modal`,
 	})
