@@ -182,15 +182,14 @@ func TestSiteShell(t *testing.T) {
 		`class="skip-link" href="#main-content"`,
 		`<main id="main-content"`,
 		`class="site-masthead"`,
-		`<a href="/" class="site-brand">danielscoffee</a>`,
-		`<details class="site-menu">`,
-		`<summary class="site-menu-toggle">Menu</summary>`,
-		`aria-label="Primary navigation"`,
+		`<a href="/" class="site-back">`,
+		`<span class="sr-only">Back to home: </span>`,
+		`<span class="site-back-label">danielscoffee</span>`,
 		`<div id="header-actions" class="header-actions">`,
 		`href="https://github.com/danielscoffee"`,
 		`href="https://www.linkedin.com/in/daniel-reis-santos/"`,
 		`id="search-trigger"`,
-		`aria-label="Theme: System"`,
+		`aria-label="Theme"`,
 		`aria-label="Open search"`,
 		`aria-labelledby="search-title"`,
 		`<button class="search-close" type="submit">Close</button>`,
@@ -200,7 +199,7 @@ func TestSiteShell(t *testing.T) {
 	if strings.Contains(body, `class="site-tagline"`) {
 		t.Error("site header should not contain tagline")
 	}
-	for _, removed := range []string{"mobile-menu", "site-nav-desktop"} {
+	for _, removed := range []string{"mobile-menu", "site-nav-desktop", "site-menu", `aria-label="Primary navigation"`, `class="social-link"`} {
 		if strings.Contains(body, removed) {
 			t.Errorf("site header should not contain %q", removed)
 		}
@@ -222,7 +221,7 @@ func TestHomePage(t *testing.T) {
 
 	body := w.Body.String()
 	assertContainsAll(t, body, []string{
-		`<h1 id="board-title" class="board-title">danielscoffee</h1>`,
+		`<h1 id="board-title" class="board-title"><span class="board-title-text">danielscoffee</span></h1>`,
 		`Backend developer. Systems enjoyer. Production bug survivor.`,
 		`<a class="board-door" href="/blog">`,
 		`<a class="board-door" href="/projects">`,

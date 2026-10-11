@@ -24,23 +24,15 @@ templ Base(pageTitle string, pageDescription string) {
 			<a class="skip-link" href="#main-content">Skip to content</a>
 			<header class="site-masthead">
 				<div class="masthead-inner">
-					<a href="/" class="site-brand">danielscoffee</a>
-					<details class="site-menu">
-						<summary class="site-menu-toggle">Menu</summary>
-						<div id="site-menu-panel" class="site-menu-panel">
-							<nav class="site-nav" aria-label="Primary navigation">
-								<a href="/blog" class="site-nav-link">Blog</a>
-								<a href="/projects" class="site-nav-link">Projects</a>
-								<a href="/about" class="site-nav-link">About</a>
-							</nav>
-							<div id="header-actions" class="header-actions">
-								<a href="https://github.com/danielscoffee" class="social-link" rel="noreferrer" target="_blank">GitHub</a>
-								<a href="https://www.linkedin.com/in/daniel-reis-santos/" class="social-link" rel="noreferrer" target="_blank">LinkedIn</a>
-								<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme: System" aria-live="polite" data-theme-storage-key="theme-preference">Theme: System</button>
-								<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">Search <span class="search-kbd">Ctrl+K</span></button>
-							</div>
-						</div>
-					</details>
+					<a href="/" class="site-back">
+						<svg class="site-back-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 8H2.5"></path><path d="M7 3.5 2.5 8 7 12.5"></path></svg>
+						<span class="sr-only">Back to home: </span>
+						<span class="site-back-label">danielscoffee</span>
+					</a>
+					<div id="header-actions" class="header-actions">
+						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme" aria-live="polite" data-theme-storage-key="theme-preference">Theme</button>
+						<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">Search <span class="search-kbd">Ctrl+K</span></button>
+					</div>
 				</div>
 			</header>
 			<main id="main-content" class="site-container">

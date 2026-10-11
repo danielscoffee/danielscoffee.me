@@ -74,10 +74,13 @@ func TestThemeScriptKeepsModesStorageAndCompactText(t *testing.T) {
 		t.Fatalf("read theme-toggle.js: %v", err)
 	}
 	js := string(jsBytes)
-	for _, marker := range []string{`"theme-preference"`, `"system", "light", "dark"`, "matchMedia", "localStorage", "button.textContent = label", `button.setAttribute("aria-label", label)`} {
+	for _, marker := range []string{`"theme-preference"`, `"(prefers-color-scheme: dark)"`, `preference || "system"`, "matchMedia", "localStorage", "button.textContent = label", `button.setAttribute("aria-label", label)`} {
 		if !strings.Contains(js, marker) {
 			t.Errorf("theme-toggle.js missing %q", marker)
 		}
+	}
+	if strings.Contains(js, `"System"`) {
+		t.Error("theme toggle must switch light/dark only; following the OS is the default, not a button state")
 	}
 }
 
@@ -87,7 +90,7 @@ func TestThemeRenderedShellStartsCompactWithFullLabel(t *testing.T) {
 		t.Fatalf("render base: %v", err)
 	}
 	html := output.String()
-	if !strings.Contains(html, `id="theme-toggle"`) || !strings.Contains(html, `aria-label="Theme: System"`) || !strings.Contains(html, `>Theme: System</button>`) {
+	if !strings.Contains(html, `id="theme-toggle"`) || !strings.Contains(html, `aria-label="Theme"`) || !strings.Contains(html, `>Theme</button>`) {
 		t.Fatalf("theme control should render compact text and full accessible label: %s", html)
 	}
 	if !strings.Contains(html, `id="search-results" class="search-results" aria-live="polite"`) {
@@ -187,32 +190,51 @@ func TestFlatFullWidthMasthead(t *testing.T) {
 	}
 }
 
-func TestCompactSiteMenu(t *testing.T) {
+func TestBackLinkMasthead(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
 		t.Fatalf("read styles: %v", err)
 	}
 	css := string(cssBytes)
 
-	toggleRule := regexp.MustCompile(`(?s)\.site-menu-toggle\s*\{[^}]*\}`).FindString(css)
-	for _, marker := range []string{"min-height: 44px", "list-style: none", "margin-left: auto"} {
-		if !strings.Contains(toggleRule, marker) {
-			t.Errorf("site menu toggle missing %q: %s", marker, toggleRule)
+	backRule := regexp.MustCompile(`(?s)\t\.site-back\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"min-height: 44px", "var(--font-editorial)"} {
+		if !strings.Contains(backRule, marker) {
+			t.Errorf("back link missing %q: %s", marker, backRule)
 		}
 	}
-	if !strings.Contains(css, ".site-menu-toggle::-webkit-details-marker") {
-		t.Error("site menu toggle must hide the WebKit disclosure marker")
-	}
-	for _, removed := range []string{".site-nav-desktop", ".mobile-menu"} {
+	for _, removed := range []string{".site-nav-desktop", ".mobile-menu", ".site-menu", ".social-link"} {
 		if strings.Contains(css, removed) {
 			t.Errorf("old masthead selector %q must be removed", removed)
 		}
 	}
-	mobileLinkRule := regexp.MustCompile(`(?s)\.site-menu-panel \.theme-toggle\s*\{[^}]*\}`).FindString(css)
-	for _, marker := range []string{"width: 100%", "justify-content: flex-start"} {
-		if !strings.Contains(mobileLinkRule, marker) {
-			t.Errorf("narrow site menu rows missing %q: %s", marker, mobileLinkRule)
-		}
+}
+
+func TestBrandViewTransition(t *testing.T) {
+	cssBytes, err := os.ReadFile("styles/input.css")
+	if err != nil {
+		t.Fatalf("read styles: %v", err)
+	}
+	css := string(cssBytes)
+
+	if !regexp.MustCompile(`(?m)^@view-transition \{\n\tnavigation: auto;`).MatchString(css) {
+		t.Error("pages must opt in to cross-document view transitions")
+	}
+	nameRule := regexp.MustCompile(`(?s)\.board-title-text,\n\.site-back-label \{[^}]*\}`).FindString(css)
+	if !strings.Contains(nameRule, "view-transition-name: site-brand") {
+		t.Errorf("board title and back label must share the site-brand transition name: %q", nameRule)
+	}
+	reducedAt := strings.Index(css, "@media (prefers-reduced-motion: reduce)")
+	if reducedAt < 0 || !strings.Contains(css[reducedAt:], "@view-transition {\n\t\tnavigation: none;") {
+		t.Error("reduced motion must turn view transitions off")
+	}
+
+	cssOut, err := os.ReadFile("assets/css/output.css")
+	if err != nil {
+		t.Fatalf("read generated CSS: %v", err)
+	}
+	if !strings.Contains(string(cssOut), "@view-transition") {
+		t.Error("generated CSS must keep the @view-transition rule")
 	}
 }
 
@@ -223,10 +245,18 @@ func TestHomeBoardStyles(t *testing.T) {
 	}
 	css := string(cssBytes)
 
-	for _, token := range []string{"--board", "--board-text", "--board-muted", "--board-frame", "--board-focus"} {
-		if got := strings.Count(css, token+":"); got < 3 {
-			t.Errorf("expected %s in light, dark, and system-dark themes, got %d", token, got)
-		}
+	// The home doors sit straight on the page (no panel), top-left, so they
+	// use the page tokens and carry no board token family of their own.
+	if strings.Contains(css, "--board") {
+		t.Error("the home page has no board panel; --board tokens must not return")
+	}
+	boardRule := regexp.MustCompile(`(?s)\t\.menu-board\s*\{[^}]*\}`).FindString(css)
+	if strings.Contains(boardRule, "background") || strings.Contains(boardRule, "padding") || !strings.Contains(boardRule, "color: rgb(var(--text))") {
+		t.Errorf("menu board must be unboxed page text: %s", boardRule)
+	}
+	shellRule := regexp.MustCompile(`(?s)\t\.home-shell\s*\{[^}]*\}`).FindString(css)
+	if strings.Contains(shellRule, "place-items") || strings.Contains(shellRule, "center") {
+		t.Errorf("home must anchor to the top-left corner, not centre: %s", shellRule)
 	}
 
 	frameRule := regexp.MustCompile(`(?s)\.door-frame\s*\{[^}]*\}`).FindString(css)
@@ -266,8 +296,8 @@ func TestHomeBoardStyles(t *testing.T) {
 		}
 	}
 	focusRule := regexp.MustCompile(`(?s)\.board-door:focus-visible\s*\{[^}]*\}`).FindString(css)
-	if !strings.Contains(focusRule, "outline: 3px solid rgb(var(--board-focus))") {
-		t.Errorf("board doors need a visible board focus ring: %s", focusRule)
+	if !strings.Contains(focusRule, "outline: 3px solid rgb(var(--focus))") {
+		t.Errorf("board doors need the site focus ring: %s", focusRule)
 	}
 }
 

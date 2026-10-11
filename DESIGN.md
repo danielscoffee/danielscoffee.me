@@ -17,7 +17,6 @@ colors:
   parchment-code: "rgb(239 229 215)"
   code-ink: "rgb(66 42 29)"
   roast-shadow: "rgb(63 40 27)"
-  board-espresso: "rgb(54 35 25)"
   kraft-frame: "rgb(176 132 88)"
   # Dark theme (:root[data-theme="dark"] and system-dark)
   roasted-ground: "rgb(27 20 16)"
@@ -33,7 +32,6 @@ colors:
   dark-mocha-label: "rgb(225 199 171)"
   grounds-code: "rgb(22 16 13)"
   dark-code-ink: "rgb(238 216 190)"
-  board-roast: "rgb(78 54 39)"
 typography:
   brand:
     fontFamily: "Source Serif 4, Georgia, serif"
@@ -99,7 +97,6 @@ spacing:
   touch-target: "44px"
   content-reading: "68ch"
   content-wide: "72rem"
-  board-width: "40rem"
   plate-rest: "96px"
   plate-touch: "128px"
   plate-open: "192px"
@@ -149,27 +146,24 @@ components:
     height: "48px"
     padding: "0.7rem 0.85rem"
   menu-board:
-    backgroundColor: "{colors.board-espresso}"
-    textColor: "{colors.cream}"
-    padding: "clamp(1.25rem, 4vw, 2.5rem)"
-    width: "40rem"
-  menu-board-dark:
-    backgroundColor: "{colors.board-roast}"
-    textColor: "{colors.cream}"
+    textColor: "{colors.espresso-ink}"
+    width: "100%"
+  board-title:
+    textColor: "{colors.cinnamon-roast-deep}"
+    typography: "{typography.board-title}"
   board-row:
-    textColor: "{colors.cream}"
+    textColor: "{colors.espresso-ink}"
     typography: "{typography.board-row}"
     height: "44px"
   scene-plate:
     backgroundColor: "{colors.kraft-frame}"
     size: "96px"
-  site-menu-toggle:
-    textColor: "{colors.cold-brew}"
-    typography: "{typography.label}"
-    rounded: "{rounded.sm}"
-    height: "44px"
-  site-menu-toggle-hover:
+  site-back:
     textColor: "{colors.cinnamon-roast-deep}"
+    typography: "{typography.brand}"
+    height: "44px"
+  site-back-hover:
+    textColor: "{colors.espresso-ink}"
   dialog-search:
     backgroundColor: "{colors.fresh-filter}"
     textColor: "{colors.espresso-ink}"
@@ -185,7 +179,7 @@ components:
 
 A working engineer's log kept on warm paper in espresso ink. The site reads like a notebook that lives next to the grinder: precise, honest, a little stained by use. Personality comes from the coffee identity and nowhere else: the palette is roasted, the dark mode is a darker roast rather than a black screen, and the brand mark is set in the same serif as the writing. Everything else is in service of reading long technical prose.
 
-The home page is the notebook's cover: a single espresso menu board with three framed doors, set outside the masthead-and-footer shell used by every other page.
+The home page is the notebook's cover: the brand and three photo doors set straight on the paper in the top-left corner, like a menu chalked onto the first page, outside the masthead-and-footer shell used by every other page.
 
 Density is calm. Index pages are a wide shell of paper cards; reading pages narrow to a 68-character measure. Components are warm and tactile: cards are sheets of filter paper with a faint warm shadow, chips are dabs of latte foam, and hover is a gentle physical lift rather than a color explosion. Controls stay quiet in muted sans until touched.
 
@@ -198,7 +192,7 @@ This system rejects three looks outright: generic SaaS (gradient heroes, glass c
 - Flat paper surfaces, softly lifted; one deep shadow reserved for the search dialog.
 - Gently rounded corners, 44px touch targets, visible ember focus rings.
 - Self-hosted fonts, no external runtime assets.
-- One signature surface, the menu board, carries the site's framing; inner pages stay paper.
+- One signature surface, the home menu, carries the site's framing; it sits on the page itself, never in a panel.
 
 ## Colors
 
@@ -224,19 +218,12 @@ All colors are stored as space-separated RGB channels in CSS custom properties (
 - **Roast Shadow** (`--shadow-color`): warm brown shadow base in light themes; pure black in dark themes.
 
 ### Menu Board (home only)
-The board is a dark surface on both themes; its tokens (`--board*`) are defined in light, dark, and system-dark, and only `.menu-board` and its children consume them.
-- **Board Espresso** (`--board`, light): the board fill, identical in value to Espresso Ink.
-- **Board Roast** (`--board`, dark): a lifted medium-roast brown, lighter than the Dark Roast page surfaces so the board reads as an object on the page.
-- **Cream / Milky Tan** (`--board-text` / `--board-muted`): board text and its hairlines, leaders, and route labels (at 40-60% alpha); same values in both themes.
-- **Kraft Frame** (`--board-frame`): the scene-plate backing fill, visible only while a photo loads; same value in both themes.
-- **Caramel Focus** (`--board-focus`): the board's focus outline and selection tint; same value in both themes.
+The home menu has no color family of its own: the title uses Cinnamon Roast Deep (Caramel Crema Light in the dark), door names use Espresso Ink (Cream), leaders and routes use Cold Brew (Milky Tan), and focus uses the site focus color. It draws no hairlines. Scene plates fall back to Latte Foam while a photo loads.
 
 A functional sub-palette (`--syntax-*` for Chroma highlighting, `--task-*` for Neorg TODO/DOING/DONE/CANCELLED states) lives in `internal/web/styles/input.css`. It is confined to code blocks and task lists and never appears in site chrome.
 
 ### Named Rules
-**The Board Stays Dark Rule.** The menu board is espresso or board-roast in every theme and never takes the paper surface colors. It is the only large dark surface in light mode, which is why it reads as a board and not a card.
-
-**The Flat Board Rule.** The menu board and its scene plates are square-cornered, borderless, and shadowless, in the spirit of borretti.me. Tone alone separates board from page and plate from board.
+**The Unboxed Menu Rule.** The home menu is never put in a panel, card, or block, and draws no rules or hairlines. The title and doors sit directly on the page, anchored top-left with leaders running to the right margin, and the scene plates are square, borderless, and shadowless, in the spirit of borretti.me.
 
 **The One Roast Rule.** Cinnamon Roast (Caramel Crema in the dark) is the only accent hue in the interface. A second chrome accent dilutes the identity; syntax and task colors stay inside content.
 
@@ -272,11 +259,11 @@ A functional sub-palette (`--syntax-*` for Chroma highlighting, `--task-*` for N
 
 Two shells: a **wide shell** (`min(100% - 2rem, 72rem)`) for the masthead, footer, and index grids, and a **reading measure** (68ch) for intros and prose. Index lists are an auto-fit grid of cards, `minmax(min(100%, 25rem), 1fr)` with a 1.25rem gap. Project devlogs use a fixed one/two/three-column grid at 640px and 900px, where the first devlog spans two columns and two rows.
 
-The home page has its own shell: no masthead, no footer. The menu board is a 40rem-max centered column, top-anchored near the resting board's vertical center so a growing plate pushes only the rows below it. The resting half-height is tracked per mode in `--board-rest-half` (16rem default; 14.75rem at ≤480px; 19rem on touch; 17.5rem on touch at ≤480px). At ≤480px the dotted leader and route label hide and board padding tightens to 1.25rem × 1rem.
+The home page has its own shell: no masthead, no footer. The menu spans the full page width inside `clamp(1.5rem, 5vw, 3rem)` of page padding (48px on desktop), anchored top-left, so the dotted leaders run to the right margin and a growing plate pushes only the rows below it. At ≤480px the dotted leader and route label hide.
 
 Vertical rhythm: main content pads 2.5rem top and 3rem bottom; sections are separated by 2.5rem; cards pad with `clamp(1.25rem, 3vw, 1.75rem)`.
 
-Responsive behavior: inner pages use one masthead at every width: brand mark left, a `<details>` "Menu" disclosure at right. Opening it reveals one panel with nav, social links, theme, and search, laid out as a right-aligned wrapping row under a Kraft Line top border; at ≤560px the panel becomes a single column of full-width rows and the shell gutter tightens to 0.625rem per side. On touch devices the `Ctrl+K` hint is hidden. At 480px the search dialog goes nearly full-screen.
+Responsive behavior: inner pages use one masthead at every width: the back link (drawn arrow plus brand) at left, theme and search at right. The row wraps the actions under the back link when space runs out (around 320px), and at ≤560px the shell gutter tightens to 0.625rem per side. On touch devices the `Ctrl+K` hint is hidden. At 480px the search dialog goes nearly full-screen.
 
 ## Elevation & Depth
 
@@ -285,7 +272,7 @@ Paper, softly lifted. Surfaces are flat sheets distinguished first by tone (Oat 
 ### Shadow Vocabulary
 - **Resting sheet** (`box-shadow: 0 0.25rem 0.9rem rgb(var(--shadow-color) / 0.06)`): cards and devlog tiles at rest.
 - **Lifted sheet** (`box-shadow: 0 0.4rem 1.2rem rgb(var(--shadow-color) / 0.09)`): card hover and focus-within, paired with `translateY(-1px)` on editorial cards.
-- **Board** (`box-shadow: none`): the menu board is flat; it is made heavy by tone alone (The Flat Board Rule).
+- **Home menu** (`box-shadow: none`): no panel and no shadow; it is part of the page (The Unboxed Menu Rule).
 - **Dialog** (`box-shadow: 0 1.5rem 4rem rgb(var(--shadow-color) / 0.28)`): the search dialog only, over a 58% Roast Shadow backdrop.
 
 ### Named Rules
@@ -293,10 +280,10 @@ Paper, softly lifted. Surfaces are flat sheets distinguished first by tone (Oat 
 
 ## Shapes
 
-Gently curved, never pill-shaped, never sharp. Controls, chips, inputs, and inline code use the small radius (0.375rem); cards and the dialog use the medium radius (0.75rem). Code blocks and definition panels use 0.5rem, content images 0.65rem, inline code and spoilers 0.25rem. Borders are always 1px Kraft Line; the thick line is the 0.25rem Cinnamon Roast rule on blockquotes. The menu board and scene plates are the deliberate exception to the radius scale: square, borderless, and flat (The Flat Board Rule).
+Gently curved, never pill-shaped, never sharp. Controls, chips, inputs, and inline code use the small radius (0.375rem); cards and the dialog use the medium radius (0.75rem). Code blocks and definition panels use 0.5rem, content images 0.65rem, inline code and spoilers 0.25rem. Borders are always 1px Kraft Line; the thick line is the 0.25rem Cinnamon Roast rule on blockquotes. The home menu's scene plates are the deliberate exception to the radius scale: square, borderless, and flat (The Unboxed Menu Rule).
 
 ### Named Rules
-**The Gentle Corner Rule.** Two radii do the work: 6px for things you press, 12px for things you read. The home board and its plates are the one square exception.
+**The Gentle Corner Rule.** Two radii do the work: 6px for things you press, 12px for things you read. The home menu's scene plates are the one square exception.
 
 ## Components
 
@@ -326,14 +313,15 @@ Warm and tactile: controls feel like paper and ink you can touch, with restraint
 - **States:** search results show loading (accent text), empty (dashed Kraft Line box, centered muted text), and error (accent border) messages.
 
 ### Navigation
-- **Masthead (inner pages):** serif brand mark at left and one "Menu" disclosure at right, at every width, inside the wide shell. Transparent and borderless; the footer carries the only top border. The home page has neither masthead nor footer.
-- **Menu toggle:** 44px summary in the Label style, small radius, with a drawn plus that collapses to a minus when open (two 1.5px bars, 180ms). Cold Brew at rest; Cinnamon Roast Deep on hover, focus, and open.
-- **Menu panel:** nav links (Blog, Projects, About), then GitHub and LinkedIn, then the theme and search buttons, in one wrapping right-aligned row (single column ≤560px). The theme button's visible text is "Theme: <mode>".
+- **Masthead (inner pages):** a back link to the home board at left, and the theme and search ghost buttons at right, at every width, inside the wide shell. There are no section links: the home board is the site's navigation. Transparent and borderless; the footer carries the only top border and the GitHub, LinkedIn, and RSS links. The home page has neither masthead nor footer.
+- **Back link:** a 1rem drawn arrow (authored SVG, 1.75 stroke, currentColor) plus "danielscoffee" in the Brand style, Cinnamon Roast Deep, 44px tall. Hover and focus turn it Espresso Ink and nudge the arrow 3px left (180ms). Its accessible name is "Back to home: danielscoffee".
+- **Theme button:** a two-state Light/Dark switch labelled "Theme: Light" or "Theme: Dark". With no saved choice the site follows the OS (`data-theme="system"`) and the label shows the theme it resolves to; a click saves the opposite theme.
+- **Brand transition:** pages opt in to cross-document view transitions. The board title on `/` and the back-link label share `view-transition-name: site-brand`, so the brand glides between the board header and the masthead (450ms, `cubic-bezier(0.2, 0, 0, 1)`) while the page crossfades (220ms). Reduced motion turns view transitions off; browsers without support simply navigate.
 - **Links:** Cold Brew 0.82rem labels with a 44px hit area; hover and focus turn them Cinnamon Roast Deep. No underline, no pill highlight.
 - **Footer:** brand name left, RSS/GitHub/LinkedIn right, muted 0.85rem, 44px targets.
 
 ### Menu Board (signature)
-A flat dark espresso panel (40rem max, square corners, no border, no shadow) that holds the site's doors. Anatomy: a serif board title over a muted hairline, then a list of rows separated by 40%-alpha Milky Tan hairlines. Each row is a 44px-minimum link: scene plate, serif door name, a dotted leader, and the route (`/blog`) in muted sans. Hover and focus brighten the route and leader to Cream; focus draws a 3px Caramel Focus outline offset 4px. The board never uses paper surface tokens (see The Board Stays Dark Rule).
+The site's doors, set straight on the page from the top-left corner across the full width (no panel, no hairlines; see The Unboxed Menu Rule). Anatomy: the serif brand title in the accent, then a list of rows separated only by space. Each row is a 44px-minimum link: scene plate, serif door name, a dotted Cold Brew leader running to the right page margin, and the route (`/blog`) in muted sans at the far right. Hover and focus darken the route and leader to the text color; focus draws the site's 3px focus outline offset 4px.
 
 ### Scene Plate (signature)
 A square, borderless window onto a 400×400 photograph of Daniel's coffee rituals (writing at the table, pour-over at home, the café takeaway). Photos are CC0 from StockSnap, self-hosted as JPEGs under 60KB, credited in `internal/web/assets/img/scenes/CREDITS.md`, with the source embedded in each file. The image always renders at 192px, centered and cropped by the frame, so the frame opens like a shutter and never rescales the photo.
@@ -355,7 +343,7 @@ A command palette on the topmost Fresh Filter sheet: serif heading, labelled 48p
 - **Do** treat the scene-plate frame-grow (0.3s ease-out) as the one named exception to 180ms; it is a size change that needs the longer travel. Any other motion longer than 180ms needs the same explicit justification.
 - **Do** keep the board intro single-shot: the intro line holds for about 4.6s and fades out (350ms), then the three rows settle upward over 400ms with an 80ms stagger, finishing near 5.2s; it plays once per tab session, any key, click, or focus skips it, and `prefers-reduced-motion` skips it entirely.
 - **Do** crop scene photos for the frame: the subject sits inside the central 100-300 window of the 400×400 crop so the 96px rest frame shows it whole, and the outer ring adds the context revealed on grow. Use only CC0 or equivalent photos, self-hosted, under 60KB, with the source embedded and listed in CREDITS.md.
-- **Do** give the inner-page header one "Menu" disclosure at every width rather than a separate desktop nav.
+- **Do** keep the inner-page header to a back link plus theme and search; section navigation lives on the home board.
 - **Do** edit `internal/web/styles/input.css` and `.templ` sources; `output.css` is generated.
 - **Do** keep coffee motifs in the site's framing (home, masthead, footer, empty and error states), where they say who wrote this, and keep them out of article bodies.
 

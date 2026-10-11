@@ -67,11 +67,6 @@
 		--task-doing: 25 70 140;
 		--task-done: 20 105 50;
 		--task-cancelled: 170 30 30;
-		--board: 54 35 25;
-		--board-text: 244 231 211;
-		--board-muted: 190 166 143;
-		--board-frame: 176 132 88;
-		--board-focus: 236 159 91;
 	}
 
 	:root[data-theme="dark"] {
@@ -98,11 +93,6 @@
 		--task-doing: 130 190 255;
 		--task-done: 115 220 145;
 		--task-cancelled: 255 145 145;
-		--board: 78 54 39;
-		--board-text: 244 231 211;
-		--board-muted: 190 166 143;
-		--board-frame: 176 132 88;
-		--board-focus: 236 159 91;
 	}
 
 	@media (prefers-color-scheme: dark) {
@@ -130,11 +120,6 @@
 			--task-doing: 130 190 255;
 			--task-done: 115 220 145;
 			--task-cancelled: 255 145 145;
-			--board: 78 54 39;
-			--board-text: 244 231 211;
-			--board-muted: 190 166 143;
-			--board-frame: 176 132 88;
-			--board-focus: 236 159 91;
 		}
 	}
 
@@ -227,87 +212,49 @@
 
 	.masthead-inner {
 		min-height: 4.5rem;
-		display: grid;
-		grid-template-columns: 1fr auto;
-		align-items: start;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.25rem 1rem;
 		padding-block: 0.875rem;
 	}
 
-	.site-brand {
-		grid-area: 1 / 1;
-		position: relative;
-		z-index: 1;
-		justify-self: start;
+	/* The way back to the home board: a drawn arrow plus the brand. The
+	   label shares a view-transition name with the board title on /. */
+	.site-back {
 		display: inline-flex;
 		min-height: 44px;
 		align-items: center;
+		gap: 0.5rem;
 		color: rgb(var(--accent-strong));
 		font: 600 1.05rem var(--font-editorial);
 		text-decoration: none;
 		white-space: nowrap;
 	}
-	.site-menu {
-		grid-row: 1;
-		grid-column: 1 / -1;
-		min-width: 0;
+	.site-back-arrow {
+		width: 1rem;
+		height: 1rem;
+		flex: none;
+		transition: transform 180ms ease;
 	}
-	.site-menu-toggle {
-		display: flex;
-		width: fit-content;
-		min-height: 44px;
-		align-items: center;
-		margin-left: auto;
-		padding: 0.35rem 0.55rem;
-		border-radius: var(--radius-sm);
-		cursor: pointer;
-		list-style: none;
-		color: rgb(var(--muted));
-		font: 500 0.82rem var(--font-ui);
-		transition: color 180ms ease;
+	.site-back-label {
+		display: inline-block;
 	}
-	.site-menu-toggle::-webkit-details-marker {
-		display: none;
+	.site-back:hover,
+	.site-back:focus-visible {
+		color: rgb(var(--text));
 	}
-	/* Drawn plus/minus: two 1.5px bars; the vertical bar collapses when open. */
-	.site-menu-toggle::after {
-		content: "";
-		width: 10px;
-		height: 10px;
-		margin-left: 0.45rem;
-		background:
-			linear-gradient(currentColor, currentColor) center / 10px 1.5px no-repeat,
-			linear-gradient(currentColor, currentColor) center / 1.5px 10px no-repeat;
-		transition: background-size 180ms ease;
+	.site-back:hover .site-back-arrow,
+	.site-back:focus-visible .site-back-arrow {
+		transform: translateX(-3px);
 	}
-	.site-menu[open] .site-menu-toggle::after {
-		background-size:
-			10px 1.5px,
-			1.5px 0;
-	}
-	.site-menu-toggle:hover,
-	.site-menu-toggle:focus-visible,
-	.site-menu[open] .site-menu-toggle {
-		color: rgb(var(--accent-strong));
-	}
-	.site-menu-panel {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: flex-end;
-		gap: 0.25rem 1.25rem;
-		margin-top: 0.5rem;
-		padding: 0.5rem 0;
-		border-top: 1px solid rgb(var(--border));
-	}
-	.site-nav,
 	.header-actions {
 		display: flex;
 		align-items: center;
-		flex-wrap: wrap;
 		gap: 0.2rem;
 	}
 	.site-nav-link,
-	.social-link,
 	.theme-toggle {
 		display: inline-flex;
 		min-height: 44px;
@@ -320,15 +267,9 @@
 		text-decoration: none;
 		white-space: nowrap;
 	}
-	.site-brand:hover,
-	.site-brand:focus-visible {
-		color: rgb(var(--text));
-	}
 	.site-nav-link:hover,
-	.social-link:hover,
 	.theme-toggle:hover,
 	.site-nav-link:focus-visible,
-	.social-link:focus-visible,
 	.theme-toggle:focus-visible {
 		color: rgb(var(--accent-strong));
 	}
@@ -383,31 +324,6 @@
 		.footer-inner {
 			width: calc(100% - 1.25rem);
 		}
-		.site-menu-panel {
-			flex-direction: column;
-			align-items: stretch;
-			gap: 0.1rem;
-		}
-		.site-nav,
-		.header-actions {
-			display: grid;
-			grid-template-columns: 1fr;
-			gap: 0.1rem;
-		}
-		.site-menu-panel .header-actions {
-			margin-top: 0.25rem;
-			padding-top: 0.25rem;
-			border-top: 1px solid rgb(var(--border));
-		}
-		.site-menu-panel .site-nav-link,
-		.site-menu-panel .social-link,
-		.site-menu-panel .theme-toggle {
-			width: 100%;
-			justify-content: flex-start;
-		}
-		#theme-toggle {
-			justify-content: flex-start;
-		}
 		.footer-inner {
 			align-items: center;
 			flex-direction: row;
@@ -425,43 +341,35 @@
 		height: auto;
 		min-height: 100%;
 		min-height: 100dvh;
-		display: grid;
-		place-items: start center;
-		padding: clamp(1rem, 4vw, 3rem);
+		display: block;
+		padding: clamp(1.5rem, 5vw, 3rem);
 	}
 
-	/* Top-anchored at roughly the resting board's centred position, so a
-	   growing frame pushes only the rows below it, as on borretti.me.
-	   --board-rest-half tracks the resting board's half-height per frame
-	   size (see the hover: none and 480px blocks). */
+	/* No panel: the title and doors sit straight on the page, anchored to
+	   the top-left corner as on borretti.me, so a growing frame only pushes
+	   the rows below it. */
 	.home-main {
-		--board-rest-half: 16rem;
 		width: 100%;
 		min-width: 0;
-		display: grid;
-		justify-items: center;
-		margin-top: max(0px, calc(50dvh - var(--board-rest-half) - clamp(1rem, 4vw, 3rem)));
 	}
 
+	/* Full page width so each dotted leader runs to the right margin. */
 	.menu-board {
-		width: min(100%, 40rem);
-		padding: clamp(1.25rem, 4vw, 2.5rem);
-		background: rgb(var(--board));
-		color: rgb(var(--board-text));
-	}
-
-	.menu-board ::selection {
-		background-color: rgb(var(--board-focus) / 0.35);
-		color: rgb(var(--board-text));
+		width: 100%;
+		color: rgb(var(--text));
 	}
 
 	.board-title {
 		margin: 0;
 		padding-bottom: 0.85rem;
-		border-bottom: 1px solid rgb(var(--board-muted) / 0.4);
+		color: rgb(var(--accent-strong));
 		font: 600 clamp(2rem, 5vw, 2.5rem) / 1.1 var(--font-editorial);
 		letter-spacing: -0.015em;
 		overflow-wrap: anywhere;
+	}
+
+	.board-title-text {
+		display: inline-block;
 	}
 
 	.board-body {
@@ -479,7 +387,7 @@
 		align-self: center;
 		max-width: 26ch;
 		margin: 0;
-		color: rgb(var(--board-text));
+		color: rgb(var(--text));
 		font: 600 clamp(1.5rem, 4vw, 2rem) / 1.25 var(--font-editorial);
 		letter-spacing: -0.015em;
 		text-wrap: balance;
@@ -490,10 +398,6 @@
 		list-style: none;
 		margin: 0;
 		padding: 0;
-	}
-
-	.board-row + .board-row {
-		border-top: 1px solid rgb(var(--board-muted) / 0.4);
 	}
 
 	.board-door {
@@ -508,7 +412,7 @@
 	}
 
 	.board-door:focus-visible {
-		outline: 3px solid rgb(var(--board-focus));
+		outline: 3px solid rgb(var(--focus));
 		outline-offset: 4px;
 	}
 
@@ -521,7 +425,7 @@
 		width: 96px;
 		height: 96px;
 		overflow: hidden;
-		background: rgb(var(--board-frame));
+		background: rgb(var(--chip-bg));
 		transition: width 0.3s ease-out, height 0.3s ease-out;
 	}
 
@@ -547,12 +451,12 @@
 		min-width: 1.5rem;
 		align-self: center;
 		margin-top: 0.7rem;
-		border-bottom: 2px dotted rgb(var(--board-muted) / 0.6);
+		border-bottom: 2px dotted rgb(var(--muted) / 0.6);
 		transition: border-color 180ms ease;
 	}
 
 	.door-route {
-		color: rgb(var(--board-muted));
+		color: rgb(var(--muted));
 		font: 400 0.82rem var(--font-ui);
 		letter-spacing: 0.02em;
 		white-space: nowrap;
@@ -560,11 +464,11 @@
 	}
 
 	.board-door:is(:hover, :focus-visible) .door-route {
-		color: rgb(var(--board-text));
+		color: rgb(var(--text));
 	}
 
 	.board-door:is(:hover, :focus-visible) .door-leader {
-		border-bottom-color: rgb(var(--board-text) / 0.8);
+		border-bottom-color: rgb(var(--text) / 0.8);
 	}
 
 	.board-intro {
@@ -822,9 +726,16 @@
 		color: rgb(var(--text));
 	}
 
+	/* Tailwind's preflight strips list markers; prose lists need them back. */
 	.post-prose ul,
 	.post-prose ol {
 		padding-left: 1.45em;
+	}
+	.post-prose ul {
+		list-style: disc;
+	}
+	.post-prose ol {
+		list-style: decimal;
 	}
 
 	.post-prose li + li {
@@ -1056,21 +967,23 @@
 		padding-left: 0;
 	}
 
+	/* Hanging indent instead of flex: inline code inside a task stays in
+	   the text flow rather than becoming its own flex item. */
 	.post-prose ul.task-list li {
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
+		position: relative;
+		padding-left: calc(12ch + 0.5rem);
 	}
 
 	.post-prose ul.task-list li::before {
 		content: "[TODO]";
-		display: inline-block;
+		position: absolute;
+		left: 0;
+		top: 0;
 		min-width: 12ch;
 		font-size: 1em;
 		font-weight: 500;
 		letter-spacing: 0;
 		color: rgb(var(--task-todo));
-		line-height: 1.5;
 	}
 
 	.post-prose ul.task-list li[data-task-state="doing"]::before {
@@ -1375,9 +1288,6 @@
 	.search-kbd {
 		display: none;
 	}
-	.home-main {
-		--board-rest-half: 19rem;
-	}
 }
 
 @media (max-width: 480px) {
@@ -1385,24 +1295,38 @@
 	.door-route {
 		display: none;
 	}
-	.menu-board {
-		padding: 1.25rem 1rem;
-	}
 	.board-door {
 		gap: 0.75rem 0.85rem;
 	}
-	.home-main {
-		--board-rest-half: 14.75rem;
-	}
 }
 
-@media (hover: none) and (max-width: 480px) {
-	.home-main {
-		--board-rest-half: 17.5rem;
-	}
+/* Cross-document view transition (Chromium, Safari 18.2+; others just
+   navigate). The board title on / and the back-link label on inner pages
+   share one name, so the brand glides between them while the rest fades. */
+@view-transition {
+	navigation: auto;
+}
+
+.board-title-text,
+.site-back-label {
+	view-transition-name: site-brand;
+}
+
+::view-transition-group(site-brand) {
+	animation-duration: 450ms;
+	animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 220ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
+	@view-transition {
+		navigation: none;
+	}
+
 	*,
 	*::before,
 	*::after {
