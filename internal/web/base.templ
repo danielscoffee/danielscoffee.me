@@ -112,12 +112,17 @@ templ BaseTrail(pageTitle string, pageDescription string, section string, trail 
 
 			<dialog id="search-modal" class="search-modal" aria-labelledby="search-title">
 				<div class="search-modal-inner">
-					<div class="search-dialog-header">
-						<h2 id="search-title">Search site</h2>
-						<form method="dialog"><button class="search-close" type="submit">Close</button></form>
+					<h2 id="search-title" class="sr-only">Search site</h2>
+					<div class="search-bar">
+						<svg class="search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="4.75"></circle><path d="M10.5 10.5 14 14"></path></svg>
+						<label for="search-input" class="sr-only">Search posts and projects</label>
+						<input id="search-input" class="search-input" type="search" placeholder="Search posts and projects" autocomplete="off"/>
+						<form method="dialog" class="search-close-form">
+							<button class="search-close" type="submit" aria-label="Close search">
+								<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 4l8 8"></path><path d="M12 4l-8 8"></path></svg>
+							</button>
+						</form>
 					</div>
-					<label for="search-input" class="search-label">Search posts and projects</label>
-					<input id="search-input" class="search-input" type="search" placeholder="Try: blog accessibility" autocomplete="off"/>
 					<p class="search-hint">Filters: <code>blog</code> or <code>projects</code>. Press Esc to close.</p>
 					<ul id="search-results" class="search-results" aria-live="polite"></ul>
 				</div>

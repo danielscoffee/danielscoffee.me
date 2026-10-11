@@ -172,7 +172,7 @@ components:
     backgroundColor: "{colors.fresh-filter}"
     textColor: "{colors.espresso-ink}"
     rounded: "{rounded.md}"
-    padding: "1.15rem"
+    padding: "0"
 ---
 
 # Design System: danielscoffee
@@ -309,7 +309,7 @@ Under an article title: the date, then each tag as a plain muted link separated 
 ### Inputs / Fields
 - **Style:** 48px tall, Oat Paper field set into the Fresh Filter dialog, 1px Kraft Line, small radius, 1rem text.
 - **Focus:** border turns Cinnamon Roast with a 2px Ember Focus outline, offset 2px.
-- **States:** search results show loading (accent text), empty (dashed Kraft Line box, centered muted text), and error (accent border) messages.
+- **States:** search results show loading (accent text), empty ("No results" in muted text), and error (body text) messages, all as plain rows without boxes.
 
 ### Navigation
 - **Masthead (inner pages):** the `danielscoffee` wordmark linking home, a smaller breadcrumb trail beside it, then theme and search at the far right, at every width, inside the wide shell. The home board is the site's navigation, so the header carries no sibling section links. Transparent and borderless; the footer carries the only top border and the GitHub, LinkedIn, and RSS links. Pages without a section (404, 500) show the wordmark alone. The home page has neither masthead nor footer.
@@ -340,7 +340,7 @@ A Parchment Code frame (1px Kraft Line, 0.5rem radius) holding a caption bar ove
 - **Rule:** logos stay monochrome. Brand colours would add hues to site chrome (The One Roast Rule).
 
 ### Search Dialog (signature)
-A command palette on the topmost Fresh Filter sheet: serif heading, labelled 48px input, filter hint (`blog`, `projects`), and a scrolling result list of small-radius Filter Paper rows with an uppercase type label, title, and summary. It opens with Ctrl/⌘+K, closes on Esc, and returns focus to the trigger.
+A thin command palette on the topmost Fresh Filter sheet, set 12vh from the top: one borderless row holding a drawn search icon, a 48px input with no box, and an icon-only ✕ close button (44px, "Close search"); a Kraft Line hairline under the row turns Ember when the input has focus, standing in for the input's outline. Below sit the filter hint (`blog`, `projects`) and a list of compact flat result rows: title with the uppercase type label at the right, then a one-line truncated summary; rows tint to Filter Paper with an accent title on hover and focus. The dialog grows to `min(40rem, 100dvh − 12vh − 2rem)` and only the result list scrolls (thin Kraft Line scrollbar, scroll contained); the page behind is locked while it is open, and `scrollbar-gutter: stable` on every page keeps that lock from shifting the layout. The heading and input label are screen-reader only, and the browser's native clear button is hidden. It opens with Ctrl/⌘+K, closes on Esc or ✕, and returns focus to the trigger.
 
 ## Do's and Don'ts
 

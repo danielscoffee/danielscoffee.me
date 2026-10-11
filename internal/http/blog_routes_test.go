@@ -193,7 +193,9 @@ func TestSiteShell(t *testing.T) {
 		`aria-label="Theme"`,
 		`aria-label="Open search"`,
 		`aria-labelledby="search-title"`,
-		`<button class="search-close" type="submit">Close</button>`,
+		`<h2 id="search-title" class="sr-only">Search site</h2>`,
+		`<button class="search-close" type="submit" aria-label="Close search">`,
+		`<path d="M4 4l8 8"></path><path d="M12 4l-8 8"></path>`,
 		`<footer class="site-footer"`,
 		`class="footer-action-link" href="/rss.xml"`,
 	})

@@ -701,6 +701,13 @@ html,
   height: 100%;
 }
 
+/* Reserve the scrollbar's room on every page, so short and long pages
+	   line up and locking scroll under the search dialog shifts nothing. */
+
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   background-color: rgb(var(--bg));
@@ -1793,10 +1800,16 @@ a {
   color: rgb(var(--task-cancelled));
 }
 
+/* A thin command palette: one borderless row (icon, input, close), a
+	   hairline, then flat result rows. The dialog keeps the system's only
+	   shadow. */
+
 .search-modal {
-  width: min(42rem, calc(100vw - 2rem));
-  max-height: min(38rem, calc(100dvh - 2rem));
-  border: 1px solid rgb(var(--border));
+  width: min(36rem, calc(100vw - 2rem));
+  max-height: min(40rem, calc(100dvh - 12vh - 2rem));
+  margin: 12vh auto auto;
+  overflow: hidden;
+  border: 0;
   border-radius: var(--radius-md);
   background: rgb(var(--surface-raised));
   color: rgb(var(--text));
@@ -1808,90 +1821,156 @@ a {
   background: rgb(var(--shadow-color) / 0.58);
 }
 
-.search-modal-inner {
-  padding: 1.15rem;
-  display: grid;
-  gap: 0.8rem;
+/* Bar and hint stay put; only the result list scrolls. */
+
+.search-modal[open] .search-modal-inner {
+  display: flex;
+  max-height: inherit;
+  flex-direction: column;
 }
 
-.search-dialog-header {
+/* The page behind stays still while search is open. */
+
+html:has(.search-modal[open]) {
+  overflow: hidden;
+}
+
+.search-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  gap: 0.6rem;
+  padding: 0.2rem 0.2rem 0.2rem 0.95rem;
+  border-bottom: 1px solid rgb(var(--border) / 0.6);
+  transition: border-color 180ms ease;
 }
 
-.search-dialog-header h2 {
-  margin: 0;
-  font-family: var(--font-editorial);
+/* The input drops its box; the hairline under the row marks focus. */
+
+.search-bar:focus-within {
+  border-bottom-color: rgb(var(--accent));
 }
 
-.search-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.search-close {
-  min-width: 44px;
-  min-height: 44px;
-  border: 1px solid rgb(var(--border));
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: rgb(var(--text));
+.search-icon {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  color: rgb(var(--muted));
 }
 
 .search-input {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   min-height: 48px;
-  box-sizing: border-box;
-  border: 1px solid rgb(var(--border));
-  border-radius: var(--radius-sm);
-  background: rgb(var(--bg));
+  border: 0;
+  background: transparent;
   color: rgb(var(--text));
-  padding: 0.7rem 0.85rem;
+  padding: 0;
   font-size: 1rem;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+       appearance: none;
 }
 
-.search-input:focus {
-  border-color: rgb(var(--accent));
-  outline: 2px solid rgb(var(--focus));
-  outline-offset: 2px;
+.search-input::-moz-placeholder {
+  color: rgb(var(--muted));
+}
+
+.search-input::placeholder {
+  color: rgb(var(--muted));
+}
+
+.search-input::-webkit-search-cancel-button,
+	.search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-close-form {
+  margin: 0;
+}
+
+.search-close {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: rgb(var(--muted));
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+
+.search-close svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.search-close:hover,
+	.search-close:focus-visible {
+  color: rgb(var(--accent-strong));
 }
 
 .search-hint {
   margin: 0;
-  font-size: 0.78rem;
+  padding: 0.6rem 0.95rem 0.35rem;
+  font-size: 0.75rem;
   color: rgb(var(--muted));
 }
 
 .search-results {
+  flex: 1;
+  min-height: 0;
   list-style: none;
   margin: 0;
-  padding: 0;
-  max-height: 20rem;
-  overflow: auto;
+  padding: 0 0.45rem 0.45rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--border)) transparent;
   display: grid;
-  gap: 0.5rem;
+  align-content: start;
+  gap: 0.1rem;
 }
 
+/* One compact row per result: title and type on a line, summary on one
+	   truncated line below. */
+
 .search-result a {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+			"title type"
+			"summary summary";
+  align-items: baseline;
+  -moz-column-gap: 0.75rem;
+       column-gap: 0.75rem;
   min-height: 44px;
   box-sizing: border-box;
-  border: 1px solid rgb(var(--border));
   border-radius: var(--radius-sm);
-  padding: 0.65rem 0.75rem;
-  background: rgb(var(--surface));
+  padding: 0.5rem 0.5rem;
   color: rgb(var(--text));
   text-decoration: none;
+  transition: background-color 180ms ease;
+}
+
+.search-result a:hover,
+	.search-result a:focus-visible {
+  background: rgb(var(--surface));
+}
+
+.search-result a:hover .search-result-title,
+	.search-result a:focus-visible .search-result-title {
+  color: rgb(var(--accent-strong));
 }
 
 .search-result-message {
-  padding: 0.9rem 0.75rem;
-  border: 1px dashed rgb(var(--border));
-  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.5rem;
   color: rgb(var(--muted));
-  text-align: center;
+  font-size: 0.85rem;
 }
 
 .search-result-message-loading {
@@ -1900,45 +1979,41 @@ a {
 
 .search-result-message-error {
   color: rgb(var(--text));
-  border-color: rgb(var(--accent));
-}
-
-.search-result a:hover,
-	.search-result a:focus-visible {
-  border-color: rgb(var(--accent));
 }
 
 .search-result-type {
-  font-size: 0.72rem;
+  grid-area: type;
+  font-size: 0.68rem;
   color: rgb(var(--muted));
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
+}
+
+.search-result-title,
+	.search-result-summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .search-result-title {
+  grid-area: title;
   font-size: 0.92rem;
   font-weight: 600;
-  margin-top: 0.2rem;
 }
 
 .search-result-summary {
-  font-size: 0.82rem;
+  grid-area: summary;
+  font-size: 0.8rem;
   color: rgb(var(--muted));
-  margin-top: 0.2rem;
+  margin-top: 0.1rem;
 }
 
 @media (max-width: 480px) {
   .search-modal {
     width: calc(100vw - 1rem);
     max-height: calc(100dvh - 1rem);
-  }
-
-  .search-modal-inner {
-    padding: 0.85rem;
-  }
-
-  .search-results {
-    max-height: calc(100dvh - 17rem);
+    margin-top: 0.5rem;
   }
 }
 
