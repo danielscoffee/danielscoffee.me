@@ -31,6 +31,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	mux.HandleFunc("/rss.xml", s.rssHandler)
 	mux.HandleFunc("/sitemap.xml", s.sitemapHandler)
 	mux.HandleFunc("/robots.txt", s.robotsHandler)
+	mux.HandleFunc("/llms.txt", s.llmsHandler)
 
 	return s.requestLoggingMiddleware(s.securityHeadersMiddleware(s.compressionMiddleware(s.pageContextMiddleware(mux))))
 }
