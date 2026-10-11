@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -623,16 +624,20 @@ func TestFavicon(t *testing.T) {
 func TestBackLinks(t *testing.T) {
 	h := testBlogServer().RegisterRoutes()
 	for path, want := range map[string]string{
-		"/post/hello-world":              `<a class="page-back" href="/blog">`,
-		"/projects/side-project":         `<a class="page-back" href="/projects">`,
-		"/projects/side-project/rebuild": `<a class="page-back" href="/projects/side-project">`,
+		"/post/hello-world":              `<a class="page-back" href="/blog" aria-label="Back">`,
+		"/projects/side-project":         `<a class="page-back" href="/projects" aria-label="Back">`,
+		"/projects/side-project/rebuild": `<a class="page-back" href="/projects/side-project" aria-label="Back">`,
 	} {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
 		body := w.Body.String()
-		assertContainsAll(t, body, []string{`<nav class="page-breadcrumb" aria-label="Breadcrumb">`, want})
+		assertContainsAll(t, body, []string{`<div class="page-breadcrumb">`, want, `<script defer src="/assets/js/page-back.js?v=1"></script>`})
 		if strings.Index(body, `class="page-breadcrumb"`) > strings.Index(body, `<article class="article-shell`) {
 			t.Errorf("%s: the return link must sit above the article", path)
+		}
+		link := regexp.MustCompile(`(?s)<a class="page-back".*?</a>`).FindString(body)
+		if text := strings.TrimSpace(regexp.MustCompile(`(?s)<[^>]*>`).ReplaceAllString(link, "")); text != "" {
+			t.Errorf("%s: the return link must be the arrow alone, got text %q", path, text)
 		}
 	}
 }

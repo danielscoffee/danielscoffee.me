@@ -1854,12 +1854,10 @@ a {
 
 .page-back {
   display: inline-flex;
-  min-height: 44px;
+  width: 44px;
+  height: 44px;
   align-items: center;
-  gap: 0.45rem;
   color: rgb(var(--muted));
-  font: 500 0.82rem var(--font-ui);
-  text-decoration: none;
   transition: color 180ms ease;
 }
 
