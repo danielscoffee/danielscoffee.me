@@ -610,3 +610,20 @@ func TestFavicon(t *testing.T) {
 		t.Fatalf("favicon must be a plain 32x32 SVG: %s", body)
 	}
 }
+
+func TestBackLinks(t *testing.T) {
+	h := testBlogServer().RegisterRoutes()
+	for path, want := range map[string]string{
+		"/post/hello-world":              `<a class="page-back" href="/blog">`,
+		"/projects/side-project":         `<a class="page-back" href="/projects">`,
+		"/projects/side-project/rebuild": `<a class="page-back" href="/projects/side-project">`,
+	} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		body := w.Body.String()
+		assertContainsAll(t, body, []string{`<nav class="page-breadcrumb" aria-label="Breadcrumb">`, want})
+		if strings.Index(body, `class="page-breadcrumb"`) > strings.Index(body, `<article class="article-shell`) {
+			t.Errorf("%s: the return link must sit above the article", path)
+		}
+	}
+}

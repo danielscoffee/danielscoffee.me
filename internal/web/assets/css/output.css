@@ -1935,21 +1935,42 @@ a {
   font-size: 0.78rem;
 }
 
-.project-subpost-breadcrumb {
-  margin: 0 0 1rem;
+/* Return link above posts, projects, and devlogs. */
+
+.page-breadcrumb {
+  margin: -0.75rem 0 0;
 }
 
-.project-subpost-back {
-  font-family: var(--font-code);
-  font-size: 0.78rem;
+.page-breadcrumb + .article-shell {
+  margin-top: 1rem;
+}
+
+.page-back {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.45rem;
   color: rgb(var(--muted));
+  font: 500 0.82rem var(--font-ui);
   text-decoration: none;
+  transition: color 180ms ease;
 }
 
-.project-subpost-back:hover {
+.page-back-arrow {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: none;
+  transition: transform 180ms ease;
+}
+
+.page-back:hover,
+	.page-back:focus-visible {
   color: rgb(var(--accent-strong));
-  text-decoration: underline;
-  text-underline-offset: 3px;
+}
+
+.page-back:hover .page-back-arrow,
+	.page-back:focus-visible .page-back-arrow {
+  transform: translateX(-3px);
 }
 
 .sr-only {
