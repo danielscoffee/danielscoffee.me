@@ -33,6 +33,7 @@ Off-the-shelf tools gave me two of these three at best:
 *** DONE folder-based project loader with draft and duplicate-slug checks
 *** DONE nested routes for project devlogs
 *** DONE flat devlog list on each project page
+The Blog and Projects indexes, with an outlined year above each group and one line per title, come from [Anthony Fu's site](https://antfu.me/posts). The devlog list below uses the same rows, with the year in each date.
 *** DONE search with `blog` and `projects` filters
 *** DONE RSS and sitemap entries for posts, projects, and devlogs
 *** DONE link validation, request limits, and pinned build inputs
