@@ -260,6 +260,32 @@ date: 2026-05-01
 	}
 }
 
+func TestParseNorg_InlineCode(t *testing.T) {
+	for _, tc := range []struct {
+		name, body, want, notWant string
+	}{
+		{"plain", "Run `go test ./...` now.", "Run <code>go test ./...</code> now.", "<em>"},
+		{"slashes stay literal", "`/` redirected to `/blog`", "<code>/</code> redirected to <code>/blog</code>", "<em>"},
+		{"html escaped", "`<a href>`", "<code>&lt;a href&gt;</code>", "<a href>"},
+		{"no modifiers inside", "`*not bold*`", "<code>*not bold*</code>", "<strong>"},
+		{"italic skips code", "/italic `a/b` still/", "<em>italic <code>a/b</code> still</em>", ""},
+		{"lone backtick", "a lone ` backtick", "a lone ` backtick", "<code>"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, rendered, err := Parse(norgWithBody(tc.body))
+			if err != nil {
+				t.Fatalf("parse: %v", err)
+			}
+			if !strings.Contains(rendered, tc.want) {
+				t.Fatalf("expected %q in %s", tc.want, rendered)
+			}
+			if tc.notWant != "" && strings.Contains(rendered, tc.notWant) {
+				t.Fatalf("did not expect %q in %s", tc.notWant, rendered)
+			}
+		})
+	}
+}
+
 func TestParseNorg_ValidLinks(t *testing.T) {
 	for _, href := range []string{
 		"/about",
