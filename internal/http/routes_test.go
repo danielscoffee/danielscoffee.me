@@ -66,6 +66,7 @@ func TestServerLimits(t *testing.T) {
 	server := New(
 		8080,
 		"https://example.com",
+		"https://example.com",
 		content.NewStore(nil),
 		content.NewProjectStore(nil),
 		content.Page{},

@@ -34,9 +34,15 @@ func NewRuntime() (*Runtime, error) {
 		port = 8080
 	}
 
-	siteURL := strings.TrimRight(os.Getenv("SITE_URL"), "/")
+	// canonicalBase stays empty unless SITE_URL is set, so pages never
+	// advertise a guessed origin in canonical or share tags.
+	canonicalBase := strings.TrimRight(os.Getenv("SITE_URL"), "/")
+	siteURL := canonicalBase
 	if siteURL == "" {
 		siteURL = fmt.Sprintf("http://localhost:%d", port)
+		if os.Getenv("APP_ENV") == "production" {
+			logger.Warn().Str("fallback", siteURL).Msg("SITE_URL is not set: feeds, sitemap, and robots.txt will point at localhost, and pages omit canonical and share URLs")
+		}
 	}
 
 	posts, err := content.LoadPosts("content/posts")
@@ -67,7 +73,7 @@ func NewRuntime() (*Runtime, error) {
 	projectStore := content.NewProjectStore(projects)
 	searchDocs := content.BuildSearchDocs(posts, projects)
 
-	apiServer := httpapp.New(port, siteURL, postStore, projectStore, aboutPage, logger, searchDocs)
+	apiServer := httpapp.New(port, siteURL, canonicalBase, postStore, projectStore, aboutPage, logger, searchDocs)
 
 	return &Runtime{
 		Server:       apiServer,

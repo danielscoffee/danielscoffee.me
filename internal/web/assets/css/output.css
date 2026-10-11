@@ -1968,6 +1968,10 @@ a {
   position: fixed;
 }
 
+.absolute {
+  position: absolute;
+}
+
 .block {
   display: block;
 }

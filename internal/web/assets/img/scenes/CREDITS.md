@@ -14,3 +14,9 @@ comment.
 
 CC0 does not grant rights to imply endorsement by the photographers or by
 anyone or anything depicted.
+
+## Share image
+
+`../og-default.jpg` (1200x630, used for Open Graph and Twitter cards) is a
+screenshot of an HTML layout: the three photos above, with text set in the
+site's self-hosted Source Serif 4 and Source Sans 3 (SIL OFL 1.1).

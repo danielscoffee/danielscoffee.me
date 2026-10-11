@@ -520,3 +520,76 @@ func TestHealthRoute(t *testing.T) {
 		t.Fatalf("expected health body to contain status up, got %q", w.Body.String())
 	}
 }
+
+func TestPageMetadata(t *testing.T) {
+	s := testBlogServer()
+	s.canonicalBase = "https://example.com"
+	h := s.RegisterRoutes()
+
+	get := func(path string) string {
+		t.Helper()
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		return w.Body.String()
+	}
+
+	t.Run("share and canonical tags", func(t *testing.T) {
+		assertContainsAll(t, get("/blog"), []string{
+			`<title>Blog · danielscoffee</title>`,
+			`<meta name="description" content="Every post on danielscoffee, newest first.">`,
+			`<link rel="canonical" href="https://example.com/blog">`,
+			`<meta property="og:url" content="https://example.com/blog">`,
+			`<meta property="og:image" content="https://example.com/assets/img/og-default.jpg">`,
+			`<meta property="og:title" content="Blog · danielscoffee">`,
+			`<meta property="og:description" content="Every post on danielscoffee, newest first.">`,
+			`<meta name="twitter:card" content="summary_large_image">`,
+		})
+	})
+
+	t.Run("filtered projects name their tag and point home", func(t *testing.T) {
+		body := get("/projects?tag=go")
+		assertContainsAll(t, body, []string{
+			`<title>Projects tagged go · danielscoffee</title>`,
+			`content="Projects on danielscoffee tagged go, with their devlogs."`,
+			`Tagged with <span class="tag-emphasis">go</span>`,
+			`<link rel="canonical" href="https://example.com/projects">`,
+		})
+	})
+
+	t.Run("tag pages have their own title and description", func(t *testing.T) {
+		assertContainsAll(t, get("/tag/go"), []string{
+			`<title>Posts tagged go · danielscoffee</title>`,
+			`content="Posts on danielscoffee tagged go."`,
+		})
+	})
+
+	t.Run("posts carry BlogPosting data", func(t *testing.T) {
+		assertContainsAll(t, get("/post/hello-world"), []string{
+			`<script id="article-data" type="application/ld+json">`,
+			`"@type":"BlogPosting"`,
+			`"headline":"Hello World"`,
+			`"datePublished":"2026-04-26"`,
+			`"url":"https://example.com/post/hello-world"`,
+		})
+	})
+
+	t.Run("error pages are not shareable", func(t *testing.T) {
+		body := get("/no-such-page")
+		for _, tag := range []string{`rel="canonical"`, `property="og:`, `twitter:card`} {
+			if strings.Contains(body, tag) {
+				t.Errorf("404 page should not carry %s", tag)
+			}
+		}
+	})
+}
+
+func TestPageMetadataWithoutSiteURL(t *testing.T) {
+	h := testBlogServer().RegisterRoutes()
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/blog", nil))
+	body := w.Body.String()
+	if strings.Contains(body, `rel="canonical"`) || strings.Contains(body, `property="og:url"`) || strings.Contains(body, `property="og:image"`) {
+		t.Fatal("without SITE_URL the head must not guess absolute URLs")
+	}
+	assertContainsAll(t, body, []string{`<meta property="og:title" content="Blog · danielscoffee">`, `<meta name="twitter:card" content="summary_large_image">`})
+}

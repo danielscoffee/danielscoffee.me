@@ -26,7 +26,7 @@ templ TagPageIntro(tag, subtitle string) {
 }
 
 templ BlogIndexPage(posts []content.Post) {
-	@Base("Blog", "All blog posts", "blog") {
+	@Base("Blog", "Every post on danielscoffee, newest first.", "blog") {
 		@SectionIntro("Blog", "All writing in one place.")
 		<section class="section-block">
 			<h2 class="section-title">Latest entries</h2>
@@ -55,13 +55,24 @@ templ AboutPage(page content.Page) {
 	}
 }
 
-templ ProjectsIndexPage(projects []content.Project) {
-	@Base("Projects", "Project notes and builds", "projects") {
-		@SectionIntro("Projects", "Build logs, notes, and shipped experiments.")
-		<section class="section-block">
-			@ProjectList(projects)
-		</section>
+templ ProjectsIndexPage(projects []content.Project, tag string) {
+	if tag == "" {
+		@Base("Projects", "Projects and their devlogs, newest first.", "projects") {
+			@SectionIntro("Projects", "Build logs, notes, and shipped experiments.")
+			@projectsListSection(projects)
+		}
+	} else {
+		@Base("Projects tagged "+tag, "Projects on danielscoffee tagged "+tag+", with their devlogs.", "projects") {
+			@TagPageIntro(tag, "Filtered projects by topic.")
+			@projectsListSection(projects)
+		}
 	}
+}
+
+templ projectsListSection(projects []content.Project) {
+	<section class="section-block">
+		@ProjectList(projects)
+	</section>
 }
 
 templ ProjectDetailPage(project content.Project) {
@@ -107,12 +118,13 @@ templ ProjectSubPostPage(project content.Project, sub content.ProjectSubPost) {
 			<div class="article-body">
 				@templ.Raw(string(sub.BodyHTML))
 			</div>
+			@templ.JSONScript("article-data", blogPostingJSONLD(ctx, sub.Title, sub.Date)).WithType("application/ld+json")
 		</article>
 	}
 }
 
 templ TagPage(tag string, posts []content.Post) {
-	@Base("Tag: "+tag, "Posts filtered by tag", "blog") {
+	@Base("Posts tagged "+tag, "Posts on danielscoffee tagged "+tag+".", "blog") {
 		@TagPageIntro(tag, "Filtered writing by topic.")
 		<section class="section-block">
 			<h2 class="section-title">Posts</h2>
@@ -190,6 +202,7 @@ templ BlogPostPage(post content.Post) {
 			<div class="article-body">
 				@templ.Raw(string(post.BodyHTML))
 			</div>
+			@templ.JSONScript("article-data", blogPostingJSONLD(ctx, post.Title, post.Date)).WithType("application/ld+json")
 		</article>
 	}
 }

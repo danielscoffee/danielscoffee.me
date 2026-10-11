@@ -15,17 +15,19 @@ type Server struct {
 	projectStore  *content.ProjectStore
 	aboutPage     content.Page
 	siteURL       string
+	canonicalBase string
 	logger        zerolog.Logger
 	searchIndexer *SearchIndexer
 }
 
-func New(port int, siteURL string, contentStore *content.Store, projectStore *content.ProjectStore, aboutPage content.Page, logger zerolog.Logger, searchDocs []content.SearchDoc) *http.Server {
+func New(port int, siteURL string, canonicalBase string, contentStore *content.Store, projectStore *content.ProjectStore, aboutPage content.Page, logger zerolog.Logger, searchDocs []content.SearchDoc) *http.Server {
 	app := &Server{
 		port:          port,
 		contentStore:  contentStore,
 		projectStore:  projectStore,
 		aboutPage:     aboutPage,
 		siteURL:       siteURL,
+		canonicalBase: canonicalBase,
 		logger:        logger,
 		searchIndexer: NewSearchIndexer(searchDocs),
 	}

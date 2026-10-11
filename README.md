@@ -120,7 +120,7 @@ Environment variables:
 | Variable | Default | Description |
 | --- | --- | --- |
 | `PORT` | `8080` | HTTP port |
-| `SITE_URL` | `http://localhost:<PORT>` | Absolute base URL for feeds/sitemap |
+| `SITE_URL` | `http://localhost:<PORT>` | Public base URL for feeds, sitemap, and robots.txt, plus canonical and share (Open Graph) URLs. Required in production: when unset, pages omit canonical and share URLs and the app logs a warning. |
 | `APP_ENV` | `local` in `.env.example` | Runtime environment label for compose/deploy |
 | `LOG_FORMAT` | `json` | `json` or `text` |
 | `LOG_LEVEL` | `info` | zerolog level such as `debug`, `info`, `warn`, `error` |

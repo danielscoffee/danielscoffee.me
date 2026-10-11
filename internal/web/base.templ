@@ -1,10 +1,28 @@
 package web
 
-templ siteHead(pageTitle string, pageDescription string) {
+// siteHead renders the shared head. Share tags go on every indexable page;
+// the canonical, og:url, and og:image need an absolute URL, so they appear
+// only when SITE_URL is configured. Error pages pass indexable=false.
+templ siteHead(pageTitle string, pageDescription string, indexable bool) {
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width,initial-scale=1"/>
 	<title>{ pageTitle }</title>
 	<meta name="description" content={ pageDescription }/>
+	if indexable {
+		if canonical := canonicalURL(ctx); canonical != "" {
+			<link rel="canonical" href={ templ.SafeURL(canonical) }/>
+			<meta property="og:url" content={ canonical }/>
+			<meta property="og:image" content={ absoluteURL(ctx, shareImagePath) }/>
+			<meta property="og:image:width" content="1200"/>
+			<meta property="og:image:height" content="630"/>
+			<meta property="og:image:alt" content={ shareImageAlt }/>
+		}
+		<meta property="og:type" content="website"/>
+		<meta property="og:site_name" content={ siteName }/>
+		<meta property="og:title" content={ pageTitle }/>
+		<meta property="og:description" content={ pageDescription }/>
+		<meta name="twitter:card" content="summary_large_image"/>
+	}
 	<link rel="preload" href="/assets/fonts/source-serif-4-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
 	<link rel="preload" href="/assets/fonts/source-sans-3-regular.woff2" as="font" type="font/woff2" crossorigin="anonymous"/>
 	<link href="/assets/css/output.css?v=2" rel="stylesheet"/>
@@ -16,7 +34,7 @@ templ Base(pageTitle string, pageDescription string, section string) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full" data-theme="system">
 		<head>
-			@siteHead(pageTitle, pageDescription)
+			@siteHead(pageTitle+pageTitleSuffix, pageDescription, section != "")
 			<script defer src="/assets/js/theme-toggle.js?v=2"></script>
 			<script defer src="/assets/js/search.js?v=2"></script>
 			<script defer src="/assets/js/code-copy.js?v=1"></script>
