@@ -593,3 +593,20 @@ func TestPageMetadataWithoutSiteURL(t *testing.T) {
 	}
 	assertContainsAll(t, body, []string{`<meta property="og:title" content="Blog · danielscoffee">`, `<meta name="twitter:card" content="summary_large_image">`})
 }
+
+func TestFavicon(t *testing.T) {
+	h := testBlogServer().RegisterRoutes()
+	for _, path := range []string{"/", "/blog"} {
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
+		assertContainsAll(t, w.Body.String(), []string{`<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">`})
+	}
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/assets/favicon.svg", nil))
+	if w.Code != http.StatusOK || !strings.HasPrefix(w.Header().Get("Content-Type"), "image/svg+xml") {
+		t.Fatalf("favicon: status %d, type %q", w.Code, w.Header().Get("Content-Type"))
+	}
+	if body := w.Body.String(); !strings.Contains(body, `viewBox="0 0 32 32"`) || strings.Contains(body, "<script") {
+		t.Fatalf("favicon must be a plain 32x32 SVG: %s", body)
+	}
+}

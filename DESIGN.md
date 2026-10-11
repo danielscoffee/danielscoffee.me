@@ -336,6 +336,9 @@ A square, borderless window onto a 400×400 photograph of Daniel's coffee ritual
 - **Interaction:** on hover-capable devices the frame grows 96px → 192px over 0.3s ease-out on hover and focus-visible. Growth is held while the intro plays (`data-intro="play"`). Touch devices get static 128px frames with no transition.
 - **Use:** plates frame navigation surfaces such as the home board. They are not content images and do not appear in article bodies or cards.
 
+### Favicon
+`internal/web/assets/favicon.svg`: an Oat Paper cup with Caramel Crema steam on an Espresso Ink tile (7px radius on a 32px grid). Strokes stay at 2px or more on that grid so the cup still reads at 16px. It is linked from the shared head as an SVG icon.
+
 ### Code Block
 A Parchment Code frame (1px Kraft Line, 0.5rem radius) holding a caption bar over the highlighted code.
 - **Bar:** the language mark (16px, monochrome `currentColor`, from Simple Icons, CC0) and the language name in the Label style, in Cold Brew. Unknown languages show a drawn `</>` mark and the name as written; no language shows "Code".
