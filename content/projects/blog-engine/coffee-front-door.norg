@@ -1,0 +1,64 @@
+@document.meta
+title: "Devlog 2026-10-10: a coffee menu for a front door"
+slug: coffee-front-door
+date: 2026-10-10
+summary: Replacing the / redirect with a three-door menu, borretti.me hover frames, a five-second intro, and a CSS view transition.
+tags: [devlog, css, design]
+draft: false
+@end
+
+Until today, `/` redirected to `/blog`. Now it opens on a menu with three doors, Blog, Projects, and About, each with a photo from my coffee routine.
+
+** The hover
+I took the hover from [Fernando Borretti's site](https://borretti.me). Each door shows a 96px window onto a photo that stays 192px wide. On hover or keyboard focus the window grows to 192px, so you see more of the scene instead of a zoomed copy of it.
+
+@code css
+.door-frame {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  transition: width 0.3s ease-out, height 0.3s ease-out;
+}
+
+.door-frame img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 192px;
+  height: 192px;
+  transform: translate(-50%, -50%);
+}
+@end
+
+Touch screens get a static 128px frame instead, since a finger has no hover.
+
+** The photos
+I started with hand-drawn SVG scenes and swapped them for real photos: a hand writing next to a cup, a gooseneck kettle over a pour-over, a takeaway latte. All three are CC0 from StockSnap, cropped to 400px squares and served from the site itself, at 21 to 32KB each. The credits sit next to the files in `CREDITS.md`.
+
+** The intro
+On your first visit in a tab, the page shows "Backend developer. Systems enjoyer. Production bug survivor." for about five seconds before the doors settle in. Any key, click, or focus skips it, and reduced motion skips it entirely. The animation is CSS; a 31-line external script only remembers that you have seen it, because the content security policy allows no inline scripts.
+
+** The walk between pages
+Inner pages lost their menu. They now carry a back arrow with the site name, plus theme and search. The theme button switches between light and dark, and follows the OS until you click it.
+
+Both pages opt into cross-document view transitions, and the menu title and the back link share one name:
+
+@code css
+@view-transition {
+  navigation: auto;
+}
+
+.board-title-text,
+.site-back-label {
+  view-transition-name: site-brand;
+}
+@end
+
+Click a door in Chrome or Safari and the site name slides from the menu into the header. Firefox just loads the page.
+
+** How the menu got flat
+*** DONE first pass: a dark rounded panel, centered on the page
+*** DONE square corners, no border, no shadow
+*** DONE no panel at all: the menu sits in the top-left corner
+*** DONE no rules between rows; leaders run to the right margin

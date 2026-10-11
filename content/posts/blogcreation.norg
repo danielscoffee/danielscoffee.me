@@ -1,10 +1,60 @@
 @document.meta
-title: Danielscoffee.me Rebuild
+title: Rebuilding danielscoffee.me
 slug: danielscoffee-me-rebuild
-date: 2026-05-02
-summary: Reworked blog engine with Neorg support and better UX.
+date: 2026-10-10
+summary: How this site went from Markdown glue to one Go binary with a Neorg parser I wrote myself, and what I would keep.
 tags: [go, neorg, web]
 draft: false
 @end
 
-*
+The old version of this site was a pile of Markdown files glued together with a templating helper. It worked until I wanted project devlogs, tags, and search. Each one meant more glue, so in April I started over.
+
+* What I wanted
+- Write in `.norg` and publish the file as it is.
+- Ship one Go binary: no database, no Node at runtime.
+- Give each project a folder, with its devlogs next to it.
+
+* What runs the site today
+@table
+| Layer | Choice |
+| - | - |
+| HTTP | Go `net/http` and its stdlib router |
+| Templates | templ, compiled to Go |
+| Content | a Neorg parser I wrote, about 1,000 lines |
+| Code blocks | Chroma for highlighting |
+| Styles | Tailwind v3 standalone binary plus handwritten CSS |
+| Logs | zerolog |
+| Deploy | a distroless Docker image on Railway |
+@end
+
+The app parses every `.norg` file once at startup and keeps the results in memory. A request reads from a slice and renders a template. I have no cache to invalidate, because nothing changes until the next deploy.
+
+All of it comes to about 2,400 lines of Go, with roughly 2,200 more lines of tests.
+
+* How it came together
+** April: an empty shell
+My first commit fixed a `go:embed` build that broke when the CSS file did not exist yet. A humble start.
+
+** May: the parser and the projects
+The Neorg parser landed on May 2. A week later it handled tables, task states, definition lists, spoilers, and inline math. On May 19 projects became folders: `index.norg` describes the project, and every other file in the folder turns into a devlog at `/projects/{slug}/{post}`.
+
+** July: hardening and a visual pass
+I ran `govulncheck`, and it flagged a reachable vulnerability in the `crypto/tls` package of Go 1.26.4. I moved to 1.26.5 and kept pulling the thread:
+- The parser validates every link it renders, since its HTML goes out through `templ.Raw`.
+- Search answers `400` to any query over 256 bytes.
+- The build pins the Tailwind download by SHA-256 and pins GitHub Actions to commits.
+
+The next day I self-hosted Source Serif 4 and Source Sans 3 and moved the palette to warm paper and espresso. Two weeks after that, I split the parser out of a single 1,015-line file into its own package of five files.
+
+** October: a front door
+Until this week, `/` redirected to `/blog`. Now it opens on a menu with three doors: Blog, Projects, and About. Each door shows a photo from my coffee routine: writing over a cup, a pour-over at home, a takeaway latte from the café. Hover one and its frame grows from 96 to 192 pixels, a trick I took from [Fernando Borretti's site](https://borretti.me). Click it and a CSS view transition slides the site name into the header of the next page, with no JavaScript.
+
+* What I would keep
+Parsing at startup was the best call. A broken `.norg` file stops the app at boot, where I see it, instead of failing in front of a reader.
+
+Writing the parser myself comes second. It took longer than pulling in a Markdown library, but I can read every line that turns my notes into HTML. That made the security pass a short afternoon instead of an audit of someone else's renderer.
+
+* What is still rough
+Search scores each word on its own. A search for `bento grid` returns anything that mentions /bento/ or /grid/, and /rebuild/ does not match /rebuilt/. Phrase matching and stemming come next.
+
+The devlogs on the [Blog Engine project page](/projects/blog-engine) have the details.
