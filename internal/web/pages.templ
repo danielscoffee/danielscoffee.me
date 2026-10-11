@@ -104,7 +104,7 @@ templ DevlogList(project content.Project) {
 }
 
 templ ProjectSubPostPage(project content.Project, sub content.ProjectSubPost) {
-	@Base(sub.Title, sub.Summary, "projects") {
+	@BaseTrail(sub.Title, sub.Summary, "projects", []Crumb{{Label: project.Title, Href: "/projects/" + project.Slug}}) {
 		<article class="article-shell post-prose">
 			@ArticleHeader(sub.Title, sub.Date, nil, "")
 			<div class="article-body">

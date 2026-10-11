@@ -784,57 +784,111 @@ a {
   min-height: 4.5rem;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 0.25rem 1rem;
+  gap: 0 1rem;
   padding-block: 0.875rem;
 }
 
-/* Left: the current section, linking to its index. It shares a
-	   view-transition name with the matching door name on /. */
+/* Left: the wordmark, linking home, then a smaller breadcrumb trail
+	   (section / project). Every crumb but the current page links up. */
+
+.site-brand {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: rgb(var(--text));
+  font: 600 clamp(1.25rem, 1.1rem + 0.5vw, 1.45rem) / 1.1 var(--font-editorial);
+  letter-spacing: -0.015em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 180ms ease;
+}
+
+.site-brand:hover,
+	.site-brand:focus-visible {
+  color: rgb(var(--accent-strong));
+}
+
+.site-crumbs {
+  min-width: 0;
+  margin-right: auto;
+  margin-left: -1rem;
+}
+
+.crumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 400 0.95rem var(--font-editorial);
+  text-transform: lowercase;
+}
+
+.crumb {
+  display: inline-flex;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.crumb-sep {
+  padding-inline: 0.5rem;
+  color: rgb(var(--muted) / 0.6);
+}
+
+/* Each crumb carries full, short, and tiny labels ("projects", "proj",
+	   "p"); data-fit on the nav picks one. */
+
+.crumb-short,
+	.crumb-tiny,
+	.site-crumbs[data-fit="short"] .crumb-full,
+	.site-crumbs[data-fit="tiny"] .crumb-full {
+  display: none;
+}
+
+.site-crumbs[data-fit="short"] .crumb-short,
+	.site-crumbs[data-fit="tiny"] .crumb-tiny {
+  display: inline;
+}
+
+.crumb-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: rgb(var(--muted));
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 180ms ease;
+}
+
+.crumb-link:hover,
+	.crumb-link:focus-visible {
+  color: rgb(var(--accent-strong));
+}
+
+/* The section crumb shares a view-transition name with the matching
+	   door name on /. */
 
 .site-section {
   display: inline-flex;
   min-height: 44px;
   align-items: center;
-  color: rgb(var(--accent-strong));
-  font: 600 1.05rem var(--font-editorial);
-  text-decoration: none;
   white-space: nowrap;
 }
 
-.site-section:hover,
-	.site-section:focus-visible {
-  color: rgb(var(--text));
-}
+/* The last crumb, the page one step up from here, carries the accent. */
 
-/* Far right: an icon-only way one level up the site. */
-
-.site-back {
-  display: inline-flex;
-  width: 44px;
-  height: 44px;
-  align-items: center;
-  justify-content: center;
-  color: rgb(var(--muted));
-  transition: color 180ms ease;
-}
-
-.site-back-arrow {
-  width: 1.1rem;
-  height: 1.1rem;
-  flex: none;
-  transition: transform 180ms ease;
-}
-
-.site-back:hover,
-	.site-back:focus-visible {
+.crumb:last-child > .crumb-link,
+	.crumb:last-child > .site-section {
   color: rgb(var(--accent-strong));
+  font-weight: 600;
 }
 
-.site-back:hover .site-back-arrow,
-	.site-back:focus-visible .site-back-arrow {
-  transform: translateX(-3px);
+.crumb:last-child > .crumb-link:hover,
+	.crumb:last-child > .crumb-link:focus-visible {
+  color: rgb(var(--text));
 }
 
 .header-actions {
@@ -868,6 +922,12 @@ a {
 #theme-toggle {
   min-width: 4.5rem;
   justify-content: center;
+}
+
+/* A flex item drops trailing spaces, so the prefix is spaced here. */
+
+.theme-prefix {
+  margin-right: 0.25em;
 }
 
 .search-kbd {
@@ -919,6 +979,46 @@ a {
   .masthead-inner,
 		.footer-inner {
     width: calc(100% - 1.25rem);
+  }
+
+  /* The keyboard hint costs the trail its room on narrow screens. */
+
+  .search-kbd {
+    display: none;
+  }
+
+  /* Until crumbs-fit.js measures, narrow screens start short. */
+
+  .site-crumbs:not([data-fit]) .crumb-full {
+    display: none;
+  }
+
+  .site-crumbs:not([data-fit]) .crumb-short {
+    display: inline;
+  }
+}
+
+@media (max-width: 400px) {
+  /* Phones keep the wordmark and trail on one row: the theme button
+		   shows its mode alone (its aria-label keeps "Theme: ...") and the
+		   slashes tighten. */
+
+  .theme-prefix {
+    display: none;
+  }
+
+  .crumb-sep {
+    padding-inline: 0.35rem;
+  }
+}
+
+@media (max-width: 340px) {
+  .site-brand {
+    font-size: 1.15rem;
+  }
+
+  .theme-toggle {
+    padding-inline: 0.4rem;
   }
 
   .footer-inner {

@@ -24,18 +24,40 @@ func pageContext(ctx context.Context) PageContext {
 	return pc
 }
 
-// parentPath is where the masthead's back arrow leads: one level up the
-// site's tree, whatever page the reader came from.
-func parentPath(ctx context.Context) string {
-	path := strings.TrimRight(pageContext(ctx).Path, "/")
-	switch {
-	case strings.HasPrefix(path, "/post/"), strings.HasPrefix(path, "/tag/"):
-		return "/blog"
-	case strings.HasPrefix(path, "/projects/"):
-		return path[:strings.LastIndex(path, "/")]
-	default:
-		return "/"
+// Crumb is one link in the masthead breadcrumb below the section, such as
+// the project above a devlog.
+type Crumb struct {
+	Label string
+	Href  string
+}
+
+// shortLabel is a crumb's middle size: its first word, cut to four letters
+// when longer than five ("projects" -> "proj", "Blog Engine" -> "Blog").
+func shortLabel(label string) string {
+	fields := strings.Fields(label)
+	if len(fields) == 0 {
+		return ""
 	}
+	word := []rune(fields[0])
+	if len(word) > 5 {
+		word = word[:4]
+	}
+	return string(word)
+}
+
+// tinyLabel is a crumb's smallest size: its first letter.
+func tinyLabel(label string) string {
+	word := []rune(strings.TrimSpace(label))
+	if len(word) == 0 {
+		return ""
+	}
+	return string(word[:1])
+}
+
+// isCurrentPath reports whether the request is for path itself, so its crumb
+// can be marked as the current page instead of linking to itself.
+func isCurrentPath(ctx context.Context, path string) bool {
+	return strings.TrimRight(pageContext(ctx).Path, "/") == path
 }
 
 // absoluteURL joins the configured base URL and path. It returns "" when no

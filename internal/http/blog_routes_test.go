@@ -182,8 +182,10 @@ func TestSiteShell(t *testing.T) {
 		`class="skip-link" href="#main-content"`,
 		`<main id="main-content"`,
 		`class="site-masthead"`,
-		`<a href="/blog" class="site-section" data-section="blog">blog</a>`,
-		`<a href="/" class="site-back" aria-label="Back">`,
+		`<a href="/" class="site-brand">danielscoffee</a>`,
+		`<nav class="site-crumbs" aria-label="Breadcrumb">`,
+		`<span class="site-section" data-section="blog" aria-current="page">`,
+		`<script defer src="/assets/js/crumbs-fit.js?v=1"></script>`,
 		`<div id="header-actions" class="header-actions">`,
 		`href="https://github.com/danielscoffee"`,
 		`href="https://www.linkedin.com/in/daniel-reis-santos/"`,
@@ -300,7 +302,7 @@ func TestBaseTemplateIncludesThemeControls(t *testing.T) {
 		`id="theme-toggle"`,
 		`href="/assets/css/output.css?v=2"`,
 		`src="/assets/js/theme-init.js?v=2"`,
-		`src="/assets/js/theme-toggle.js?v=2"`,
+		`src="/assets/js/theme-toggle.js?v=3"`,
 		`src="/assets/js/search.js?v=2"`,
 		`src="/assets/js/code-copy.js?v=1"`,
 		`theme-preference`,
@@ -427,7 +429,7 @@ func TestEditorialArticles(t *testing.T) {
 	}{
 		{path: "/post/hello-world", date: "2026-04-26", rawContent: `<h2>Hello</h2>`},
 		{path: "/projects/side-project", date: "2026-05-01", rawContent: `<p>overview</p>`},
-		{path: "/projects/side-project/rebuild", date: "2026-05-10", rawContent: `<p>rebuild body</p>`, breadcrumb: `<a href="/projects/side-project" class="site-back" aria-label="Back">`},
+		{path: "/projects/side-project/rebuild", date: "2026-05-10", rawContent: `<p>rebuild body</p>`, breadcrumb: `<a href="/projects/side-project" class="crumb-link">`},
 		{path: "/about", rawContent: `<p>about text</p>`},
 	}
 
@@ -634,23 +636,42 @@ func TestNoReturnArrowAboveArticles(t *testing.T) {
 	}
 }
 
-func TestMastheadBackFallback(t *testing.T) {
+func TestBreadcrumbs(t *testing.T) {
 	h := testBlogServer().RegisterRoutes()
-	for path, parent := range map[string]string{
-		"/blog":                          "/",
-		"/about":                         "/",
-		"/projects":                      "/",
-		"/post/hello-world":              "/blog",
-		"/tag/go":                        "/blog",
-		"/projects/side-project":         "/projects",
-		"/projects/side-project/rebuild": "/projects/side-project",
+	brand := `<a href="/" class="site-brand">danielscoffee</a>`
+	label := func(full, short, tiny string) []string {
+		return []string{
+			`<span class="crumb-full" aria-hidden="true">` + full + `</span>`,
+			`<span class="crumb-short" aria-hidden="true">` + short + `</span>`,
+			`<span class="crumb-tiny" aria-hidden="true">` + tiny + `</span>`,
+			`<span class="sr-only">` + full + `</span>`,
+		}
+	}
+	blogLink := `<a href="/blog" class="crumb-link site-section" data-section="blog">`
+	projectsLink := `<a href="/projects" class="crumb-link site-section" data-section="projects">`
+	for path, want := range map[string][]string{
+		"/blog":                          append([]string{`<span class="site-section" data-section="blog" aria-current="page">`}, label("blog", "blog", "b")...),
+		"/about":                         append([]string{`<span class="site-section" data-section="about" aria-current="page">`}, label("about", "about", "a")...),
+		"/projects":                      append([]string{`<span class="site-section" data-section="projects" aria-current="page">`}, label("projects", "proj", "p")...),
+		"/post/hello-world":              {blogLink},
+		"/tag/go":                        {blogLink},
+		"/projects/side-project":         {projectsLink},
+		"/projects/side-project/rebuild": append([]string{projectsLink, `<a href="/projects/side-project" class="crumb-link">`}, label("Side Project", "Side", "S")...),
 	} {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
 		body := w.Body.String()
-		assertContainsAll(t, body, []string{`<a href="` + parent + `" class="site-back" aria-label="Back">`})
-		if strings.Contains(body, "site-back.js") {
-			t.Errorf("%s: the back arrow follows the hierarchy, not history; no script", path)
+		assertContainsAll(t, body, append([]string{brand, `<nav class="site-crumbs" aria-label="Breadcrumb">`}, want...))
+		if strings.Contains(body, `class="site-back"`) {
+			t.Errorf("%s: the breadcrumb replaces the icon-only back arrow", path)
 		}
+	}
+
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/missing", nil))
+	body := w.Body.String()
+	assertContainsAll(t, body, []string{brand})
+	if strings.Contains(body, `class="site-crumbs"`) {
+		t.Error("pages without a section show only the wordmark")
 	}
 }

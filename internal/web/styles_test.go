@@ -74,7 +74,7 @@ func TestThemeScriptKeepsModesStorageAndCompactText(t *testing.T) {
 		t.Fatalf("read theme-toggle.js: %v", err)
 	}
 	js := string(jsBytes)
-	for _, marker := range []string{`"theme-preference"`, `"(prefers-color-scheme: dark)"`, `preference || "system"`, "matchMedia", "localStorage", "button.textContent = label", `button.setAttribute("aria-label", label)`} {
+	for _, marker := range []string{`"theme-preference"`, `"(prefers-color-scheme: dark)"`, `preference || "system"`, "matchMedia", "localStorage", `prefix.textContent = "Theme:"`, "button.replaceChildren(prefix, labels[mode])", `button.setAttribute("aria-label", label)`} {
 		if !strings.Contains(js, marker) {
 			t.Errorf("theme-toggle.js missing %q", marker)
 		}
@@ -190,28 +190,85 @@ func TestFlatFullWidthMasthead(t *testing.T) {
 	}
 }
 
-func TestBackLinkMasthead(t *testing.T) {
+func TestBreadcrumbMasthead(t *testing.T) {
 	cssBytes, err := os.ReadFile("styles/input.css")
 	if err != nil {
 		t.Fatalf("read styles: %v", err)
 	}
 	css := string(cssBytes)
 
-	sectionRule := regexp.MustCompile(`(?s)\t\.site-section\s*\{[^}]*\}`).FindString(css)
-	for _, marker := range []string{"min-height: 44px", "var(--font-editorial)"} {
-		if !strings.Contains(sectionRule, marker) {
-			t.Errorf("section label missing %q: %s", marker, sectionRule)
+	brandRule := regexp.MustCompile(`(?s)\t\.site-brand\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"min-height: 44px", "font: 600 clamp(1.25rem", "white-space: nowrap"} {
+		if !strings.Contains(brandRule, marker) {
+			t.Errorf("wordmark missing %q: %s", marker, brandRule)
 		}
 	}
-	backRule := regexp.MustCompile(`(?s)\t\.site-back\s*\{[^}]*\}`).FindString(css)
-	for _, marker := range []string{"width: 44px", "height: 44px"} {
-		if !strings.Contains(backRule, marker) {
-			t.Errorf("back arrow needs a 44px target, missing %q: %s", marker, backRule)
+	listRule := regexp.MustCompile(`(?s)\t\.crumb-list\s*\{[^}]*\}`).FindString(css)
+	for _, marker := range []string{"font: 400 0.95rem var(--font-editorial)", "flex-wrap: wrap", "list-style: none"} {
+		if !strings.Contains(listRule, marker) {
+			t.Errorf("breadcrumb list missing %q: %s", marker, listRule)
 		}
+	}
+	lastRule := regexp.MustCompile(`(?s)\t\.crumb:last-child > \.crumb-link,\s*\.crumb:last-child > \.site-section\s*\{[^}]*\}`).FindString(css)
+	if !strings.Contains(lastRule, "rgb(var(--accent-strong))") {
+		t.Errorf("the last crumb must carry the accent: %q", lastRule)
+	}
+	if strings.Contains(regexp.MustCompile(`(?s)\t\.site-section\s*\{[^}]*\}`).FindString(css), "accent-strong") {
+		t.Error("the section crumb is accented only when it is the last crumb")
+	}
+	for _, marker := range []string{`.site-crumbs[data-fit="short"] .crumb-short`, `.site-crumbs[data-fit="tiny"] .crumb-tiny`, `.site-crumbs:not([data-fit]) .crumb-short`} {
+		if !strings.Contains(css, marker) {
+			t.Errorf("breadcrumb label sizes missing %q", marker)
+		}
+	}
+	sectionRule := regexp.MustCompile(`(?s)\t\.site-section\s*\{[^}]*\}`).FindString(css)
+	if !strings.Contains(sectionRule, "min-height: 44px") {
+		t.Errorf("section crumb needs a 44px target: %s", sectionRule)
+	}
+	crumbRule := regexp.MustCompile(`(?s)\t\.crumb-link\s*\{[^}]*\}`).FindString(css)
+	if !strings.Contains(crumbRule, "min-height: 44px") {
+		t.Errorf("breadcrumb links need a 44px target: %s", crumbRule)
+	}
+	if strings.Contains(css, ".site-back") {
+		t.Error("the icon-only back arrow is replaced by the breadcrumb")
 	}
 	for _, removed := range []string{".site-nav-desktop", ".mobile-menu", ".site-menu", ".social-link"} {
 		if strings.Contains(css, removed) {
 			t.Errorf("old masthead selector %q must be removed", removed)
+		}
+	}
+}
+
+func TestCrumbsFitScript(t *testing.T) {
+	jsBytes, err := os.ReadFile("assets/js/crumbs-fit.js")
+	if err != nil {
+		t.Fatalf("read crumbs-fit.js: %v", err)
+	}
+	js := string(jsBytes)
+	for _, marker := range []string{`["full", "short", "tiny"]`, "nav.dataset.fit", "ResizeObserver", "document.fonts", "getBoundingClientRect"} {
+		if !strings.Contains(js, marker) {
+			t.Errorf("crumbs-fit.js missing %q", marker)
+		}
+	}
+	if strings.Contains(js, "innerHTML") || strings.Contains(js, "textContent =") {
+		t.Error("crumbs-fit.js must only toggle data-fit, never rewrite labels")
+	}
+}
+
+func TestCrumbLabels(t *testing.T) {
+	for label, want := range map[string][2]string{
+		"blog":        {"blog", "b"},
+		"about":       {"about", "a"},
+		"projects":    {"proj", "p"},
+		"Blog Engine": {"Blog", "B"},
+		"Café Notes":  {"Café", "C"},
+		"":            {"", ""},
+	} {
+		if got := shortLabel(label); got != want[0] {
+			t.Errorf("shortLabel(%q) = %q, want %q", label, got, want[0])
+		}
+		if got := tinyLabel(label); got != want[1] {
+			t.Errorf("tinyLabel(%q) = %q, want %q", label, got, want[1])
 		}
 	}
 }

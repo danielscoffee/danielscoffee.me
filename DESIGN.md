@@ -35,8 +35,12 @@ colors:
 typography:
   brand:
     fontFamily: "Source Serif 4, Georgia, serif"
-    fontSize: "1.05rem"
+    fontSize: "clamp(1.25rem, 1.1rem + 0.5vw, 1.45rem)"
     fontWeight: 600
+  crumb:
+    fontFamily: "Source Serif 4, Georgia, serif"
+    fontSize: "0.95rem"
+    fontWeight: 400
   headline:
     fontFamily: "Source Sans 3, ui-sans-serif, system-ui, sans-serif"
     fontSize: "2.25rem"
@@ -101,9 +105,11 @@ spacing:
   plate-open: "192px"
 components:
   brand:
-    textColor: "{colors.cinnamon-roast-deep}"
+    textColor: "{colors.espresso-ink}"
     typography: "{typography.brand}"
     height: "44px"
+  brand-hover:
+    textColor: "{colors.cinnamon-roast-deep}"
   nav-link:
     textColor: "{colors.cold-brew}"
     typography: "{typography.label}"
@@ -151,16 +157,16 @@ components:
   scene-plate:
     backgroundColor: "{colors.kraft-frame}"
     size: "96px"
-  site-section:
+  crumb-last:
     textColor: "{colors.cinnamon-roast-deep}"
-    typography: "{typography.brand}"
+    typography: "{typography.crumb}"
     height: "44px"
   site-section-hover:
     textColor: "{colors.espresso-ink}"
-  site-back:
+  crumb-link:
     textColor: "{colors.cold-brew}"
-    size: "44px"
-  site-back-hover:
+    height: "44px"
+  crumb-link-hover:
     textColor: "{colors.cinnamon-roast-deep}"
   dialog-search:
     backgroundColor: "{colors.fresh-filter}"
@@ -261,7 +267,7 @@ The home page has its own shell: no masthead, no footer. The menu spans the full
 
 Vertical rhythm: main content pads 2.5rem top and 3rem bottom; sections are separated by 2.5rem; cards pad with `clamp(1.25rem, 3vw, 1.75rem)`.
 
-Responsive behavior: inner pages use one masthead at every width: the section label at left; theme, search, and the back arrow at right. The actions keep to the right edge and wrap under the label only when space runs out, and at ≤560px the shell gutter tightens to 0.625rem per side. On touch devices the `Ctrl+K` hint is hidden. At 480px the search dialog goes nearly full-screen.
+Responsive behavior: inner pages use one masthead row at every width: the wordmark and trail at left; theme and search at right. Rather than wrap, the trail shortens only as far as it must to share the wordmark's row: full labels (`projects / blog engine`), then short (`proj / blog`), then tiny (`p / b`); screen readers always hear the full labels. At ≤560px the `Ctrl+K` hint is hidden and the shell gutter tightens to 0.625rem per side; at ≤400px the theme button shows its mode alone ("Light", aria-label still "Theme: Light") and the slashes tighten; at ≤340px the wordmark steps down to 1.15rem. Without JavaScript, narrow screens start on short labels and the actions wrap under the row if needed. At 480px the search dialog goes nearly full-screen.
 
 ## Elevation & Depth
 
@@ -306,12 +312,12 @@ Under an article title: the date, then each tag as a plain muted link separated 
 - **States:** search results show loading (accent text), empty (dashed Kraft Line box, centered muted text), and error (accent border) messages.
 
 ### Navigation
-- **Masthead (inner pages):** the current section at left (`blog`, `projects`, `about`), then theme, search, and a back arrow at the far right, at every width, inside the wide shell. The home board is the site's navigation, so the header carries no section links. Transparent and borderless; the footer carries the only top border and the GitHub, LinkedIn, and RSS links. Pages without a section (404, 500) show "danielscoffee" linking home. The home page has neither masthead nor footer.
+- **Masthead (inner pages):** the `danielscoffee` wordmark linking home, a smaller breadcrumb trail beside it, then theme and search at the far right, at every width, inside the wide shell. The home board is the site's navigation, so the header carries no sibling section links. Transparent and borderless; the footer carries the only top border and the GitHub, LinkedIn, and RSS links. Pages without a section (404, 500) show the wordmark alone. The home page has neither masthead nor footer.
 - **Section index pages:** Blog, Projects, and About show no visible page title, because the section label already names them. Each keeps a screen-reader-only `<h1>`; Blog and Projects open with their one-line subtitle, About with its first paragraph. Posts, projects, devlogs, and tag pages keep their visible titles.
 - **Section label:** the section name in lowercase, in the Brand style (Source Serif 4 600, 1.05rem, Cinnamon Roast Deep), 44px tall, linking to the section index; hover and focus turn it Espresso Ink.
-- **Back arrow:** an icon-only 44×44px link at the far right that goes one level up the site, never back through history: `/blog` for posts and tags, the project for a devlog, `/projects` for a project, `/` for section pages. A 1.1rem drawn arrow (authored SVG, 1.75 stroke, currentColor) in Cold Brew, turning Cinnamon Roast Deep and nudging 3px left on hover and focus (180ms). Its accessible name is "Back". Articles carry no second arrow above the body.
+- **Breadcrumb:** the wordmark (brand serif 600, `clamp(1.25rem, 1.1rem + 0.5vw, 1.45rem)`, Espresso Ink, turning Cinnamon Roast Deep on hover) is the home crumb; the trail after it is a `nav` labelled "Breadcrumb" with an ordered list, lowercase serif at 0.95rem, baseline-aligned with the wordmark. It is how readers go back: every crumb except the current page links up the site, never back through history. The last crumb, the page one step up from here, is Cinnamon Roast Deep at 600 (Espresso Ink on hover); earlier crumbs are Cold Brew, turning Cinnamon Roast Deep on hover and focus (180ms). On a section's own index the section crumb is the current page (`aria-current="page"`), not a link. Posts and tag pages read `danielscoffee / blog`, projects `danielscoffee / projects`, devlogs add their project. Each crumb carries full, short, and tiny labels; `crumbs-fit.js` picks the longest that fits (see Responsive behavior). Separators are muted slashes hidden from screen readers; every link keeps a 44px target. Articles carry no back link above the body.
 - **Theme button:** a two-state Light/Dark switch labelled "Theme: Light" or "Theme: Dark". With no saved choice the site follows the OS (`data-theme="system"`) and the label shows the theme it resolves to; a click saves the opposite theme. The switch crossfades the whole page over 700ms on `cubic-bezier(0.45, 0, 0.55, 1)` (a typed same-document view transition, `theme`), so screen brightness ramps instead of flipping; browsers without typed view transitions ease colours over the same 700ms instead. The fade moves nothing, so it stays under reduced motion.
-- **Section transition:** pages opt in to cross-document view transitions. Each door name on `/` shares a `view-transition-name` (`section-blog`, `section-projects`, `section-about`) with the section label on that section's pages, so "Blog" glides into the header (450ms, `cubic-bezier(0.2, 0, 0, 1)`) while the page crossfades (220ms), and back again on the arrow. Door names with no partner fade at the page's 220ms instead of lingering. Reduced motion turns view transitions off; browsers without support simply navigate.
+- **Section transition:** pages opt in to cross-document view transitions. Each door name on `/` shares a `view-transition-name` (`section-blog`, `section-projects`, `section-about`) with the section crumb on that section's pages, so "Blog" glides into the header (450ms, `cubic-bezier(0.2, 0, 0, 1)`) while the page crossfades (220ms), and back again on the home crumb. Door names with no partner fade at the page's 220ms instead of lingering. Reduced motion turns view transitions off; browsers without support simply navigate.
 - **Links:** Cold Brew 0.82rem labels with a 44px hit area; hover and focus turn them Cinnamon Roast Deep. No underline, no pill highlight.
 - **Footer:** brand name left, RSS/GitHub/LinkedIn right, muted 0.85rem, 44px targets.
 
@@ -348,7 +354,7 @@ A command palette on the topmost Fresh Filter sheet: serif heading, labelled 48p
 - **Do** treat the scene-plate frame-grow (0.3s ease-out) as the first named exception to 180ms; it is a size change that needs the longer travel. Any other motion longer than 180ms needs the same explicit justification.
 - **Do** keep the board intro single-shot: the intro line holds for about 4.6s and fades out (350ms), then the three rows settle upward over 400ms with an 80ms stagger, finishing near 5.2s; it plays once per tab session, any key, click, or focus skips it, and `prefers-reduced-motion` skips it entirely.
 - **Do** crop scene photos for the frame: the subject sits inside the central 100-300 window of the 400×400 crop so the 96px rest frame shows it whole, and the outer ring adds the context revealed on grow. Use only CC0 or equivalent photos, self-hosted, under 60KB, with the source embedded and listed in CREDITS.md.
-- **Do** keep the inner-page header to the section label, theme, search, and the back arrow; section navigation lives on the home board.
+- **Do** keep the inner-page header to the breadcrumb, theme, and search; section navigation lives on the home board.
 - **Do** edit `internal/web/styles/input.css` and `.templ` sources; `output.css` is generated.
 - **Do** keep coffee motifs in the site's framing (home, masthead, footer, empty and error states), where they say who wrote this, and keep them out of article bodies.
 

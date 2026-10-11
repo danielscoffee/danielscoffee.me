@@ -31,30 +31,68 @@ templ siteHead(pageTitle string, pageDescription string, indexable bool) {
 	<script src="/assets/js/theme-init.js?v=2"></script>
 }
 
+// crumbLabel carries a crumb in three sizes; crumbs-fit.js shows the longest
+// that keeps the trail on the wordmark's row. Screen readers always hear the
+// full label.
+templ crumbLabel(label string) {
+	<span class="crumb-full" aria-hidden="true">{ label }</span>
+	<span class="crumb-short" aria-hidden="true">{ shortLabel(label) }</span>
+	<span class="crumb-tiny" aria-hidden="true">{ tinyLabel(label) }</span>
+	<span class="sr-only">{ label }</span>
+}
+
 templ Base(pageTitle string, pageDescription string, section string) {
+	@BaseTrail(pageTitle, pageDescription, section, nil) {
+		{ children... }
+	}
+}
+
+// BaseTrail is Base with crumbs after the section in the masthead
+// breadcrumb, for pages nested deeper than a section index.
+templ BaseTrail(pageTitle string, pageDescription string, section string, trail []Crumb) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full" data-theme="system">
 		<head>
 			@siteHead(pageTitle+pageTitleSuffix, pageDescription, section != "")
-			<script defer src="/assets/js/theme-toggle.js?v=2"></script>
+			<script defer src="/assets/js/theme-toggle.js?v=3"></script>
 			<script defer src="/assets/js/search.js?v=2"></script>
 			<script defer src="/assets/js/code-copy.js?v=1"></script>
+			<script defer src="/assets/js/crumbs-fit.js?v=1"></script>
 		</head>
 		<body class="site-shell">
 			<a class="skip-link" href="#main-content">Skip to content</a>
 			<header class="site-masthead">
 				<div class="masthead-inner">
+					<a href="/" class="site-brand">danielscoffee</a>
 					if section != "" {
-						<a href={ templ.SafeURL("/" + section) } class="site-section" data-section={ section }>{ section }</a>
-					} else {
-						<a href="/" class="site-section">danielscoffee</a>
+						<nav class="site-crumbs" aria-label="Breadcrumb">
+							<ol class="crumb-list">
+								<li class="crumb">
+									<span class="crumb-sep" aria-hidden="true">/</span>
+									if isCurrentPath(ctx, "/"+section) {
+										<span class="site-section" data-section={ section } aria-current="page">
+											@crumbLabel(section)
+										</span>
+									} else {
+										<a href={ templ.SafeURL("/" + section) } class="crumb-link site-section" data-section={ section }>
+											@crumbLabel(section)
+										</a>
+									}
+								</li>
+								for _, crumb := range trail {
+									<li class="crumb">
+										<span class="crumb-sep" aria-hidden="true">/</span>
+										<a href={ templ.SafeURL(crumb.Href) } class="crumb-link">
+											@crumbLabel(crumb.Label)
+										</a>
+									</li>
+								}
+							</ol>
+						</nav>
 					}
 					<div id="header-actions" class="header-actions">
 						<button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme" aria-live="polite" data-theme-storage-key="theme-preference">Theme</button>
 						<button class="theme-toggle search-trigger" type="button" id="search-trigger" aria-label="Open search">Search <span class="search-kbd">Ctrl+K</span></button>
-						<a href={ templ.SafeURL(parentPath(ctx)) } class="site-back" aria-label="Back">
-							<svg class="site-back-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 8H2.5"></path><path d="M7 3.5 2.5 8 7 12.5"></path></svg>
-						</a>
 					</div>
 				</div>
 			</header>

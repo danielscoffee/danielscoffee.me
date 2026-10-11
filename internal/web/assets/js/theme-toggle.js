@@ -37,7 +37,11 @@
     root.setAttribute("data-theme", preference || "system");
     const mode = effective();
     const label = `Theme: ${labels[mode]}`;
-    button.textContent = label;
+    // The prefix sits in its own span so narrow screens can show the mode alone.
+    const prefix = document.createElement("span");
+    prefix.className = "theme-prefix";
+    prefix.textContent = "Theme:";
+    button.replaceChildren(prefix, labels[mode]);
     button.setAttribute("aria-label", label);
     button.dataset.themeMode = mode;
   };
